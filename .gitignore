@@ -4,3 +4,8 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# 환경 변수 파일 (비밀 정보 포함)
+.env
+.env.local
+.env.*.local

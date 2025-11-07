@@ -14,6 +14,7 @@ type Step = "login" | "welcome" | "guide" | "webcam" | "loading" | "result";
 export default function Home() {
   const [step, setStep] = useState<Step>("login");
   const [user, setUser] = useState<User | null>(null);
+  const [loginInfo, setLoginInfo] = useState<{ company: string; employeeId: string } | null>(null); // 로그인 시 입력한 정보 저장
   const [capturedImage, setCapturedImage] = useState<string>("");
   const [faceAge, setFaceAge] = useState<number>(0);
   const { toast } = useToast();
@@ -27,6 +28,7 @@ export default function Home() {
       
       const userData = await response.json() as User;
       setUser(userData);
+      setLoginInfo({ company, employeeId }); // 로그인 정보 저장
       setStep("welcome");
     } catch (error) {
       toast({
@@ -45,14 +47,36 @@ export default function Home() {
     setStep("webcam");
   };
 
-  const handleCapture = (imageSrc: string) => {
+  const handleCapture = async (imageSrc: string) => {
     setCapturedImage(imageSrc);
     setStep("loading");
     
-    setTimeout(() => {
+    // 분석 시뮬레이션 (실제로는 AI 분석 API 호출)
+    setTimeout(async () => {
       const randomFaceAge = 20;
       setFaceAge(randomFaceAge);
       setStep("result");
+
+      // 분석 결과를 구글 시트에 저장
+      if (user && loginInfo) {
+        try {
+          const ageDifference = user.realAge - randomFaceAge; // 실제 나이 - 얼굴 나이
+          const completedAt = new Date().toISOString(); // ISO 8601 형식: "2024-01-01T12:00:00.000Z"
+
+          await apiRequest("POST", "/api/analysis/save", {
+            company: loginInfo.company,
+            employeeId: loginInfo.employeeId,
+            name: user.name,
+            realAge: user.realAge,
+            faceAge: randomFaceAge,
+            ageDifference,
+            completedAt,
+          });
+        } catch (error) {
+          // 저장 실패해도 사용자에게는 오류 표시하지 않음 (백그라운드 작업)
+          console.error("분석 결과 저장 실패:", error);
+        }
+      }
     }, 2000);
   };
 
@@ -66,6 +90,7 @@ export default function Home() {
     setCapturedImage("");
     setFaceAge(0);
     setUser(null);
+    setLoginInfo(null); // 로그인 정보도 초기화
     setStep("login");
   };
 
