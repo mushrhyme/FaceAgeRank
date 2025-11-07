@@ -73,7 +73,13 @@ export class GoogleSheetsService {
         ],
       ];
 
-      await this.sheets.spreadsheets.values.append({
+      console.log("📝 구글 시트에 데이터 추가 시도:", {
+        spreadsheetId: this.spreadsheetId,
+        range: "Sheet1!A:G",
+        values: values[0],
+      });
+
+      const response = await this.sheets.spreadsheets.values.append({
         spreadsheetId: this.spreadsheetId,
         range: "Sheet1!A:G", // A열부터 G열까지
         valueInputOption: "USER_ENTERED", // 사용자가 입력한 것처럼 처리 (날짜 형식 자동 인식)
@@ -83,9 +89,23 @@ export class GoogleSheetsService {
         },
       });
 
+      console.log("✅ 구글 시트 API 응답:", {
+        updatedRows: response.data.updates?.updatedRows,
+        updatedCells: response.data.updates?.updatedCells,
+      });
+
       return true;
-    } catch (error) {
-      console.error("구글 시트 저장 실패:", error);
+    } catch (error: any) {
+      console.error("❌ 구글 시트 저장 실패:");
+      console.error("에러 타입:", error?.constructor?.name);
+      console.error("에러 메시지:", error?.message);
+      if (error?.response) {
+        console.error("API 응답 상태:", error.response.status);
+        console.error("API 응답 데이터:", error.response.data);
+      }
+      if (error?.code) {
+        console.error("에러 코드:", error.code);
+      }
       throw error;
     }
   }

@@ -60,17 +60,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // 구글 시트에 저장
-      console.log("📊 분석 결과 저장 시도:", { company: data.company, name: data.name, faceAge: data.faceAge });
+      console.log("📊 분석 결과 저장 시도:", { 
+        company: data.company, 
+        employeeId: data.employeeId,
+        name: data.name, 
+        realAge: data.realAge,
+        faceAge: data.faceAge,
+        ageDifference: data.ageDifference,
+        completedAt: data.completedAt,
+      });
+      
       await googleSheetsService.saveAnalysisResult(data);
-      console.log("✅ 구글 시트 저장 성공");
+      console.log("✅ 구글 시트 저장 성공 - API 응답 완료");
 
       res.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: "잘못된 요청입니다." });
       }
-      console.error("분석 결과 저장 실패:", error);
-      res.status(500).json({ error: "결과 저장 중 오류가 발생했습니다." });
+      console.error("❌ 분석 결과 저장 실패 - 라우트 레벨:");
+      console.error("에러:", error);
+      if (error?.message) {
+        console.error("에러 메시지:", error.message);
+      }
+      res.status(500).json({ 
+        error: "결과 저장 중 오류가 발생했습니다.",
+        details: error?.message || String(error)
+      });
     }
   });
 
