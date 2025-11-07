@@ -1,47 +1,71 @@
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import type { User } from "@shared/schema";
 import LoginForm from "@/components/LoginForm";
+import WelcomeScreen from "@/components/WelcomeScreen";
+import CaptureGuide from "@/components/CaptureGuide";
 import WebcamCapture from "@/components/WebcamCapture";
-import Countdown from "@/components/Countdown";
 import LoadingAnalysis from "@/components/LoadingAnalysis";
 import ResultDisplay from "@/components/ResultDisplay";
 
-type Step = "login" | "webcam" | "countdown" | "loading" | "result";
+type Step = "login" | "welcome" | "guide" | "webcam" | "loading" | "result";
 
 export default function Home() {
   const [step, setStep] = useState<Step>("login");
-  const [company, setCompany] = useState("");
-  const [employeeId, setEmployeeId] = useState("");
+  const [user, setUser] = useState<User | null>(null);
   const [capturedImage, setCapturedImage] = useState<string>("");
-  const [estimatedAge, setEstimatedAge] = useState<number>(0);
+  const [faceAge, setFaceAge] = useState<number>(0);
+  const { toast } = useToast();
 
-  const handleLogin = (companyName: string, empId: string) => {
-    setCompany(companyName);
-    setEmployeeId(empId);
+  const handleLogin = async (company: string, employeeId: string) => {
+    try {
+      const response = await apiRequest("POST", "/api/user/lookup", {
+        company,
+        employeeId,
+      });
+      
+      const userData = await response.json() as User;
+      setUser(userData);
+      setStep("welcome");
+    } catch (error) {
+      toast({
+        title: "오류",
+        description: "사용자 정보를 찾을 수 없습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleWelcomeContinue = () => {
+    setStep("guide");
+  };
+
+  const handleGuideStart = () => {
     setStep("webcam");
   };
 
   const handleCapture = (imageSrc: string) => {
     setCapturedImage(imageSrc);
-    setStep("countdown");
-  };
-
-  const handleCountdownComplete = () => {
     setStep("loading");
     
     setTimeout(() => {
-      const randomAge = Math.floor(Math.random() * 20) + 20;
-      setEstimatedAge(randomAge);
+      const randomFaceAge = 20;
+      setFaceAge(randomFaceAge);
       setStep("result");
     }, 2000);
   };
 
-  const handleNewAttempt = () => {
+  const handleRetry = () => {
     setCapturedImage("");
-    setEstimatedAge(0);
-    setStep("login");
+    setFaceAge(0);
+    setStep("guide");
   };
 
-  const handleBack = () => {
+  const handleReset = () => {
+    setCapturedImage("");
+    setFaceAge(0);
+    setUser(null);
     setStep("login");
   };
 
@@ -49,23 +73,28 @@ export default function Home() {
     <>
       {step === "login" && <LoginForm onSubmit={handleLogin} />}
       
-      {step === "webcam" && (
-        <WebcamCapture onCapture={handleCapture} onBack={handleBack} />
+      {step === "welcome" && user && (
+        <WelcomeScreen name={user.name} onContinue={handleWelcomeContinue} />
       )}
       
-      {step === "countdown" && (
-        <Countdown onComplete={handleCountdownComplete} />
+      {step === "guide" && (
+        <CaptureGuide onStart={handleGuideStart} />
+      )}
+      
+      {step === "webcam" && (
+        <WebcamCapture onCapture={handleCapture} />
       )}
       
       {step === "loading" && <LoadingAnalysis />}
       
-      {step === "result" && (
+      {step === "result" && user && (
         <ResultDisplay
-          age={estimatedAge}
+          realAge={user.realAge}
+          faceAge={faceAge}
           capturedImage={capturedImage}
-          company={company}
-          employeeId={employeeId}
-          onNewAttempt={handleNewAttempt}
+          name={user.name}
+          onRetry={handleRetry}
+          onReset={handleReset}
         />
       )}
     </>

@@ -3,11 +3,14 @@ import ResultDisplay from "../ResultDisplay";
 export default function ResultDisplayExample() {
   return (
     <ResultDisplay
-      age={28}
-      company="테크 컴퍼니"
-      employeeId="EMP-12345"
-      onNewAttempt={() => {
-        console.log("New attempt clicked");
+      realAge={30}
+      faceAge={20}
+      name="조유민"
+      onRetry={() => {
+        console.log("Retry clicked");
+      }}
+      onReset={() => {
+        console.log("Reset clicked");
       }}
     />
   );

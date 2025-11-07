@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
   const webcamRef = useRef<Webcam>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [error, setError] = useState<string>("");
+  const [countdown, setCountdown] = useState<number | null>(null);
 
   const handleUserMedia = useCallback(() => {
     setHasPermission(true);
@@ -25,12 +26,27 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
     setError("카메라 접근 권한이 필요합니다. 브라우저 설정에서 카메라를 허용해주세요.");
   }, []);
 
-  const handleCapture = useCallback(() => {
-    const imageSrc = webcamRef.current?.getScreenshot();
-    if (imageSrc) {
-      onCapture(imageSrc);
+  const handleStartCountdown = useCallback(() => {
+    setCountdown(3);
+  }, []);
+
+  useEffect(() => {
+    if (countdown === null) return;
+
+    if (countdown === 0) {
+      const imageSrc = webcamRef.current?.getScreenshot();
+      if (imageSrc) {
+        onCapture(imageSrc);
+      }
+      return;
     }
-  }, [onCapture]);
+
+    const timer = setTimeout(() => {
+      setCountdown(countdown - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [countdown, onCapture]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background">
@@ -69,6 +85,54 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
               onUserMediaError={handleUserMediaError}
               className="w-full h-full object-cover"
             />
+            
+            {hasPermission && (
+              <div className="absolute inset-0 pointer-events-none">
+                <svg
+                  viewBox="0 0 1280 720"
+                  className="w-full h-full"
+                  preserveAspectRatio="xMidYMid slice"
+                >
+                  <defs>
+                    <linearGradient id="guideline-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="white" stopOpacity="0.6" />
+                      <stop offset="100%" stopColor="white" stopOpacity="0.3" />
+                    </linearGradient>
+                  </defs>
+                  
+                  <ellipse
+                    cx="640"
+                    cy="280"
+                    rx="180"
+                    ry="200"
+                    fill="none"
+                    stroke="url(#guideline-gradient)"
+                    strokeWidth="3"
+                    strokeDasharray="10,8"
+                  />
+                  
+                  <path
+                    d="M 460 450 Q 460 520, 500 580 L 500 680 M 780 450 Q 780 520, 740 580 L 740 680 M 500 680 L 740 680"
+                    fill="none"
+                    stroke="url(#guideline-gradient)"
+                    strokeWidth="3"
+                    strokeDasharray="10,8"
+                  />
+                  
+                  <text
+                    x="640"
+                    y="650"
+                    textAnchor="middle"
+                    fill="white"
+                    fontSize="24"
+                    fontWeight="500"
+                    opacity="0.8"
+                  >
+                    가이드라인 안에 위치해주세요
+                  </text>
+                </svg>
+              </div>
+            )}
           </div>
 
           {hasPermission && (
@@ -88,17 +152,60 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
           </Alert>
         )}
 
-        {hasPermission && (
+        {hasPermission && countdown === null && (
           <div className="flex justify-center">
             <Button
               size="lg"
-              onClick={handleCapture}
+              onClick={handleStartCountdown}
               className="h-12 px-8 text-base font-medium min-w-48"
               data-testid="button-start"
             >
               <Camera className="w-5 h-5 mr-2" />
               시작
             </Button>
+          </div>
+        )}
+
+        {countdown !== null && countdown > 0 && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
+            <div className="relative">
+              <div
+                className="text-white font-bold transition-all duration-300"
+                style={{
+                  fontSize: "10rem",
+                  lineHeight: 1,
+                  animation: "scaleIn 0.3s ease-out",
+                }}
+                data-testid="text-countdown"
+              >
+                {countdown}
+              </div>
+              <div
+                className="absolute inset-0 rounded-full border-4 border-white/20"
+                style={{
+                  width: "12rem",
+                  height: "12rem",
+                  left: "50%",
+                  top: "50%",
+                  transform: "translate(-50%, -50%)",
+                }}
+              />
+            </div>
+            <style>{`
+              @keyframes scaleIn {
+                0% {
+                  transform: scale(0.5);
+                  opacity: 0;
+                }
+                50% {
+                  transform: scale(1.1);
+                }
+                100% {
+                  transform: scale(1);
+                  opacity: 1;
+                }
+              }
+            `}</style>
           </div>
         )}
 
