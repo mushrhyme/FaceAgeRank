@@ -21,59 +21,63 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="text-center space-y-2 pb-8">
-          <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-            <Camera className="w-8 h-8 text-primary" />
-          </div>
-          <CardTitle className="text-2xl font-semibold">얼굴 나이 측정</CardTitle>
-          <CardDescription className="text-base">
-            회사명과 사번을 입력하여 시작하세요
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="company" className="text-sm font-medium">
-                회사명
-              </Label>
-              <Input
-                id="company"
-                type="text"
-                placeholder="회사명을 입력하세요"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-                className="h-12"
-                data-testid="input-company"
-                required
-              />
+    <div className="min-h-screen flex items-center justify-center p-8 bg-background">
+      <div className="w-full max-w-6xl">
+        <Card className="shadow-xl">
+          <CardHeader className="text-center space-y-4 pb-12 pt-12">
+            <div className="mx-auto w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
+              <Camera className="w-12 h-12 text-primary" />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="employeeId" className="text-sm font-medium">
-                사번
-              </Label>
-              <Input
-                id="employeeId"
-                type="text"
-                placeholder="사번을 입력하세요"
-                value={employeeId}
-                onChange={(e) => setEmployeeId(e.target.value)}
-                className="h-12"
-                data-testid="input-employee-id"
-                required
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full h-12 text-base font-medium"
-              data-testid="button-submit"
-            >
-              확인
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+            <CardTitle className="text-4xl font-semibold">얼굴 나이 측정</CardTitle>
+            <CardDescription className="text-xl">
+              회사명과 사번을 입력하여 시작하세요
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="px-16 pb-16">
+            <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl mx-auto">
+              <div className="space-y-3">
+                <Label htmlFor="company" className="text-lg font-medium">
+                  회사명
+                </Label>
+                <Input
+                  id="company"
+                  type="text"
+                  placeholder="회사명을 입력하세요"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  className="h-16 text-lg"
+                  data-testid="input-company"
+                  required
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="employeeId" className="text-lg font-medium">
+                  사번
+                </Label>
+                <Input
+                  id="employeeId"
+                  type="text"
+                  placeholder="사번을 입력하세요"
+                  value={employeeId}
+                  onChange={(e) => setEmployeeId(e.target.value)}
+                  className="h-16 text-lg"
+                  data-testid="input-employee-id"
+                  required
+                />
+              </div>
+              <div className="pt-4">
+                <Button
+                  type="submit"
+                  className="w-full h-16 text-xl font-medium"
+                  data-testid="button-submit"
+                >
+                  확인
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

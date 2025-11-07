@@ -49,23 +49,23 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
   }, [countdown, onCapture]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background">
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-background">
       {onBack && (
         <Button
           variant="ghost"
           onClick={onBack}
-          className="absolute top-4 left-4"
+          className="absolute top-8 left-8 h-14 px-6 text-lg"
           data-testid="button-back"
         >
-          <ArrowLeft className="w-5 h-5 mr-2" />
+          <ArrowLeft className="w-6 h-6 mr-2" />
           뒤로
         </Button>
       )}
 
-      <div className="w-full max-w-4xl space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-semibold">카메라 준비</h1>
-          <p className="text-muted-foreground">
+      <div className="w-full max-w-6xl space-y-12">
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl font-semibold">카메라 준비</h1>
+          <p className="text-xl text-muted-foreground">
             얼굴이 화면 중앙에 오도록 위치를 조정하세요
           </p>
         </div>
@@ -139,9 +139,9 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="relative">
                   <div
-                    className="text-white font-bold transition-all duration-300 drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]"
+                    className="text-white font-bold transition-all duration-300 drop-shadow-[0_0_30px_rgba(0,0,0,0.9)]"
                     style={{
-                      fontSize: "10rem",
+                      fontSize: "16rem",
                       lineHeight: 1,
                       animation: "scaleIn 0.3s ease-out",
                     }}
@@ -152,8 +152,8 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
                   <div
                     className="absolute inset-0 rounded-full border-4 border-white/20"
                     style={{
-                      width: "12rem",
-                      height: "12rem",
+                      width: "16rem",
+                      height: "16rem",
                       left: "50%",
                       top: "50%",
                       transform: "translate(-50%, -50%)",
@@ -181,10 +181,10 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
 
           {hasPermission && (
             <Badge
-              className="absolute top-4 right-4 bg-green-500/90 text-white backdrop-blur-sm"
+              className="absolute top-6 right-6 bg-green-500/90 text-white backdrop-blur-sm text-lg px-4 py-2"
               data-testid="badge-camera-active"
             >
-              <div className="w-2 h-2 rounded-full bg-white mr-2 animate-pulse" />
+              <div className="w-3 h-3 rounded-full bg-white mr-2 animate-pulse" />
               카메라 활성
             </Badge>
           )}
@@ -201,10 +201,10 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
             <Button
               size="lg"
               onClick={handleStartCountdown}
-              className="h-12 px-8 text-base font-medium min-w-48"
+              className="h-16 px-16 text-xl font-medium min-w-64"
               data-testid="button-start"
             >
-              <Camera className="w-5 h-5 mr-2" />
+              <Camera className="w-6 h-6 mr-2" />
               시작
             </Button>
           </div>
@@ -216,7 +216,7 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
             <Button
               variant="outline"
               onClick={() => window.location.reload()}
-              className="h-12 px-8"
+              className="h-16 px-16 text-xl font-medium"
               data-testid="button-retry"
             >
               다시 시도
