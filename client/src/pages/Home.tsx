@@ -81,6 +81,19 @@ export default function Home() {
             completedAt,
           });
 
+          // 응답 Content-Type 확인
+          const contentType = response.headers.get("content-type");
+          if (!contentType || !contentType.includes("application/json")) {
+            const text = await response.text();
+            console.error("❌ JSON이 아닌 응답 받음:", {
+              contentType,
+              status: response.status,
+              statusText: response.statusText,
+              body: text.substring(0, 200), // 처음 200자만
+            });
+            throw new Error(`서버가 JSON이 아닌 응답을 반환했습니다: ${response.status} ${response.statusText}`);
+          }
+
           const result = await response.json();
           console.log("✅ 구글 시트 저장 성공:", result);
         } catch (error) {
@@ -88,6 +101,7 @@ export default function Home() {
           console.error("❌ 분석 결과 저장 실패:", error);
           if (error instanceof Error) {
             console.error("에러 상세:", error.message);
+            console.error("에러 스택:", error.stack);
           }
         }
       } else {
