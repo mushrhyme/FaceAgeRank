@@ -61,7 +61,17 @@ export default function Home() {
       if (user && loginInfo) {
         try {
           const ageDifference = user.realAge - randomFaceAge; // 실제 나이 - 얼굴 나이
-          const completedAt = new Date().toISOString(); // ISO 8601 형식: "2024-01-01T12:00:00.000Z"
+          // 한국 시간대(KST)로 변환하여 읽기 쉬운 형식으로 포맷팅: "2025-11-07 22:20:47"
+          const now = new Date();
+          const kstOffset = 9 * 60; // KST는 UTC+9 (분 단위)
+          const kstTime = new Date(now.getTime() + (kstOffset + now.getTimezoneOffset()) * 60000);
+          const year = kstTime.getFullYear();
+          const month = String(kstTime.getMonth() + 1).padStart(2, "0");
+          const day = String(kstTime.getDate()).padStart(2, "0");
+          const hours = String(kstTime.getHours()).padStart(2, "0");
+          const minutes = String(kstTime.getMinutes()).padStart(2, "0");
+          const seconds = String(kstTime.getSeconds()).padStart(2, "0");
+          const completedAt = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 
           console.log("📤 구글 시트 저장 요청 전송:", {
             company: loginInfo.company,
