@@ -133,6 +133,50 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
                 </svg>
               </div>
             )}
+
+            {/* 카운트다운 오버레이 - 웹캠 위에만 표시 */}
+            {countdown !== null && countdown > 0 && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="relative">
+                  <div
+                    className="text-white font-bold transition-all duration-300 drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]"
+                    style={{
+                      fontSize: "10rem",
+                      lineHeight: 1,
+                      animation: "scaleIn 0.3s ease-out",
+                    }}
+                    data-testid="text-countdown"
+                  >
+                    {countdown}
+                  </div>
+                  <div
+                    className="absolute inset-0 rounded-full border-4 border-white/20"
+                    style={{
+                      width: "12rem",
+                      height: "12rem",
+                      left: "50%",
+                      top: "50%",
+                      transform: "translate(-50%, -50%)",
+                    }}
+                  />
+                </div>
+                <style>{`
+                  @keyframes scaleIn {
+                    0% {
+                      transform: scale(0.5);
+                      opacity: 0;
+                    }
+                    50% {
+                      transform: scale(1.1);
+                    }
+                    100% {
+                      transform: scale(1);
+                      opacity: 1;
+                    }
+                  }
+                `}</style>
+              </div>
+            )}
           </div>
 
           {hasPermission && (
@@ -166,48 +210,6 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
           </div>
         )}
 
-        {countdown !== null && countdown > 0 && (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
-            <div className="relative">
-              <div
-                className="text-white font-bold transition-all duration-300"
-                style={{
-                  fontSize: "10rem",
-                  lineHeight: 1,
-                  animation: "scaleIn 0.3s ease-out",
-                }}
-                data-testid="text-countdown"
-              >
-                {countdown}
-              </div>
-              <div
-                className="absolute inset-0 rounded-full border-4 border-white/20"
-                style={{
-                  width: "12rem",
-                  height: "12rem",
-                  left: "50%",
-                  top: "50%",
-                  transform: "translate(-50%, -50%)",
-                }}
-              />
-            </div>
-            <style>{`
-              @keyframes scaleIn {
-                0% {
-                  transform: scale(0.5);
-                  opacity: 0;
-                }
-                50% {
-                  transform: scale(1.1);
-                }
-                100% {
-                  transform: scale(1);
-                  opacity: 1;
-                }
-              }
-            `}</style>
-          </div>
-        )}
 
         {hasPermission === false && (
           <div className="flex justify-center">
