@@ -63,7 +63,15 @@ export default function Home() {
           const ageDifference = user.realAge - randomFaceAge; // 실제 나이 - 얼굴 나이
           const completedAt = new Date().toISOString(); // ISO 8601 형식: "2024-01-01T12:00:00.000Z"
 
-          await apiRequest("POST", "/api/analysis/save", {
+          console.log("📤 구글 시트 저장 요청 전송:", {
+            company: loginInfo.company,
+            employeeId: loginInfo.employeeId,
+            name: user.name,
+            realAge: user.realAge,
+            faceAge: randomFaceAge,
+          });
+
+          const response = await apiRequest("POST", "/api/analysis/save", {
             company: loginInfo.company,
             employeeId: loginInfo.employeeId,
             name: user.name,
@@ -72,10 +80,18 @@ export default function Home() {
             ageDifference,
             completedAt,
           });
+
+          const result = await response.json();
+          console.log("✅ 구글 시트 저장 성공:", result);
         } catch (error) {
           // 저장 실패해도 사용자에게는 오류 표시하지 않음 (백그라운드 작업)
-          console.error("분석 결과 저장 실패:", error);
+          console.error("❌ 분석 결과 저장 실패:", error);
+          if (error instanceof Error) {
+            console.error("에러 상세:", error.message);
+          }
         }
+      } else {
+        console.warn("⚠️ 사용자 정보 또는 로그인 정보가 없어 저장하지 않음");
       }
     }, 2000);
   };

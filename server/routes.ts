@@ -9,8 +9,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   let googleSheetsService: GoogleSheetsService | null = null;
   try {
     googleSheetsService = new GoogleSheetsService();
+    console.log("✅ 구글 시트 서비스 초기화 성공");
   } catch (error) {
-    console.warn("구글 시트 서비스 초기화 실패 (결과 저장 기능 비활성화):", error instanceof Error ? error.message : String(error));
+    console.warn("⚠️ 구글 시트 서비스 초기화 실패 (결과 저장 기능 비활성화):", error instanceof Error ? error.message : String(error));
   }
 
   // 회사/사번으로 사용자 조회
@@ -59,7 +60,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // 구글 시트에 저장
+      console.log("📊 분석 결과 저장 시도:", { company: data.company, name: data.name, faceAge: data.faceAge });
       await googleSheetsService.saveAnalysisResult(data);
+      console.log("✅ 구글 시트 저장 성공");
 
       res.json({ success: true });
     } catch (error) {
