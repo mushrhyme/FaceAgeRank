@@ -27,16 +27,16 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
           <div className="mx-auto w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
             <Camera className="w-12 h-12 text-primary" />
           </div>
-          <h1 className="text-4xl font-semibold">얼굴 나이 측정</h1>
-          <p className="text-xl text-muted-foreground">
-            회사명과 사번을 입력하여 시작하세요
+          <h1 className="text-6xl font-semibold">AI가 본 내 얼굴 나이</h1>
+          <p className="text-2xl text-muted-foreground">
+            현실이랑 얼마나 다를까? 동안인지 노안인지 확인해보세요!
           </p>
         </div>
 
         {/* 폼 */}
         <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl mx-auto">
           <div className="space-y-3">
-            <Label htmlFor="company" className="text-lg font-medium">
+            <Label htmlFor="company" className="text-2xl font-medium">
               회사명
             </Label>
             <Input
@@ -45,13 +45,13 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
               placeholder="회사명을 입력하세요"
               value={company}
               onChange={(e) => setCompany(e.target.value)}
-              className="h-16 text-lg"
+              className="h-20 text-2xl"
               data-testid="input-company"
               required
             />
           </div>
           <div className="space-y-3">
-            <Label htmlFor="employeeId" className="text-lg font-medium">
+            <Label htmlFor="employeeId" className="text-2xl font-medium">
               사번
             </Label>
             <Input
@@ -60,7 +60,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
               placeholder="사번을 입력하세요"
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value)}
-              className="h-16 text-lg"
+              className="h-20 text-2xl"
               data-testid="input-employee-id"
               required
             />
