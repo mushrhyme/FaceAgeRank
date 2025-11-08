@@ -23,16 +23,16 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
     <div className="h-screen flex flex-col items-center justify-center p-8 bg-background">
       <div className="w-full max-w-6xl">
         {/* 헤더 */}
-        <div className="text-center space-y-4 mb-12">
+        <div className="text-center mb-12">
           <div className="mx-auto w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
             <Camera className="w-12 h-12 text-primary" />
           </div>
-          <h1 className="text-6xl font-semibold">AI가 본 내 얼굴 나이</h1>
-          <p className="text-2xl text-muted-foreground">
+          <h1 className="text-7xl font-semibold mt-12">AI가 본 내 얼굴 나이</h1>
+          <p className="text-3xl text-muted-foreground mt-8">
             현실이랑 얼마나 다를까? 동안인지 노안인지 확인해보세요!
           </p>
         </div>
-
+        <div className="my-20" />
         {/* 폼 */}
         <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl mx-auto">
           <div className="space-y-3">

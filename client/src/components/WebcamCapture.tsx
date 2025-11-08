@@ -10,7 +10,10 @@ interface WebcamCaptureProps {
   onBack?: () => void;
 }
 
-export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps) {
+export default function WebcamCapture({
+  onCapture,
+  onBack,
+}: WebcamCaptureProps) {
   const webcamRef = useRef<Webcam>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [error, setError] = useState<string>("");
@@ -23,7 +26,9 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
 
   const handleUserMediaError = useCallback(() => {
     setHasPermission(false);
-    setError("카메라 접근 권한이 필요합니다. 브라우저 설정에서 카메라를 허용해주세요.");
+    setError(
+      "카메라 접근 권한이 필요합니다. 브라우저 설정에서 카메라를 허용해주세요."
+    );
   }, []);
 
   const handleStartCountdown = useCallback(() => {
@@ -85,7 +90,7 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
               onUserMediaError={handleUserMediaError}
               className="w-full h-full object-cover"
             />
-            
+
             {hasPermission && (
               <div className="absolute inset-0 pointer-events-none">
                 <svg
@@ -94,12 +99,18 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
                   preserveAspectRatio="xMidYMid slice"
                 >
                   <defs>
-                    <linearGradient id="guideline-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <linearGradient
+                      id="guideline-gradient"
+                      x1="0%"
+                      y1="0%"
+                      x2="0%"
+                      y2="100%"
+                    >
                       <stop offset="0%" stopColor="white" stopOpacity="0.6" />
                       <stop offset="100%" stopColor="white" stopOpacity="0.3" />
                     </linearGradient>
                   </defs>
-                  
+
                   <ellipse
                     cx="640"
                     cy="280"
@@ -110,7 +121,7 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
                     strokeWidth="3"
                     strokeDasharray="10,8"
                   />
-                  
+
                   <path
                     d="M 460 450 Q 460 520, 500 580 L 500 680 M 780 450 Q 780 520, 740 580 L 740 680 M 500 680 L 740 680"
                     fill="none"
@@ -118,7 +129,7 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
                     strokeWidth="3"
                     strokeDasharray="10,8"
                   />
-                  
+
                   <text
                     x="640"
                     y="650"
@@ -209,7 +220,6 @@ export default function WebcamCapture({ onCapture, onBack }: WebcamCaptureProps)
             </Button>
           </div>
         )}
-
 
         {hasPermission === false && (
           <div className="flex justify-center">

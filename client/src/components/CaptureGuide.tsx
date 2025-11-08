@@ -15,36 +15,41 @@ export default function CaptureGuide({ onStart }: CaptureGuideProps) {
             <Camera className="w-12 h-12 text-primary" />
           </div>
           <h1 className="text-4xl font-semibold mb-4">촬영 안내</h1>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-2xl text-muted-foreground">
             아래 안내에 따라 촬영을 진행해주세요
           </p>
         </div>
 
-        {/* 안내 사항 */}
-        <div className="space-y-6 max-w-3xl mx-auto mb-12">
-          <div className="flex items-center justify-center gap-4">
-            <CheckCircle2 className="w-8 h-8 text-primary flex-shrink-0" />
-            <p className="text-xl text-muted-foreground">
-              밝은 조명 아래에서 촬영해주세요
-            </p>
-          </div>
-          <div className="flex items-center justify-center gap-4">
-            <CheckCircle2 className="w-8 h-8 text-primary flex-shrink-0" />
-            <p className="text-xl text-muted-foreground">
-              얼굴이 화면 중앙의 가이드라인 안에 오도록 위치해주세요
-            </p>
-          </div>
-          <div className="flex items-center justify-center gap-4">
-            <CheckCircle2 className="w-8 h-8 text-primary flex-shrink-0" />
-            <p className="text-xl text-muted-foreground">
-              카메라를 정면으로 바라봐주세요
-            </p>
-          </div>
-          <div className="flex items-center justify-center gap-4">
-            <CheckCircle2 className="w-8 h-8 text-primary flex-shrink-0" />
-            <p className="text-xl text-muted-foreground">
-              촬영 시작 버튼을 누르면 3초 후 자동으로 촬영됩니다
-            </p>
+        {/* 안내 사항 - 카드 */}
+        <div className="max-w-4xl mx-auto mb-12 bg-card rounded-xl shadow p-8">
+          <div className="space-y-6">
+            <div className="flex items-start gap-4">
+              <CheckCircle2 className="w-8 h-8 text-primary flex-shrink-0 mt-1" />
+              <p className="text-2xl text-muted-foreground text-left">
+                밝은 조명 아래에서 촬영해주세요
+              </p>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <CheckCircle2 className="w-8 h-8 text-primary flex-shrink-0 mt-1" />
+              <p className="text-2xl text-muted-foreground text-left">
+                얼굴이 화면 중앙의 가이드라인 안에 오도록 위치해주세요
+              </p>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <CheckCircle2 className="w-8 h-8 text-primary flex-shrink-0 mt-1" />
+              <p className="text-2xl text-muted-foreground text-left">
+                카메라를 정면으로 바라봐주세요
+              </p>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <CheckCircle2 className="w-8 h-8 text-primary flex-shrink-0 mt-1" />
+              <p className="text-2xl text-muted-foreground text-left">
+                촬영 시작 버튼을 누르면 3초 후 자동으로 촬영됩니다
+              </p>
+            </div>
           </div>
         </div>
 

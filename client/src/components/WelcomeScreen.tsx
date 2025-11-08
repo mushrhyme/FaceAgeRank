@@ -6,7 +6,10 @@ interface WelcomeScreenProps {
   onContinue: () => void;
 }
 
-export default function WelcomeScreen({ name, onContinue }: WelcomeScreenProps) {
+export default function WelcomeScreen({
+  name,
+  onContinue,
+}: WelcomeScreenProps) {
   return (
     <div className="h-screen flex items-center justify-center p-8 bg-background">
       <div className="w-full max-w-6xl text-center space-y-12">
@@ -15,15 +18,16 @@ export default function WelcomeScreen({ name, onContinue }: WelcomeScreenProps) 
         </div>
 
         <div className="space-y-4">
-          <h1 className="text-5xl font-bold" data-testid="text-welcome-name">
+          <h1 className="text-6xl font-bold" data-testid="text-welcome-name">
             {name} 님
           </h1>
-          <p className="text-4xl font-semibold text-primary">
+
+          <p className="text-5xl font-semibold text-primary mt-[15px]">
             환영합니다!
           </p>
         </div>
 
-        <p className="text-2xl text-muted-foreground">
+        <p className="text-3xl text-muted-foreground">
           얼굴 나이 측정을 시작하겠습니다
         </p>
 
