@@ -111,19 +111,19 @@ export default function WebcamCapture({
                     </linearGradient>
                   </defs>
 
-                  <ellipse
-                    cx="640"
-                    cy="280"
-                    rx="180"
-                    ry="200"
-                    fill="none"
-                    stroke="url(#guideline-gradient)"
-                    strokeWidth="3"
-                    strokeDasharray="10,8"
-                  />
-
+                  {/* 상반신 실루엣 가이드라인 - 얼굴부터 어깨까지 연결된 하나의 경로 */}
                   <path
-                    d="M 460 450 Q 460 520, 500 580 L 500 680 M 780 450 Q 780 520, 740 580 L 740 680 M 500 680 L 740 680"
+                    d="M 640 80 
+                       A 180 200 0 0 1 820 280 
+                       Q 820 320 810 360 
+                       Q 800 400 780 450 
+                       Q 760 500 720 550 
+                       Q 680 600 640 650 
+                       Q 600 600 560 550 
+                       Q 520 500 500 450 
+                       Q 480 400 470 360 
+                       Q 460 320 460 280 
+                       A 180 200 0 0 1 640 80 Z"
                     fill="none"
                     stroke="url(#guideline-gradient)"
                     strokeWidth="3"
