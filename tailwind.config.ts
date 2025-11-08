@@ -5,6 +5,20 @@ export default {
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      fontSize: {
+        // 기본 폰트 크기를 1.2배로 확대 (모니터용)
+        xs: ["0.75rem", { lineHeight: "1rem" }], // 12px -> 14.4px
+        sm: ["1.05rem", { lineHeight: "1.5rem" }], // 14px -> 16.8px
+        base: ["1.2rem", { lineHeight: "1.75rem" }], // 16px -> 19.2px
+        lg: ["1.35rem", { lineHeight: "2rem" }], // 18px -> 21.6px
+        xl: ["1.5rem", { lineHeight: "2.25rem" }], // 20px -> 24px
+        "2xl": ["1.8rem", { lineHeight: "2.5rem" }], // 24px -> 28.8px
+        "3xl": ["2.25rem", { lineHeight: "2.75rem" }], // 30px -> 36px
+        "4xl": ["2.7rem", { lineHeight: "3.25rem" }], // 36px -> 43.2px
+        "5xl": ["3.6rem", { lineHeight: "4rem" }], // 48px -> 57.6px
+        "6xl": ["4.5rem", { lineHeight: "5rem" }], // 60px -> 72px
+        "7xl": ["5.4rem", { lineHeight: "6rem" }], // 72px -> 86.4px
+      },
       borderRadius: {
         lg: ".5625rem", /* 9px */
         md: ".375rem", /* 6px */

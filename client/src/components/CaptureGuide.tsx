@@ -22,27 +22,27 @@ export default function CaptureGuide({ onStart }: CaptureGuideProps) {
 
         {/* 안내 사항 */}
         <div className="space-y-6 max-w-3xl mx-auto mb-12">
-          <div className="flex items-start gap-4">
-            <CheckCircle2 className="w-8 h-8 text-primary mt-1 flex-shrink-0" />
-            <p className="text-xl text-muted-foreground pt-1">
+          <div className="flex items-center justify-center gap-4">
+            <CheckCircle2 className="w-8 h-8 text-primary flex-shrink-0" />
+            <p className="text-xl text-muted-foreground">
               밝은 조명 아래에서 촬영해주세요
             </p>
           </div>
-          <div className="flex items-start gap-4">
-            <CheckCircle2 className="w-8 h-8 text-primary mt-1 flex-shrink-0" />
-            <p className="text-xl text-muted-foreground pt-1">
+          <div className="flex items-center justify-center gap-4">
+            <CheckCircle2 className="w-8 h-8 text-primary flex-shrink-0" />
+            <p className="text-xl text-muted-foreground">
               얼굴이 화면 중앙의 가이드라인 안에 오도록 위치해주세요
             </p>
           </div>
-          <div className="flex items-start gap-4">
-            <CheckCircle2 className="w-8 h-8 text-primary mt-1 flex-shrink-0" />
-            <p className="text-xl text-muted-foreground pt-1">
+          <div className="flex items-center justify-center gap-4">
+            <CheckCircle2 className="w-8 h-8 text-primary flex-shrink-0" />
+            <p className="text-xl text-muted-foreground">
               카메라를 정면으로 바라봐주세요
             </p>
           </div>
-          <div className="flex items-start gap-4">
-            <CheckCircle2 className="w-8 h-8 text-primary mt-1 flex-shrink-0" />
-            <p className="text-xl text-muted-foreground pt-1">
+          <div className="flex items-center justify-center gap-4">
+            <CheckCircle2 className="w-8 h-8 text-primary flex-shrink-0" />
+            <p className="text-xl text-muted-foreground">
               촬영 시작 버튼을 누르면 3초 후 자동으로 촬영됩니다
             </p>
           </div>
