@@ -29,9 +29,33 @@ export class GoogleSheetsService {
     this.spreadsheetId = spreadsheetId;
 
     try {
+      // JSON 문자열 파싱 시도
+      let credentials;
+      try {
+        // 이미 JSON 객체인 경우와 문자열인 경우 모두 처리
+        if (typeof serviceAccountKey === 'string') {
+          // 문자열의 앞뒤 공백 제거
+          let trimmed = serviceAccountKey.trim();
+          
+          // 작은따옴표나 큰따옴표로 감싸져 있으면 제거
+          if ((trimmed.startsWith("'") && trimmed.endsWith("'")) || 
+              (trimmed.startsWith('"') && trimmed.endsWith('"'))) {
+            trimmed = trimmed.slice(1, -1);
+            // 이스케이프된 따옴표 복원
+            trimmed = trimmed.replace(/\\"/g, '"').replace(/\\'/g, "'");
+          }
+          
+          credentials = JSON.parse(trimmed);
+        } else {
+          credentials = serviceAccountKey;
+        }
+      } catch (parseError) {
+        throw new Error(`GOOGLE_SERVICE_ACCOUNT_KEY JSON 파싱 실패: ${parseError instanceof Error ? parseError.message : String(parseError)}. 환경 변수가 올바른 JSON 형식인지 확인하세요.`);
+      }
+
       // 서비스 계정 인증
       const auth = new google.auth.GoogleAuth({
-        credentials: JSON.parse(serviceAccountKey), // JSON 문자열을 파싱
+        credentials, // 파싱된 JSON 객체
         scopes: ["https://www.googleapis.com/auth/spreadsheets"], // 스프레드시트 접근 권한
       });
 
