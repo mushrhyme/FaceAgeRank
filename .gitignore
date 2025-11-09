@@ -7,5 +7,7 @@ vite.config.ts.*
 
 # 환경 변수 파일 (비밀 정보 포함)
 .env
+.env.*
 .env.local
 .env.*.local
+.env.backup
