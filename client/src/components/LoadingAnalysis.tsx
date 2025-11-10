@@ -1,12 +1,17 @@
 import { Loader2 } from "lucide-react";
 import Footer from "@/components/Footer";
 import EventHeader from "@/components/EventHeader";
+import ParticlesBackground from "@/components/ParticlesBackground";
 
 export default function LoadingAnalysis() {
   return (
-    <div className="h-screen flex flex-col bg-background relative">
-      <EventHeader />
-      <div className="flex-1 flex items-center justify-center p-8">
+    <div className="h-screen flex flex-col bg-background relative overflow-hidden">
+      {/* 배경 파티클 레이어 - z-index로 콘텐츠 뒤에 배치 */}
+      <ParticlesBackground />
+      <div className="relative z-10">
+        <EventHeader />
+      </div>
+      <div className="flex-1 flex items-center justify-center p-8 relative z-10">
         <div className="text-center space-y-12">
         <div className="relative">
           <div className="w-40 h-40 mx-auto">
