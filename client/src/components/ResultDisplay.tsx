@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, RotateCcw, Home } from "lucide-react";
+import confetti from "canvas-confetti";
 import Footer from "@/components/Footer";
 import EventHeader from "@/components/EventHeader";
 
@@ -25,6 +27,88 @@ export default function ResultDisplay({
   const ageDifference = faceAge - realAge; // 얼굴 나이 - 실제 나이
   const isYoungerLook = ageDifference < 0; // 얼굴 나이가 실제 나이보다 작으면 동안
   const message = isYoungerLook ? "동안이시네요~" : ageDifference > 0 ? "노안이시네요~" : "실제 나이와 같아요!";
+
+  // 결과 화면이 나타날 때 팡파레 효과
+  useEffect(() => {
+    const duration = 5000; // 5초간 (더 오래 지속)
+    const animationEnd = Date.now() + duration;
+    const defaults = { 
+      startVelocity: 30, 
+      spread: 360, 
+      ticks: 100, // 더 오래 지속되도록 증가
+      zIndex: 0,
+      gravity: 0.8, // 떨어지는 속도 조절
+    };
+
+    // 동안일 때는 파란색 계열, 노안일 때는 주황색 계열
+    const colors = isYoungerLook 
+      ? ['#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe'] // 파란색 계열
+      : ['#f97316', '#fb923c', '#fdba74', '#fed7aa']; // 주황색 계열
+
+    function randomInRange(min: number, max: number) {
+      return Math.random() * (max - min) + min;
+    }
+
+    const interval: NodeJS.Timeout = setInterval(function() {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 80 * (timeLeft / duration); // 더 많은 파티클
+      
+      // 왼쪽에서 발사
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+        colors: colors,
+      });
+      
+      // 오른쪽에서 발사
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+        colors: colors,
+      });
+    }, 200); // 더 자주 발사
+
+    // 중앙에서 큰 폭발 효과 (여러 번)
+    setTimeout(() => {
+      confetti({
+        ...defaults,
+        particleCount: 150,
+        origin: { x: 0.5, y: 0.3 },
+        colors: colors,
+        angle: 90,
+        spread: 60,
+      });
+    }, 500);
+
+    // 추가 폭발 효과
+    setTimeout(() => {
+      confetti({
+        ...defaults,
+        particleCount: 100,
+        origin: { x: 0.3, y: 0.4 },
+        colors: colors,
+        angle: 60,
+        spread: 45,
+      });
+      confetti({
+        ...defaults,
+        particleCount: 100,
+        origin: { x: 0.7, y: 0.4 },
+        colors: colors,
+        angle: 120,
+        spread: 45,
+      });
+    }, 1500);
+
+    return () => clearInterval(interval);
+  }, [isYoungerLook]);
 
   return (
     <div className="h-screen flex flex-col bg-background relative">
