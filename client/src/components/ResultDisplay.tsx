@@ -105,19 +105,19 @@ export default function ResultDisplay({
           <Button
             onClick={onRetry}
             variant="default"
-            className="h-16 px-10 text-xl font-medium"
+            className="h-24 px-16 text-3xl font-medium"
             data-testid="button-retry"
           >
-            <RotateCcw className="w-5 h-5 mr-2" />
+            <RotateCcw className="w-7 h-7 mr-2" />
             다시 하기
           </Button>
           <Button
             onClick={onReset}
             variant="outline"
-            className="h-16 px-10 text-xl font-medium"
+            className="h-24 px-16 text-3xl font-medium"
             data-testid="button-reset"
           >
-            <Home className="w-5 h-5 mr-2" />
+            <Home className="w-7 h-7 mr-2" />
             맨 처음으로
           </Button>
         </div>

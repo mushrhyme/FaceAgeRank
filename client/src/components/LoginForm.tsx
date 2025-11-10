@@ -68,7 +68,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
           <div className="pt-4">
             <Button
               type="submit"
-              className="w-full h-16 text-xl font-medium"
+              className="w-full h-24 text-3xl font-medium"
               data-testid="button-submit"
             >
               확인

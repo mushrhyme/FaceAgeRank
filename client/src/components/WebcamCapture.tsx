@@ -217,10 +217,10 @@ export default function WebcamCapture({
             <Button
               size="lg"
               onClick={handleStartCountdown}
-              className="h-16 px-16 text-xl font-medium min-w-64"
+              className="h-24 px-20 text-3xl font-medium min-w-80"
               data-testid="button-start"
             >
-              <Camera className="w-6 h-6 mr-2" />
+              <Camera className="w-8 h-8 mr-2" />
               시작
             </Button>
           </div>
@@ -231,7 +231,7 @@ export default function WebcamCapture({
             <Button
               variant="outline"
               onClick={() => window.location.reload()}
-              className="h-16 px-16 text-xl font-medium"
+              className="h-24 px-20 text-3xl font-medium"
               data-testid="button-retry"
             >
               다시 시도
