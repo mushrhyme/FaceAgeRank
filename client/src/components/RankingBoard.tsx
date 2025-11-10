@@ -83,15 +83,15 @@ export default function RankingBoard() {
     };
   }, [refetch]);
 
-  // 데이터를 동안랭킹과 노안랭킹으로 분리하고 정렬 및 순위 계산
+  // 데이터를 상위/하위 랭킹으로 분리하고 정렬 및 순위 계산
   const { youngRanking, oldRanking } = useMemo(() => {
     if (!rankingData || rankingData.length === 0) {
       return { youngRanking: [], oldRanking: [] };
     }
 
-    // 노안랭킹: ageDifference > 0 (얼굴 나이가 실제 나이보다 큼)
+    // 하위랭킹: ageDifference > 0 (얼굴 나이가 실제 나이보다 큼)
     const oldData = rankingData.filter(item => item.ageDifference > 0);
-    // 동안랭킹: ageDifference <= 0 (얼굴 나이가 실제 나이보다 작거나 같음)
+    // 상위랭킹: ageDifference <= 0 (얼굴 나이가 실제 나이보다 작거나 같음)
     const youngData = rankingData.filter(item => item.ageDifference <= 0);
 
     // 정렬 함수: 절댓값 기준 내림차순, 동점이면 최신순 (completedAt 내림차순)
@@ -161,14 +161,14 @@ export default function RankingBoard() {
   // 나이 차이에 따른 메시지 (얼굴 나이 - 실제 나이)
   const getAgeDifferenceMessage = (ageDifference: number) => {
     if (ageDifference > 0) {
-      // 양수: 노안 (얼굴 나이 > 실제 나이)
+      // 양수: 얼굴 나이 > 실제 나이
       return (
         <span className="text-orange-600 font-bold text-3xl">
           +{ageDifference}
         </span>
       );
     } else if (ageDifference < 0) {
-      // 음수: 동안 (얼굴 나이 < 실제 나이)
+      // 음수: 얼굴 나이 < 실제 나이
       return (
         <span className="text-blue-600 font-bold text-3xl">
           {ageDifference}
@@ -299,7 +299,7 @@ export default function RankingBoard() {
           </div>
         </Card>
 
-        {/* 노안랭킹 */}
+        {/* 하위 */}
         <Card className="overflow-hidden">
           <div className="h-full flex flex-col">
             <div className="bg-orange-100 px-4 py-3 border-b">

@@ -72,7 +72,7 @@ export class ExcelStorage implements IStorage {
       // 사번은 문자와 숫자가 섞일 수 있으므로 무조건 문자열로 처리
       const employeeId = this.safeString(row["사번"]);
       const name = this.safeString(row["이름"]);
-      // 생년월일: 8자리 숫자 형식(19970919) 또는 문자열 형식(1997-09-19) 모두 처리
+      // 생년월일: 8자리 숫자 형식(19970919) 필수
       let birthDateStr = this.safeString(row["생년월일"]);
       const department = this.safeString(row["부서"]);
 
@@ -86,6 +86,10 @@ export class ExcelStorage implements IStorage {
         const month = birthDateStr.substring(4, 6);
         const day = birthDateStr.substring(6, 8);
         birthDateStr = `${year}-${month}-${day}`;
+      } else {
+        // 8자리 형식이 아니면 에러 로그 출력
+        console.warn(`⚠️ 생년월일 형식 오류: ${birthDateStr} (8자리 숫자 형식이어야 함)`);
+        return undefined;
       }
 
       // 만 나이 계산 (오늘 날짜 기준)
