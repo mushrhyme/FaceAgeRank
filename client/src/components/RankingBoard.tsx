@@ -247,49 +247,49 @@ export default function RankingBoard() {
               <p className="text-sm text-blue-600 text-center mt-1">오늘 더 어려 보이게 나온 분들이에요! 축하드립니다~</p>
             </div>
             <div className="flex-1 overflow-auto">
-              {isLoading ? (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center space-y-4">
-                    <RefreshCw className="w-12 h-12 animate-spin mx-auto text-primary" />
-                    <p className="text-xl text-muted-foreground">랭킹 데이터를 불러오는 중...</p>
-                  </div>
-                </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center space-y-4">
+                <RefreshCw className="w-12 h-12 animate-spin mx-auto text-primary" />
+                <p className="text-xl text-muted-foreground">랭킹 데이터를 불러오는 중...</p>
+              </div>
+            </div>
               ) : youngRanking.length === 0 ? (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center space-y-4">
-                    <Trophy className="w-16 h-16 mx-auto text-muted-foreground" />
-                    <p className="text-2xl text-muted-foreground">아직 랭킹 데이터가 없습니다</p>
-                  </div>
-                </div>
-              ) : (
-                <Table className="text-xl">
-                  <TableHeader>
-                    <TableRow className="bg-muted/50">
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center space-y-4">
+                <Trophy className="w-16 h-16 mx-auto text-muted-foreground" />
+                <p className="text-2xl text-muted-foreground">아직 랭킹 데이터가 없습니다</p>
+              </div>
+            </div>
+          ) : (
+            <Table className="text-xl">
+              <TableHeader>
+                <TableRow className="bg-muted/50">
                       <TableHead className="w-8 text-center text-2xl font-bold py-3">순위</TableHead>
                       <TableHead className="w-16 text-2xl font-bold py-3">이름</TableHead>
                       <TableHead className="w-20 text-2xl font-bold py-3">회사</TableHead>
-                      <TableHead className="w-20 text-2xl font-bold py-3">부서명</TableHead>
-                      <TableHead className="w-20 text-center text-2xl font-bold py-3">나이 차이</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                  <TableHead className="w-20 text-2xl font-bold py-3">부서명</TableHead>
+                  <TableHead className="w-20 text-center text-2xl font-bold py-3">나이 차이</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                     {youngRanking.map((item, index) => (
-                      <TableRow 
+                    <TableRow 
                         key={`young-${item.company}-${item.employeeId}-${item.completedAt}`}
                         className="bg-blue-50 hover:bg-blue-100 border-l-4 border-l-blue-500"
                         style={index === youngRanking.length - 1 ? { borderLeft: '4px solid rgb(59 130 246)' } : undefined}
-                      >
-                        <TableCell className="text-center py-3">
-                          <div className="text-2xl font-bold">
+                    >
+                      <TableCell className="text-center py-3">
+                        <div className="text-2xl font-bold">
                             {getRankBadge(item.rank)}
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-bold text-2xl py-3">{item.name}</TableCell>
-                        <TableCell className="text-muted-foreground text-xl py-3">{item.company}</TableCell>
-                        <TableCell className="text-muted-foreground text-xl py-3">{item.department}</TableCell>
-                        <TableCell className="text-center py-3">
-                          {getAgeDifferenceMessage(item.ageDifference)}
-                        </TableCell>
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-bold text-2xl py-3">{item.name}</TableCell>
+                      <TableCell className="text-muted-foreground text-xl py-3">{item.company}</TableCell>
+                      <TableCell className="text-muted-foreground text-xl py-3">{item.department}</TableCell>
+                      <TableCell className="text-center py-3">
+                        {getAgeDifferenceMessage(item.ageDifference)}
+                      </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -352,12 +352,12 @@ export default function RankingBoard() {
                         </TableCell>
                       </TableRow>
                     ))}
-                  </TableBody>
-                </Table>
-              )}
+              </TableBody>
+            </Table>
+          )}
             </div>
-          </div>
-        </Card>
+        </div>
+      </Card>
       </div>
       <Footer />
     </div>

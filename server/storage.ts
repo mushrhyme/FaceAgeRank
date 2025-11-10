@@ -21,8 +21,8 @@ function calculateAge(birthDate: string): number {
   
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
     age--;
-  }
-  
+}
+
   return age;
 }
 
@@ -78,7 +78,7 @@ export class ExcelStorage implements IStorage {
 
       if (!company || !employeeId || !name || !birthDateStr || !department) {
         return null;
-      }
+  }
 
       // 생년월일이 숫자 형식(970919)인 경우 YYYY-MM-DD로 변환
       if (/^\d{6}$/.test(birthDateStr)) {

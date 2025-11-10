@@ -74,7 +74,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
     <div className="h-screen flex flex-col bg-background relative">
       <EventHeader />
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-6xl">
+      <div className="w-full max-w-6xl">
         {/* 헤더 */}
         <div className="text-center mb-12">
           <div className="mx-auto w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center">
@@ -150,7 +150,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
             </CardContent>
           </Card>
         </div>
-        </div>
+      </div>
       </div>
       <Footer />
     </div>

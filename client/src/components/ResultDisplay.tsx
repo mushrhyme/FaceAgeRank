@@ -28,8 +28,11 @@ export default function ResultDisplay({
   const isYoungerLook = ageDifference < 0; // 얼굴 나이가 실제 나이보다 작으면 동안
   const message = isYoungerLook ? "동안이시네요~" : ageDifference > 0 ? "노안이시네요~" : "실제 나이와 같아요!";
 
-  // 결과 화면이 나타날 때 팡파레 효과
+  // 결과 화면이 나타날 때 팡파레 효과 (동안일 때만)
   useEffect(() => {
+    // 동안이 아닐 때는 팡파레 효과를 표시하지 않음
+    if (!isYoungerLook) return;
+
     const duration = 5000; // 5초간 (더 오래 지속)
     const animationEnd = Date.now() + duration;
     const defaults = { 
@@ -40,10 +43,8 @@ export default function ResultDisplay({
       gravity: 0.8, // 떨어지는 속도 조절
     };
 
-    // 동안일 때는 파란색 계열, 노안일 때는 주황색 계열
-    const colors = isYoungerLook 
-      ? ['#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe'] // 파란색 계열
-      : ['#f97316', '#fb923c', '#fdba74', '#fed7aa']; // 주황색 계열
+    // 동안일 때는 파란색 계열
+    const colors = ['#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe']; // 파란색 계열
 
     function randomInRange(min: number, max: number) {
       return Math.random() * (max - min) + min;
@@ -115,7 +116,7 @@ export default function ResultDisplay({
       <EventHeader />
       <div className="flex-1 overflow-y-auto p-6">
       {/* 상단: 아이콘, 이름, 메시지 */}
-      <div className="text-center space-y-3 pt-4">
+      <div className="text-center space-y-3 pt-24">
         <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-primary/10 mx-auto">
           <Sparkles className="w-20 h-20 text-primary" />
         </div>
@@ -147,9 +148,6 @@ export default function ResultDisplay({
                   data-testid="img-captured"
                 />
               </div>
-            </div>
-            <div className="absolute -top-3 -right-3 w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl shadow-lg">
-              {faceAge}
             </div>
           </div>
         )}
