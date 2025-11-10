@@ -85,6 +85,7 @@ export default function Home() {
             company: loginInfo.company,
             employeeId: loginInfo.employeeId,
             name: user.name,
+            department: user.department, // 부서명
             realAge: user.realAge,
             faceAge: randomFaceAge,
             ageDifference,

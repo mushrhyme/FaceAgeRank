@@ -20,6 +20,7 @@ export class MemStorage implements IStorage {
       employeeId: "EMP001",
       name: "조유민",
       realAge: 30,
+      department: "DT추진팀", // 부서명
     };
     this.users.set(tempUser.id, tempUser);
   }
