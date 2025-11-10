@@ -163,7 +163,7 @@ export default function RankingBoard() {
     if (ageDifference > 0) {
       // 양수: 얼굴 나이 > 실제 나이
       return (
-        <span className="text-orange-600 font-bold text-3xl">
+        <span className="text-gray-600 font-bold text-3xl">
           +{ageDifference}
         </span>
       );
@@ -303,9 +303,9 @@ export default function RankingBoard() {
         {/* 하위 */}
         <Card className="overflow-hidden">
           <div className="h-full flex flex-col">
-            <div className="bg-orange-100 px-4 py-3 border-b">
-              <h2 className="text-3xl font-bold text-orange-700 text-center">하위 랭킹</h2>
-              <p className="text-sm text-orange-600 text-center mt-1">오늘은 조금 성숙하게 보였지만 걱정 마세요! 선물 기회는 그대로에요~</p>
+            <div className="bg-gray-100 px-4 py-3 border-b">
+              <h2 className="text-3xl font-bold text-gray-700 text-center">하위 랭킹</h2>
+              <p className="text-sm text-gray-600 text-center mt-1">오늘은 조금 성숙하게 보였지만 걱정 마세요! 선물 기회는 그대로에요~</p>
             </div>
             <div className="flex-1 overflow-auto">
               {isLoading ? (
@@ -337,8 +337,8 @@ export default function RankingBoard() {
                     {oldRanking.map((item, index) => (
                       <TableRow 
                         key={`old-${item.company}-${item.employeeId}-${item.completedAt}`}
-                        className="bg-orange-50 hover:bg-orange-100 border-l-4 border-l-orange-500"
-                        style={index === oldRanking.length - 1 ? { borderLeft: '4px solid rgb(249 115 22)' } : undefined}
+                        className="bg-gray-50 hover:bg-gray-100 border-l-4 border-l-gray-500"
+                        style={index === oldRanking.length - 1 ? { borderLeft: '4px solid rgb(107 114 128)' } : undefined}
                       >
                         <TableCell className="text-center py-3">
                           <div className="text-2xl font-bold">
