@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Camera } from "lucide-react";
+import { Bot } from 'lucide-react';
 
 interface LoginFormProps {
   onSubmit: (company: string, employeeId: string) => void;
@@ -24,8 +24,8 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
       <div className="w-full max-w-6xl">
         {/* 헤더 */}
         <div className="text-center mb-12">
-          <div className="mx-auto w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
-            <Camera className="w-12 h-12 text-primary" />
+          <div className="mx-auto w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center">
+            <Bot className="w-20 h-20 text-primary" />
           </div>
           <h1 className="text-7xl font-semibold mt-12">AI가 본 내 얼굴 나이</h1>
           <p className="text-3xl text-muted-foreground mt-8">

@@ -28,8 +28,8 @@ export default function ResultDisplay({
     <div className="h-screen flex flex-col justify-between p-8 bg-background overflow-hidden">
       {/* 상단: 아이콘, 이름, 메시지 */}
       <div className="text-center space-y-4">
-        <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary/10 mx-auto">
-          <Sparkles className="w-12 h-12 text-primary" />
+        <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-primary/10 mx-auto">
+          <Sparkles className="w-20 h-20 text-primary" />
         </div>
         <div className="space-y-2">
           <h2 className="text-2xl font-medium text-muted-foreground">
