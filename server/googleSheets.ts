@@ -167,5 +167,80 @@ export class GoogleSheetsService {
       console.warn("헤더 확인 중 오류 (무시하고 계속 진행):", error);
     }
   }
+
+  /**
+   * 구글 시트에서 랭킹 데이터 조회
+   * 나이 차이(실제 나이 - 얼굴 나이) 기준으로 내림차순 정렬
+   * 
+   * @returns 랭킹 데이터 배열
+   */
+  async getRankingData(): Promise<Array<{
+    company: string;        // 회사명
+    employeeId: string;     // 사번
+    name: string;           // 이름
+    realAge: number;        // 실제 나이
+    faceAge: number;        // 얼굴 나이
+    ageDifference: number;  // 나이 차이 (실제 나이 - 얼굴 나이)
+    completedAt: string;    // 분석 완료 시각
+  }>> {
+    try {
+      // 전체 데이터 읽기 (헤더 포함)
+      const response = await this.sheets.spreadsheets.values.get({
+        spreadsheetId: this.spreadsheetId,
+        range: "Sheet1!A:G", // A열부터 G열까지 전체
+      });
+
+      const rows = response.data.values;
+
+      // 데이터가 없으면 빈 배열 반환
+      if (!rows || rows.length <= 1) {
+        return [];
+      }
+
+      // 헤더 제외하고 데이터만 추출
+      const dataRows = rows.slice(1);
+
+      // 데이터 파싱 및 정렬
+      const rankingData = dataRows
+        .map((row: any[]) => {
+          // 각 행의 데이터 추출
+          const company = row[0] || "";
+          const employeeId = row[1] || "";
+          const name = row[2] || "";
+          const realAge = parseInt(row[3] || "0", 10);
+          const faceAge = parseInt(row[4] || "0", 10);
+          const ageDifference = parseInt(row[5] || "0", 10);
+          const completedAt = row[6] || "";
+
+          // 유효한 데이터만 반환
+          if (!name || realAge === 0 || faceAge === 0) {
+            return null;
+          }
+
+          return {
+            company,
+            employeeId,
+            name,
+            realAge,
+            faceAge,
+            ageDifference,
+            completedAt,
+          };
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null) // null 제거
+        .sort((a, b) => b.ageDifference - a.ageDifference); // 나이 차이 내림차순 정렬 (동안일수록 높은 순위)
+
+      return rankingData;
+    } catch (error: any) {
+      console.error("❌ 구글 시트 랭킹 데이터 조회 실패:");
+      console.error("에러 타입:", error?.constructor?.name);
+      console.error("에러 메시지:", error?.message);
+      if (error?.response) {
+        console.error("API 응답 상태:", error.response.status);
+        console.error("API 응답 데이터:", error.response.data);
+      }
+      throw error;
+    }
+  }
 }
 

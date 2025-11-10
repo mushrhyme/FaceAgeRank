@@ -90,6 +90,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 랭킹 데이터 조회
+  app.get("/api/ranking", async (req, res) => {
+    try {
+      // 구글 시트 서비스가 초기화되지 않았으면 오류 반환
+      if (!googleSheetsService) {
+        return res.status(503).json({ error: "구글 시트 서비스가 설정되지 않았습니다." });
+      }
+
+      // 구글 시트에서 랭킹 데이터 조회
+      const rankingData = await googleSheetsService.getRankingData();
+      
+      res.json(rankingData);
+    } catch (error: any) {
+      console.error("❌ 랭킹 데이터 조회 실패:");
+      console.error("에러:", error);
+      if (error?.message) {
+        console.error("에러 메시지:", error.message);
+      }
+      res.status(500).json({ 
+        error: "랭킹 데이터 조회 중 오류가 발생했습니다.",
+        details: error?.message || String(error)
+      });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
