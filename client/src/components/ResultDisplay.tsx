@@ -25,19 +25,19 @@ export default function ResultDisplay({
   const message = isYoungerLook ? "동안이시네요~" : ageDifference < 0 ? "노안이시네요~" : "실제 나이와 같아요!";
 
   return (
-    <div className="h-screen flex flex-col justify-between p-8 bg-background overflow-hidden">
+    <div className="h-screen flex flex-col p-6 bg-background overflow-y-auto">
       {/* 상단: 아이콘, 이름, 메시지 */}
-      <div className="text-center space-y-4">
+      <div className="text-center space-y-3 pt-4">
         <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-primary/10 mx-auto">
           <Sparkles className="w-20 h-20 text-primary" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl font-medium text-muted-foreground">
+          <h2 className="text-3xl font-medium text-muted-foreground">
             {name} 님의 결과
           </h2>
           <Badge
             variant={isYoungerLook ? "default" : "secondary"}
-            className="text-xl px-5 py-1.5"
+            className="text-3xl px-5 py-1.5"
             data-testid="badge-message"
           >
             {message}
@@ -46,11 +46,11 @@ export default function ResultDisplay({
       </div>
 
       {/* 중앙: 이미지와 나이 정보를 세로로 배치 */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-8 my-4">
+      <div className="flex flex-col items-center gap-6 mt-6 mb-4">
         {/* 이미지 */}
         {capturedImage && (
           <div className="relative flex-shrink-0">
-            <div className="w-64 h-64 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-xl bg-gradient-to-br from-primary/5 to-primary/10 p-1.5">
+            <div className="w-96 h-96 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-xl bg-gradient-to-br from-primary/5 to-primary/10 p-2">
               <div className="w-full h-full rounded-xl overflow-hidden">
                 <img
                   src={capturedImage}
@@ -67,7 +67,7 @@ export default function ResultDisplay({
         )}
 
         {/* 나이 정보 */}
-        <div className="grid grid-cols-2 gap-6 max-w-2xl">
+        <div className="grid grid-cols-2 gap-6 w-full max-w-2xl">
           <Card className="border-2">
             <div className="pt-6 pb-6 text-center space-y-2">
               <p className="text-lg text-muted-foreground">실제 나이</p>
@@ -88,10 +88,10 @@ export default function ResultDisplay({
       </div>
 
       {/* 하단: 나이 차이 메시지와 버튼 */}
-      <div className="space-y-4">
+      <div className="space-y-8 mt-4">
         {ageDifference !== 0 && (
-          <div className="text-center">
-            <p className="text-xl text-muted-foreground">
+          <div className="text-center py-4">
+            <p className="text-3xl text-muted-foreground">
               실제보다{" "}
               <span className="font-semibold text-foreground" data-testid="text-age-difference">
                 {Math.abs(ageDifference)}살 {isYoungerLook ? "어려" : "많아"}
@@ -101,23 +101,23 @@ export default function ResultDisplay({
           </div>
         )}
 
-        <div className="flex flex-wrap gap-4 justify-center">
+        <div className="flex flex-wrap gap-4 justify-center pb-4">
           <Button
             onClick={onRetry}
             variant="default"
-            className="h-24 px-16 text-3xl font-medium"
+            className="h-20 px-16 text-2xl font-medium"
             data-testid="button-retry"
           >
-            <RotateCcw className="w-7 h-7 mr-2" />
+            <RotateCcw className="w-6 h-6 mr-2" />
             다시 하기
           </Button>
           <Button
             onClick={onReset}
             variant="outline"
-            className="h-24 px-16 text-3xl font-medium"
+            className="h-20 px-16 text-2xl font-medium"
             data-testid="button-reset"
           >
-            <Home className="w-7 h-7 mr-2" />
+            <Home className="w-6 h-6 mr-2" />
             맨 처음으로
           </Button>
         </div>

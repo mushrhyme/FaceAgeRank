@@ -2,6 +2,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Bot } from 'lucide-react';
 
 interface LoginFormProps {
@@ -39,16 +46,27 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
             <Label htmlFor="company" className="text-2xl font-medium">
               회사명
             </Label>
-            <Input
-              id="company"
-              type="text"
-              placeholder="회사명을 입력하세요"
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              className="h-20 text-2xl"
-              data-testid="input-company"
-              required
-            />
+            <Select value={company} onValueChange={setCompany} required>
+              <SelectTrigger
+                id="company"
+                className="h-20 text-2xl"
+                data-testid="input-company"
+              >
+                <SelectValue placeholder="회사명을 선택하세요" />
+              </SelectTrigger>
+              <SelectContent className="text-2xl">
+                <SelectItem value="농심" className="text-2xl">농심</SelectItem>
+                <SelectItem value="율촌화학" className="text-2xl">율촌화학</SelectItem>
+                <SelectItem value="메가마트" className="text-2xl">메가마트</SelectItem>
+                <SelectItem value="농심태경" className="text-2xl">농심태경</SelectItem>
+                <SelectItem value="농심엔지니어링" className="text-2xl">농심엔지니어링</SelectItem>
+                <SelectItem value="엔디에스" className="text-2xl">엔디에스</SelectItem>
+                <SelectItem value="호텔농심" className="text-2xl">호텔농심</SelectItem>
+                <SelectItem value="농심캐피탈" className="text-2xl">농심캐피탈</SelectItem>
+                <SelectItem value="농심미분" className="text-2xl">농심미분</SelectItem>
+                <SelectItem value="농심홀딩스" className="text-2xl">농심홀딩스</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-3">
             <Label htmlFor="employeeId" className="text-2xl font-medium">
@@ -65,10 +83,10 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
               required
             />
           </div>
-          <div className="pt-4">
+          <div className="pt-4 flex justify-center">
             <Button
               type="submit"
-              className="w-full h-24 text-3xl font-medium"
+              className="h-20 px-16 text-2xl font-medium min-w-80"
               data-testid="button-submit"
             >
               확인

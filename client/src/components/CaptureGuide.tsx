@@ -57,7 +57,7 @@ export default function CaptureGuide({ onStart }: CaptureGuideProps) {
         <div className="flex justify-center">
           <Button
             onClick={onStart}
-            className="h-24 px-20 text-3xl font-medium min-w-80"
+            className="h-20 px-16 text-2xl font-medium min-w-80"
             data-testid="button-start-capture"
           >
             촬영 시작

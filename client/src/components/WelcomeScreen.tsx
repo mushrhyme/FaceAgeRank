@@ -34,7 +34,7 @@ export default function WelcomeScreen({
         <div className="pt-8">
           <Button
             onClick={onContinue}
-            className="h-24 px-20 text-3xl font-medium min-w-80"
+            className="h-20 px-16 text-2xl font-medium min-w-80"
             data-testid="button-continue"
           >
             다음
