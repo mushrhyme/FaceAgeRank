@@ -17,11 +17,15 @@ DT FAIR 2025 전시회용 얼굴 나이 측정 및 랭킹 애플리케이션입�
 - **UI Library**: Shadcn/ui (Radix UI) + Tailwind CSS
 - **Routing**: Wouter
 - **State Management**: TanStack Query (React Query)
+- **Styling**: Tailwind CSS + PostCSS
+- **Libraries**: react-webcam (웹캠), canvas-confetti (팡파레 효과)
 
 ### Backend
 - **Framework**: Express.js + TypeScript
+- **Build Tool**: esbuild (프로덕션), tsx (개발)
 - **Database**: Google Sheets API
 - **Real-time**: Server-Sent Events (SSE)
+- **Data Processing**: XLSX (엑셀 파일 읽기), Zod (스키마 검증)
 
 ## 설치 및 실행
 

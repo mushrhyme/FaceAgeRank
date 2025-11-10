@@ -179,8 +179,9 @@ export default function RankingBoard() {
   };
 
   return (
-    <div className="h-screen flex flex-col p-6 bg-background relative">
+    <div className="h-screen flex flex-col bg-background relative">
       <EventHeader />
+      <div className="flex-1 overflow-y-auto p-6">
       {/* 헤더 */}
       <div className="text-center mb-6">
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mx-auto mb-3">
@@ -238,7 +239,7 @@ export default function RankingBoard() {
       )}
 
       {/* 랭킹 테이블 */}
-      <div className="flex-1 overflow-hidden grid grid-cols-2 gap-4">
+      <div className="flex-1 overflow-hidden grid grid-cols-2 gap-4 px-6">
         {/* 동안랭킹 */}
         <Card className="overflow-hidden">
           <div className="h-full flex flex-col">
@@ -358,6 +359,7 @@ export default function RankingBoard() {
             </div>
         </div>
       </Card>
+      </div>
       </div>
       <Footer />
     </div>

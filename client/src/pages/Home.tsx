@@ -52,9 +52,9 @@ export default function Home() {
     setStep("loading");
     
     try {
-      // 최소 로딩 시간 보장 (로딩 화면이 최소 2초는 보이도록)
+      // 최소 로딩 시간 보장 (로딩 화면이 최소 3초는 보이도록)
       const loadingStartTime = Date.now();
-      const minLoadingTime = 2000; // 2초
+      const minLoadingTime = 3000; // 3초
       
       // 얼굴 나이 분석 API 호출
       const response = await apiRequest("POST", "/api/analysis/face-age", {

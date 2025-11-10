@@ -78,7 +78,7 @@ export class ExcelStorage implements IStorage {
 
       if (!company || !employeeId || !name || !birthDateStr || !department) {
         return undefined;
-      }
+  }
 
       // 생년월일이 8자리 숫자 형식(19970919)인 경우 YYYY-MM-DD로 변환
       if (/^\d{8}$/.test(birthDateStr)) {

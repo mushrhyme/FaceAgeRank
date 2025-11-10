@@ -25,10 +25,11 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
   const [isTyping, setIsTyping] = useState(true);
   
   const texts = [
+    "지금 이 순간의 얼굴 나이, 과연 몇 살일까요?",
     "오늘의 얼굴 나이 랭킹! Top3까지 상품도 드려요!",
     "내가 동안일지 궁금하다면 바로 확인해보세요!",
     "생각보다 높게 나왔나요? 그냥 재미로 보는 결과니깐 걱정마세요!",
-    "내 얼굴은 실제보다 어려 보일까? 지금 확인해보세요!",
+    "생각보다 어리게 나왔다면? 오늘 기분 좋은 날이네요!",
   ];
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
 
@@ -47,16 +48,16 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
         setDisplayedText(currentText.slice(0, currentIndex + 1));
         currentIndex++;
       } else {
-        // 타이핑 완료 후 5초 대기
+        // 타이핑 완료 후 3초 대기
         setIsTyping(false);
         clearInterval(typingInterval);
         
         setTimeout(() => {
           // 다음 텍스트로 이동
           setCurrentTextIndex((prev) => (prev + 1) % texts.length);
-        }, 5000);
+        }, 3000);
       }
-    }, 80); // 80ms마다 한 글자씩
+    }, 90); // 90ms마다 한 글자씩
 
     return () => clearInterval(typingInterval);
   }, [currentTextIndex]);
@@ -74,7 +75,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
       <div className="flex-1 flex items-center justify-center p-8">
       <div className="w-full max-w-6xl">
         {/* 헤더 */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 pt-8">
           <div className="mx-auto w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center">
             <Bot className="w-20 h-20 text-primary" />
           </div>
