@@ -45,8 +45,8 @@ export default function ResultDisplay({
         </div>
       </div>
 
-      {/* 중앙: 이미지와 나이 정보를 가로로 배치 */}
-      <div className="flex-1 flex items-center justify-center gap-8 my-4">
+      {/* 중앙: 이미지와 나이 정보를 세로로 배치 */}
+      <div className="flex-1 flex flex-col items-center justify-center gap-8 my-4">
         {/* 이미지 */}
         {capturedImage && (
           <div className="relative flex-shrink-0">
@@ -67,7 +67,7 @@ export default function ResultDisplay({
         )}
 
         {/* 나이 정보 */}
-        <div className="flex-1 grid grid-cols-2 gap-6 max-w-2xl">
+        <div className="grid grid-cols-2 gap-6 max-w-2xl">
           <Card className="border-2">
             <div className="pt-6 pb-6 text-center space-y-2">
               <p className="text-lg text-muted-foreground">실제 나이</p>
@@ -105,7 +105,7 @@ export default function ResultDisplay({
           <Button
             onClick={onRetry}
             variant="default"
-            className="h-14 px-10 text-lg font-medium"
+            className="h-16 px-10 text-xl font-medium"
             data-testid="button-retry"
           >
             <RotateCcw className="w-5 h-5 mr-2" />
@@ -114,7 +114,7 @@ export default function ResultDisplay({
           <Button
             onClick={onReset}
             variant="outline"
-            className="h-14 px-10 text-lg font-medium"
+            className="h-16 px-10 text-xl font-medium"
             data-testid="button-reset"
           >
             <Home className="w-5 h-5 mr-2" />
