@@ -25,12 +25,10 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
   const [isTyping, setIsTyping] = useState(true);
   
   const texts = [
-    "오늘의 얼굴 나이 랭킹! 동안 1등이면 상품도 드려요!",
+    "오늘의 얼굴 나이 랭킹! Top3까지 상품도 드려요!",
     "내가 동안일지 궁금하다면 바로 확인해보세요!",
-    "노안으로 나와도 괜찮아요, 그냥 재미로 보는 랭킹이에요!",
-    "실제보다 어려 보일까? 지금 확인해보세요!",
-    "내 얼굴 나이, 진짜랑 얼마나 다를까?",
-    
+    "생각보다 높게 나왔나요? 그냥 재미로 보는 결과니깐 걱정마세요!",
+    "내 얼굴은 실제보다 어려 보일까? 지금 확인해보세요!",
   ];
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
 

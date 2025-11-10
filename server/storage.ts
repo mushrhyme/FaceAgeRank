@@ -30,7 +30,7 @@ function calculateAge(birthDate: string): number {
  * 엑셀 파일에서 직원 정보를 읽어오는 스토리지
  */
 export class ExcelStorage implements IStorage {
-  private workbook: XLSX.WorkBook;
+  private workbook!: XLSX.WorkBook; // loadWorkbook()에서 초기화됨
   private filePath: string;
 
   constructor(filePath?: string) {
@@ -66,30 +66,29 @@ export class ExcelStorage implements IStorage {
   /**
    * 엑셀 데이터를 User 객체로 변환
    */
-  private excelRowToUser(row: any, id: string): User | null {
+  private excelRowToUser(row: any, id: string): User | undefined {
     try {
       const company = this.safeString(row["회사"]);
       // 사번은 문자와 숫자가 섞일 수 있으므로 무조건 문자열로 처리
       const employeeId = this.safeString(row["사번"]);
       const name = this.safeString(row["이름"]);
-      // 생년월일: 숫자 형식(970919) 또는 문자열 형식(1997-09-19) 모두 처리
+      // 생년월일: 8자리 숫자 형식(19970919) 또는 문자열 형식(1997-09-19) 모두 처리
       let birthDateStr = this.safeString(row["생년월일"]);
       const department = this.safeString(row["부서"]);
 
       if (!company || !employeeId || !name || !birthDateStr || !department) {
-        return null;
-  }
-
-      // 생년월일이 숫자 형식(970919)인 경우 YYYY-MM-DD로 변환
-      if (/^\d{6}$/.test(birthDateStr)) {
-        const year = birthDateStr.substring(0, 2);
-        const month = birthDateStr.substring(2, 4);
-        const day = birthDateStr.substring(4, 6);
-        // 00-50은 2000년대, 51-99는 1900년대
-        const fullYear = parseInt(year) <= 50 ? `20${year}` : `19${year}`;
-        birthDateStr = `${fullYear}-${month}-${day}`;
+        return undefined;
       }
 
+      // 생년월일이 8자리 숫자 형식(19970919)인 경우 YYYY-MM-DD로 변환
+      if (/^\d{8}$/.test(birthDateStr)) {
+        const year = birthDateStr.substring(0, 4);
+        const month = birthDateStr.substring(4, 6);
+        const day = birthDateStr.substring(6, 8);
+        birthDateStr = `${year}-${month}-${day}`;
+      }
+
+      // 만 나이 계산 (오늘 날짜 기준)
       const realAge = calculateAge(birthDateStr);
 
       return {
@@ -102,7 +101,7 @@ export class ExcelStorage implements IStorage {
       };
     } catch (error) {
       console.error("❌ 엑셀 행 변환 실패:", error);
-      return null;
+      return undefined;
     }
   }
 
@@ -116,12 +115,13 @@ export class ExcelStorage implements IStorage {
 
     for (const row of data) {
       // 사번은 문자와 숫자가 섞일 수 있으므로 무조건 문자열로 처리
-      const rowCompany = this.safeString(row["회사"]);
-      const rowEmployeeId = this.safeString(row["사번"]);
+      const rowData = row as Record<string, any>;
+      const rowCompany = this.safeString(rowData["회사"]);
+      const rowEmployeeId = this.safeString(rowData["사번"]);
 
       if (rowCompany === searchCompany && rowEmployeeId === searchEmployeeId) {
         const userId = randomUUID(); // 엑셀에는 ID가 없으므로 생성
-        return this.excelRowToUser(row, userId);
+        return this.excelRowToUser(rowData, userId);
       }
     }
 
