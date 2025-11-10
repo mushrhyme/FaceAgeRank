@@ -1,9 +1,13 @@
 import { Loader2 } from "lucide-react";
+import Footer from "@/components/Footer";
+import EventHeader from "@/components/EventHeader";
 
 export default function LoadingAnalysis() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-8 bg-background">
-      <div className="text-center space-y-12">
+    <div className="h-screen flex flex-col bg-background relative">
+      <EventHeader />
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="text-center space-y-12">
         <div className="relative">
           <div className="w-40 h-40 mx-auto">
             <Loader2
@@ -23,7 +27,9 @@ export default function LoadingAnalysis() {
             AI가 얼굴 나이를 분석하고 있습니다
           </p>
         </div>
+        </div>
       </div>
+      <Footer />
     </div>
   );
 }

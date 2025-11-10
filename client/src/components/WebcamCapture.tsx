@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Camera, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import EventHeader from "@/components/EventHeader";
 
 interface WebcamCaptureProps {
   onCapture: (imageSrc: string) => void;
@@ -54,7 +55,8 @@ export default function WebcamCapture({
   }, [countdown, onCapture]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-background">
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-background relative">
+      <EventHeader />
       {onBack && (
         <Button
           variant="ghost"

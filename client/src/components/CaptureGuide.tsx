@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Camera, CheckCircle2 } from "lucide-react";
+import Footer from "@/components/Footer";
+import EventHeader from "@/components/EventHeader";
 
 interface CaptureGuideProps {
   onStart: () => void;
@@ -7,8 +9,10 @@ interface CaptureGuideProps {
 
 export default function CaptureGuide({ onStart }: CaptureGuideProps) {
   return (
-    <div className="h-screen flex flex-col items-center justify-center p-8 bg-background">
-      <div className="w-full max-w-6xl">
+    <div className="h-screen flex flex-col bg-background relative">
+      <EventHeader />
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-6xl">
         {/* 헤더 */}
         <div className="text-center pb-8 mb-8">
           <div className="mx-auto w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center mb-6">
@@ -63,7 +67,9 @@ export default function CaptureGuide({ onStart }: CaptureGuideProps) {
             촬영 시작
           </Button>
         </div>
+        </div>
       </div>
+      <Footer />
     </div>
   );
 }

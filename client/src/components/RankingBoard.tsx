@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Trophy, RefreshCw, Wifi, WifiOff } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import {
@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import Footer from "@/components/Footer";
+import EventHeader from "@/components/EventHeader";
 
 interface RankingData {
   company: string;        // 회사명
@@ -25,6 +27,10 @@ interface RankingData {
   faceAge: number;        // 얼굴 나이
   ageDifference: number;  // 나이 차이 (실제 나이 - 얼굴 나이)
   completedAt: string;    // 분석 완료 시각
+}
+
+interface RankedData extends RankingData {
+  rank: number;           // 순위 (동점 처리 포함)
 }
 
 export default function RankingBoard() {
@@ -77,31 +83,94 @@ export default function RankingBoard() {
     };
   }, [refetch]);
 
-  // 순위 표시 (1위, 2위, 3위는 특별 스타일)
+  // 데이터를 동안랭킹과 노안랭킹으로 분리하고 정렬 및 순위 계산
+  const { youngRanking, oldRanking } = useMemo(() => {
+    if (!rankingData || rankingData.length === 0) {
+      return { youngRanking: [], oldRanking: [] };
+    }
+
+    // 노안랭킹: ageDifference > 0 (얼굴 나이가 실제 나이보다 큼)
+    const oldData = rankingData.filter(item => item.ageDifference > 0);
+    // 동안랭킹: ageDifference <= 0 (얼굴 나이가 실제 나이보다 작거나 같음)
+    const youngData = rankingData.filter(item => item.ageDifference <= 0);
+
+    // 정렬 함수: 절댓값 기준 내림차순, 동점이면 최신순 (completedAt 내림차순)
+    const sortByAgeDifference = (a: RankingData, b: RankingData) => {
+      const absA = Math.abs(a.ageDifference);
+      const absB = Math.abs(b.ageDifference);
+      
+      if (absA !== absB) {
+        return absB - absA; // 절댓값 내림차순
+      }
+      // 동점이면 최신순 (completedAt 내림차순)
+      return new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime();
+    };
+
+    // 정렬
+    youngData.sort(sortByAgeDifference);
+    oldData.sort(sortByAgeDifference);
+
+    // 순위 계산 함수 (동점 처리 포함)
+    const calculateRanks = (data: RankingData[]): RankedData[] => {
+      if (data.length === 0) return [];
+      
+      const ranked: RankedData[] = [];
+      let currentRank = 1;
+      let previousAgeDiff: number | null = null;
+      
+      for (let i = 0; i < data.length; i++) {
+        const absAgeDiff = Math.abs(data[i].ageDifference);
+        
+        // 이전 값과 다르면 순위 업데이트
+        if (previousAgeDiff !== null && absAgeDiff !== previousAgeDiff) {
+          currentRank = i + 1;
+        }
+        
+        ranked.push({
+          ...data[i],
+          rank: currentRank,
+        });
+        
+        previousAgeDiff = absAgeDiff;
+      }
+      
+      return ranked;
+    };
+
+    return {
+      youngRanking: calculateRanks(youngData),
+      oldRanking: calculateRanks(oldData),
+    };
+  }, [rankingData]);
+
+  // 순위 표시 (1위, 2위, 3위는 특별 스타일, 모든 순위 카드 크기 일정하게)
   const getRankBadge = (rank: number) => {
+    const commonStyle = "w-[100px] h-[50px] inline-flex items-center justify-center text-2xl font-bold";
     if (rank === 1) {
-      return <Badge className="bg-yellow-500 text-white text-2xl px-4 py-2 min-w-[80px] inline-flex justify-center">🥇 1위</Badge>;
+      return <Badge className={`bg-yellow-500 text-white ${commonStyle}`}>🥇 1위</Badge>;
     }
     if (rank === 2) {
-      return <Badge className="bg-gray-400 text-white text-2xl px-4 py-2 min-w-[80px] inline-flex justify-center">🥈 2위</Badge>;
+      return <Badge className={`bg-gray-400 text-white ${commonStyle}`}>🥈 2위</Badge>;
     }
     if (rank === 3) {
-      return <Badge className="bg-orange-400 text-white text-2xl px-4 py-2 min-w-[80px] inline-flex justify-center">🥉 3위</Badge>;
+      return <Badge className={`bg-orange-400 text-white ${commonStyle}`}>🥉 3위</Badge>;
     }
-    return <span className="text-muted-foreground text-2xl font-bold min-w-[80px] inline-block text-center">{rank}위</span>;
+    return <span className={`text-muted-foreground ${commonStyle}`}>{rank}위</span>;
   };
 
-  // 나이 차이에 따른 메시지
+  // 나이 차이에 따른 메시지 (얼굴 나이 - 실제 나이)
   const getAgeDifferenceMessage = (ageDifference: number) => {
     if (ageDifference > 0) {
+      // 양수: 노안 (얼굴 나이 > 실제 나이)
       return (
-        <span className="text-blue-600 font-bold text-3xl">
+        <span className="text-orange-600 font-bold text-3xl">
           +{ageDifference}
         </span>
       );
     } else if (ageDifference < 0) {
+      // 음수: 동안 (얼굴 나이 < 실제 나이)
       return (
-        <span className="text-red-600 font-bold text-3xl">
+        <span className="text-blue-600 font-bold text-3xl">
           {ageDifference}
         </span>
       );
@@ -110,15 +179,16 @@ export default function RankingBoard() {
   };
 
   return (
-    <div className="h-screen flex flex-col p-6 bg-background">
+    <div className="h-screen flex flex-col p-6 bg-background relative">
+      <EventHeader />
       {/* 헤더 */}
       <div className="text-center mb-6">
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mx-auto mb-3">
           <Trophy className="w-12 h-12 text-primary" />
         </div>
-        <h1 className="text-5xl font-bold mb-2">랭킹보드</h1>
+        <h1 className="text-5xl font-bold mb-6">오늘의 동안랭킹</h1>
         <p className="text-xl text-muted-foreground">
-          실제 나이와 얼굴 나이가 많이 다를수록 높은 순위를 받습니다.
+          얼굴 나이와 실제 나이 차이가 클수록 선물 당첨 기회가 올라갑니다!
         </p>
         <div className="mt-4 flex items-center gap-4 justify-center">
           {/* SSE 연결 상태 표시 */}
@@ -168,76 +238,128 @@ export default function RankingBoard() {
       )}
 
       {/* 랭킹 테이블 */}
-      <Card className="flex-1 overflow-hidden">
-        <div className="h-full overflow-auto">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center space-y-4">
-                <RefreshCw className="w-12 h-12 animate-spin mx-auto text-primary" />
-                <p className="text-xl text-muted-foreground">랭킹 데이터를 불러오는 중...</p>
-              </div>
+      <div className="flex-1 overflow-hidden grid grid-cols-2 gap-4">
+        {/* 동안랭킹 */}
+        <Card className="overflow-hidden">
+          <div className="h-full flex flex-col">
+            <div className="bg-blue-100 px-4 py-3 border-b">
+              <h2 className="text-3xl font-bold text-blue-700 text-center">상위 랭킹</h2>
+              <p className="text-sm text-blue-600 text-center mt-1">오늘 더 어려 보이게 나온 분들이에요! 축하드립니다~</p>
             </div>
-          ) : rankingData.length === 0 ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center space-y-4">
-                <Trophy className="w-16 h-16 mx-auto text-muted-foreground" />
-                <p className="text-2xl text-muted-foreground">아직 랭킹 데이터가 없습니다</p>
-                <p className="text-lg text-muted-foreground">
-                  분석을 완료하면 랭킹이 표시됩니다
-                </p>
-              </div>
-            </div>
-          ) : (
-            <Table className="text-xl">
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead className="w-14 text-center text-2xl font-bold py-3">순위</TableHead>
-                  <TableHead className="w-20 text-2xl font-bold py-3">이름</TableHead>
-                  <TableHead className="w-16 text-2xl font-bold py-3">회사</TableHead>
-                  <TableHead className="w-20 text-2xl font-bold py-3">부서명</TableHead>
-                  <TableHead className="w-20 text-center text-2xl font-bold py-3">나이 차이</TableHead>
-                  <TableHead className="w-16 text-center text-2xl font-bold py-3">실제 나이</TableHead>
-                  <TableHead className="w-16 text-center text-2xl font-bold py-3">얼굴 나이</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rankingData.map((item, index) => {
-                  const isOldFace = item.ageDifference < 0; // 노안인 경우
-                  const isYoungFace = item.ageDifference > 0; // 동안인 경우
-                  return (
-                    <TableRow 
-                      key={`${item.company}-${item.employeeId}-${item.completedAt}`}
-                      className={
-                        isOldFace 
-                          ? "bg-red-50 hover:bg-red-100 border-l-4 border-l-red-500" 
-                          : isYoungFace
-                          ? "bg-blue-50 hover:bg-blue-100 border-l-4 border-l-blue-500"
-                          : "hover:bg-muted/30"
-                      }
-                    >
-                      <TableCell className="text-center py-3">
-                        <div className="text-2xl font-bold">
-                          {getRankBadge(index + 1)}
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-bold text-2xl py-3">{item.name}</TableCell>
-                      <TableCell className="text-muted-foreground text-xl py-3">{item.company}</TableCell>
-                      <TableCell className="text-muted-foreground text-xl py-3">{item.department}</TableCell>
-                      <TableCell className="text-center py-3">
-                        {getAgeDifferenceMessage(item.ageDifference)}
-                      </TableCell>
-                      <TableCell className="text-center text-2xl font-semibold py-3">{item.realAge}세</TableCell>
-                      <TableCell className={`text-center text-2xl font-bold py-3 ${isOldFace ? "text-red-600" : isYoungFace ? "text-blue-600" : "text-primary"}`}>
-                        {item.faceAge}세
-                      </TableCell>
+            <div className="flex-1 overflow-auto">
+              {isLoading ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center space-y-4">
+                    <RefreshCw className="w-12 h-12 animate-spin mx-auto text-primary" />
+                    <p className="text-xl text-muted-foreground">랭킹 데이터를 불러오는 중...</p>
+                  </div>
+                </div>
+              ) : youngRanking.length === 0 ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center space-y-4">
+                    <Trophy className="w-16 h-16 mx-auto text-muted-foreground" />
+                    <p className="text-2xl text-muted-foreground">아직 랭킹 데이터가 없습니다</p>
+                  </div>
+                </div>
+              ) : (
+                <Table className="text-xl">
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="w-8 text-center text-2xl font-bold py-3">순위</TableHead>
+                      <TableHead className="w-16 text-2xl font-bold py-3">이름</TableHead>
+                      <TableHead className="w-20 text-2xl font-bold py-3">회사</TableHead>
+                      <TableHead className="w-20 text-2xl font-bold py-3">부서명</TableHead>
+                      <TableHead className="w-20 text-center text-2xl font-bold py-3">나이 차이</TableHead>
                     </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
-        </div>
-      </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {youngRanking.map((item, index) => (
+                      <TableRow 
+                        key={`young-${item.company}-${item.employeeId}-${item.completedAt}`}
+                        className="bg-blue-50 hover:bg-blue-100 border-l-4 border-l-blue-500"
+                        style={index === youngRanking.length - 1 ? { borderLeft: '4px solid rgb(59 130 246)' } : undefined}
+                      >
+                        <TableCell className="text-center py-3">
+                          <div className="text-2xl font-bold">
+                            {getRankBadge(item.rank)}
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-bold text-2xl py-3">{item.name}</TableCell>
+                        <TableCell className="text-muted-foreground text-xl py-3">{item.company}</TableCell>
+                        <TableCell className="text-muted-foreground text-xl py-3">{item.department}</TableCell>
+                        <TableCell className="text-center py-3">
+                          {getAgeDifferenceMessage(item.ageDifference)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </div>
+          </div>
+        </Card>
+
+        {/* 노안랭킹 */}
+        <Card className="overflow-hidden">
+          <div className="h-full flex flex-col">
+            <div className="bg-orange-100 px-4 py-3 border-b">
+              <h2 className="text-3xl font-bold text-orange-700 text-center">하위 랭킹</h2>
+              <p className="text-sm text-orange-600 text-center mt-1">오늘은 조금 성숙하게 보였지만 걱정 마세요! 선물 기회는 그대로에요~</p>
+            </div>
+            <div className="flex-1 overflow-auto">
+              {isLoading ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center space-y-4">
+                    <RefreshCw className="w-12 h-12 animate-spin mx-auto text-primary" />
+                    <p className="text-xl text-muted-foreground">랭킹 데이터를 불러오는 중...</p>
+                  </div>
+                </div>
+              ) : oldRanking.length === 0 ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center space-y-4">
+                    <Trophy className="w-16 h-16 mx-auto text-muted-foreground" />
+                    <p className="text-2xl text-muted-foreground">아직 랭킹 데이터가 없습니다</p>
+                  </div>
+                </div>
+              ) : (
+                <Table className="text-xl">
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="w-8 text-center text-2xl font-bold py-3">순위</TableHead>
+                      <TableHead className="w-16 text-2xl font-bold py-3">이름</TableHead>
+                      <TableHead className="w-20 text-2xl font-bold py-3">회사</TableHead>
+                      <TableHead className="w-20 text-2xl font-bold py-3">부서명</TableHead>
+                      <TableHead className="w-20 text-center text-2xl font-bold py-3">나이 차이</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {oldRanking.map((item, index) => (
+                      <TableRow 
+                        key={`old-${item.company}-${item.employeeId}-${item.completedAt}`}
+                        className="bg-orange-50 hover:bg-orange-100 border-l-4 border-l-orange-500"
+                        style={index === oldRanking.length - 1 ? { borderLeft: '4px solid rgb(249 115 22)' } : undefined}
+                      >
+                        <TableCell className="text-center py-3">
+                          <div className="text-2xl font-bold">
+                            {getRankBadge(item.rank)}
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-bold text-2xl py-3">{item.name}</TableCell>
+                        <TableCell className="text-muted-foreground text-xl py-3">{item.company}</TableCell>
+                        <TableCell className="text-muted-foreground text-xl py-3">{item.department}</TableCell>
+                        <TableCell className="text-center py-3">
+                          {getAgeDifferenceMessage(item.ageDifference)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </div>
+          </div>
+        </Card>
+      </div>
+      <Footer />
     </div>
   );
 }

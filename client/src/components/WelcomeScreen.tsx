@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { UserCheck } from "lucide-react";
+import Footer from "@/components/Footer";
+import EventHeader from "@/components/EventHeader";
 
 interface WelcomeScreenProps {
   name: string;
@@ -11,8 +13,10 @@ export default function WelcomeScreen({
   onContinue,
 }: WelcomeScreenProps) {
   return (
-    <div className="h-screen flex items-center justify-center p-8 bg-background">
-      <div className="w-full max-w-6xl text-center space-y-12">
+    <div className="h-screen flex flex-col bg-background relative">
+      <EventHeader />
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-6xl text-center space-y-12">
         <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-primary/10 mx-auto">
           <UserCheck className="w-20 h-20 text-primary" />
         </div>
@@ -40,7 +44,9 @@ export default function WelcomeScreen({
             다음
           </Button>
         </div>
+        </div>
       </div>
+      <Footer />
     </div>
   );
 }

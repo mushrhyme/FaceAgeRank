@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, RotateCcw, Home } from "lucide-react";
+import Footer from "@/components/Footer";
+import EventHeader from "@/components/EventHeader";
 
 interface ResultDisplayProps {
   realAge: number;
@@ -20,12 +22,14 @@ export default function ResultDisplay({
   onRetry,
   onReset,
 }: ResultDisplayProps) {
-  const ageDifference = realAge - faceAge;
-  const isYoungerLook = ageDifference > 0;
-  const message = isYoungerLook ? "동안이시네요~" : ageDifference < 0 ? "노안이시네요~" : "실제 나이와 같아요!";
+  const ageDifference = faceAge - realAge; // 얼굴 나이 - 실제 나이
+  const isYoungerLook = ageDifference < 0; // 얼굴 나이가 실제 나이보다 작으면 동안
+  const message = isYoungerLook ? "동안이시네요~" : ageDifference > 0 ? "노안이시네요~" : "실제 나이와 같아요!";
 
   return (
-    <div className="h-screen flex flex-col p-6 bg-background overflow-y-auto">
+    <div className="h-screen flex flex-col bg-background relative">
+      <EventHeader />
+      <div className="flex-1 overflow-y-auto p-6">
       {/* 상단: 아이콘, 이름, 메시지 */}
       <div className="text-center space-y-3 pt-4">
         <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-primary/10 mx-auto">
@@ -70,7 +74,7 @@ export default function ResultDisplay({
         <div className="grid grid-cols-2 gap-6 w-full max-w-2xl">
           <Card className="border-2">
             <div className="pt-6 pb-6 text-center space-y-2">
-              <p className="text-lg text-muted-foreground">실제 나이</p>
+              <p className="text-3xl text-muted-foreground">실제 나이</p>
               <p className="text-4xl font-bold" data-testid="text-real-age">
                 {realAge}살
               </p>
@@ -78,7 +82,7 @@ export default function ResultDisplay({
           </Card>
           <Card className="border-2 border-primary/30">
             <div className="pt-6 pb-6 text-center space-y-2">
-              <p className="text-lg text-muted-foreground">얼굴 나이</p>
+              <p className="text-3xl text-muted-foreground">얼굴 나이</p>
               <p className="text-4xl font-bold text-primary" data-testid="text-face-age">
                 {faceAge}살
               </p>
@@ -94,9 +98,9 @@ export default function ResultDisplay({
             <p className="text-3xl text-muted-foreground">
               실제보다{" "}
               <span className="font-semibold text-foreground" data-testid="text-age-difference">
-                {Math.abs(ageDifference)}살 {isYoungerLook ? "어려" : "많아"}
+                {Math.abs(ageDifference)}살 {isYoungerLook ? "낮게" : "높게"}
               </span>{" "}
-              보여요
+              나왔네요
             </p>
           </div>
         )}
@@ -122,6 +126,8 @@ export default function ResultDisplay({
           </Button>
         </div>
       </div>
+      </div>
+      <Footer />
     </div>
   );
 }
