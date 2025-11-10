@@ -239,9 +239,26 @@ EXCEL_FILE_PATH=./path/to/your/employees.xlsx
 
 1. **얼굴 인식 모델 실제 연동**: `server/faceAgeService.ts`의 `LocalFaceAgeService`와 `RemoteFaceAgeService` 클래스에 실제 모델 로직 구현
 
+## 라이선스
+
+이 프로젝트는 농심 DT추진팀의 독점 소프트웨어입니다. 무단 복제, 배포, 수정을 금지합니다.
+
+© 2025 농심 DT추진팀. All rights reserved.
+
+### 오픈소스 라이브러리
+
+이 프로젝트는 다음 오픈소스 라이브러리를 사용합니다:
+
+- **React** (MIT License)
+- **Express.js** (MIT License)
+- **Radix UI** (MIT License)
+- **TanStack Query** (MIT License)
+- **particles.js** (MIT License) - CDN을 통해 로드
+- **기타 의존성**: `package.json`의 `dependencies` 및 `devDependencies` 참조
+
+각 라이브러리의 라이선스는 해당 프로젝트의 LICENSE 파일을 참조하세요.
+
 ## 제작 정보
 
 - **프론트엔드 개발 및 백엔드 연동**: 조유민 주임 (농심 DT추진팀)
 - **AI 모델 개발**: 이원준 주임 (농심 디지털전략팀)
-
-© 2025 농심 DT추진팀. All rights reserved.
