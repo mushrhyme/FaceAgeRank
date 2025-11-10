@@ -51,16 +51,20 @@ export default function Home() {
     setCapturedImage(imageSrc);
     setStep("loading");
     
-    // 분석 시뮬레이션 (실제로는 AI 분석 API 호출)
-    setTimeout(async () => {
-      const randomFaceAge = 20;
-      setFaceAge(randomFaceAge);
+    try {
+      // 얼굴 나이 분석 API 호출
+      const response = await apiRequest("POST", "/api/analysis/face-age", {
+        image: imageSrc, // Base64 이미지 문자열
+      });
+
+      const { faceAge } = await response.json();
+      setFaceAge(faceAge);
       setStep("result");
 
       // 분석 결과를 구글 시트에 저장
       if (user && loginInfo) {
         try {
-          const ageDifference = user.realAge - randomFaceAge; // 실제 나이 - 얼굴 나이
+          const ageDifference = faceAge - user.realAge; // 얼굴 나이 - 실제 나이
           // 한국 시간대(KST)로 변환하여 읽기 쉬운 형식으로 포맷팅: "2025-11-07 22:20:47"
           const now = new Date();
           const kstOffset = 9 * 60; // KST는 UTC+9 (분 단위)
@@ -78,7 +82,7 @@ export default function Home() {
             employeeId: loginInfo.employeeId,
             name: user.name,
             realAge: user.realAge,
-            faceAge: randomFaceAge,
+            faceAge: faceAge,
           });
 
           const response = await apiRequest("POST", "/api/analysis/save", {
@@ -87,7 +91,7 @@ export default function Home() {
             name: user.name,
             department: user.department, // 부서명
             realAge: user.realAge,
-            faceAge: randomFaceAge,
+            faceAge: faceAge,
             ageDifference,
             completedAt,
           });
@@ -118,7 +122,13 @@ export default function Home() {
       } else {
         console.warn("⚠️ 사용자 정보 또는 로그인 정보가 없어 저장하지 않음");
       }
-    }, 2000);
+    } catch (error) {
+      // 얼굴 나이 분석 실패 시 오류 처리
+      console.error("❌ 얼굴 나이 분석 실패:", error);
+      setStep("result"); // 일단 결과 화면으로 이동 (에러 표시는 ResultDisplay에서 처리 가능)
+      // 임시로 랜덤 값 사용 (나중에 에러 처리 개선)
+      setFaceAge(Math.floor(Math.random() * 30) + 20);
+    }
   };
 
   const handleRetry = () => {

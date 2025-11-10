@@ -1,20 +1,18 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  company: text("company").notNull(),
-  employeeId: text("employee_id").notNull(),
-  name: text("name").notNull(),
-  realAge: integer("real_age").notNull(),
-  department: text("department").notNull(), // 부서명
+// 사용자 스키마 정의
+export const userSchema = z.object({
+  id: z.string(),
+  company: z.string(),
+  employeeId: z.string(),
+  name: z.string(),
+  realAge: z.number().int().positive(),
+  department: z.string(),
 });
 
-export const insertUserSchema = createInsertSchema(users).omit({
+export const insertUserSchema = userSchema.omit({
   id: true,
 });
 
+export type User = z.infer<typeof userSchema>;
 export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;

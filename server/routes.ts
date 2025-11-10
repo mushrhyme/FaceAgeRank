@@ -2,6 +2,7 @@ import type { Express, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { GoogleSheetsService } from "./googleSheets";
+import { createFaceAgeService } from "./faceAgeService";
 import { z } from "zod";
 
 // SSE 연결된 클라이언트 목록 관리
@@ -29,6 +30,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
   } catch (error) {
     console.warn("⚠️ 구글 시트 서비스 초기화 실패 (결과 저장 기능 비활성화):", error instanceof Error ? error.message : String(error));
   }
+
+  // 얼굴 나이 분석 서비스 초기화 (환경 변수가 없으면 null)
+  const faceAgeService = createFaceAgeService();
+  if (faceAgeService) {
+    console.log("✅ 얼굴 나이 분석 서비스 초기화 성공");
+  } else {
+    console.warn("⚠️ 얼굴 나이 분석 서비스 비활성화됨 (시뮬레이션 모드)");
+  }
+
+  // 얼굴 나이 분석 API (Base64 이미지 또는 파일 업로드)
+  // Base64 방식: POST /api/analysis/face-age (JSON body: { image: "data:image/jpeg;base64,..." })
+  // 파일 업로드 방식: POST /api/analysis/face-age (multipart/form-data: image 파일)
+  app.post("/api/analysis/face-age", async (req, res) => {
+    try {
+      let imageBuffer: Buffer;
+
+      // Base64 이미지 처리
+      if (req.body.image) {
+        const base64Data = req.body.image;
+        // "data:image/jpeg;base64," 같은 prefix 제거
+        const base64String = base64Data.includes(",") 
+          ? base64Data.split(",")[1] 
+          : base64Data;
+        imageBuffer = Buffer.from(base64String, "base64");
+      } 
+      // 파일 업로드 처리 (multipart/form-data)
+      else if (req.body.rawBody && Buffer.isBuffer(req.body.rawBody)) {
+        // TODO: multer를 사용하면 req.file.buffer로 접근 가능
+        // 현재는 rawBody를 파싱해야 함 (복잡하므로 일단 Base64 방식 권장)
+        return res.status(400).json({ 
+          error: "파일 업로드는 아직 지원되지 않습니다. Base64 형식으로 전송해주세요." 
+        });
+      } 
+      else {
+        return res.status(400).json({ error: "이미지 데이터가 필요합니다." });
+      }
+
+      // 얼굴 나이 분석
+      if (faceAgeService) {
+        const faceAge = await faceAgeService.predictAge(imageBuffer);
+        res.json({ faceAge });
+      } else {
+        // 서비스가 없으면 시뮬레이션 (임시)
+        const faceAge = Math.floor(Math.random() * 30) + 20;
+        res.json({ faceAge });
+      }
+    } catch (error: any) {
+      console.error("❌ 얼굴 나이 분석 실패:", error);
+      res.status(500).json({ 
+        error: "얼굴 나이 분석 중 오류가 발생했습니다.",
+        details: error?.message || String(error)
+      });
+    }
+  });
 
   // 회사/사번으로 사용자 조회
   app.post("/api/user/lookup", async (req, res) => {
