@@ -212,22 +212,9 @@ export default function WebcamCapture({
           </Alert>
         )}
 
-        {hasPermission && countdown === null && (
-          <div className="flex justify-center">
-            <Button
-              size="lg"
-              onClick={handleStartCountdown}
-              className="h-24 px-20 text-3xl font-medium min-w-80"
-              data-testid="button-start"
-            >
-              <Camera className="w-8 h-8 mr-2" />
-              시작
-            </Button>
-          </div>
-        )}
-
-        {hasPermission === false && (
-          <div className="flex justify-center">
+        {/* 버튼 영역 - 고정 높이로 레이아웃 시프트 방지 */}
+        <div className="flex justify-center min-h-[120px] items-center">
+          {hasPermission === false ? (
             <Button
               variant="outline"
               onClick={() => window.location.reload()}
@@ -236,8 +223,19 @@ export default function WebcamCapture({
             >
               다시 시도
             </Button>
-          </div>
-        )}
+          ) : (
+            <Button
+              size="lg"
+              onClick={handleStartCountdown}
+              disabled={!hasPermission || countdown !== null}
+              className="h-24 px-20 text-3xl font-medium min-w-80"
+              data-testid="button-start"
+            >
+              <Camera className="w-8 h-8 mr-2" />
+              시작
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
