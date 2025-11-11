@@ -26,16 +26,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   let googleSheetsService: GoogleSheetsService | null = null;
   try {
     googleSheetsService = new GoogleSheetsService();
-    console.log("✅ 구글 시트 서비스 초기화 성공");
   } catch (error) {
     console.warn("⚠️ 구글 시트 서비스 초기화 실패 (결과 저장 기능 비활성화):", error instanceof Error ? error.message : String(error));
   }
 
   // 얼굴 나이 분석 서비스 초기화 (환경 변수가 없으면 null)
   const faceAgeService = createFaceAgeService();
-  if (faceAgeService) {
-    console.log("✅ 얼굴 나이 분석 서비스 초기화 성공");
-  } else {
+  if (!faceAgeService) {
     console.warn("⚠️ 얼굴 나이 분석 서비스 비활성화됨 (시뮬레이션 모드)");
   }
 
@@ -132,25 +129,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // 구글 시트에 저장
-      console.log("📊 분석 결과 저장 시도:", { 
-        company: data.company, 
-        employeeId: data.employeeId,
-        name: data.name, 
-        realAge: data.realAge,
-        faceAge: data.faceAge,
-        ageDifference: data.ageDifference,
-        completedAt: data.completedAt,
-      });
-      
       await googleSheetsService.saveAnalysisResult(data);
-      console.log("✅ 구글 시트 저장 성공 - API 응답 완료");
 
       // SSE로 모든 연결된 클라이언트에게 랭킹 갱신 알림 전송
       broadcastToSSEClients("ranking-updated", {
         message: "랭킹이 업데이트되었습니다",
         timestamp: new Date().toISOString(),
       });
-      console.log(`📢 SSE로 랭킹 갱신 알림 전송 (${sseClients.size}개 클라이언트)`);
 
       res.json({ success: true });
     } catch (error: any) {

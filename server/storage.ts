@@ -45,7 +45,6 @@ export class ExcelStorage implements IStorage {
     
     try {
       this.workbook = XLSX.readFile(this.filePath);
-      console.log(`✅ 엑셀 파일 로드 성공: ${this.filePath}`);
     } catch (error) {
       throw new Error(`엑셀 파일 로드 실패: ${error instanceof Error ? error.message : String(error)}`);
     }

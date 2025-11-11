@@ -88,14 +88,6 @@ export default function Home() {
           const seconds = String(kstTime.getSeconds()).padStart(2, "0");
           const completedAt = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 
-          console.log("📤 구글 시트 저장 요청 전송:", {
-            company: loginInfo.company,
-            employeeId: loginInfo.employeeId,
-            name: user.name,
-            realAge: user.realAge,
-            faceAge: faceAge,
-          });
-
           const response = await apiRequest("POST", "/api/analysis/save", {
             company: loginInfo.company,
             employeeId: loginInfo.employeeId,
@@ -120,8 +112,7 @@ export default function Home() {
             throw new Error(`서버가 JSON이 아닌 응답을 반환했습니다: ${response.status} ${response.statusText}`);
           }
 
-          const result = await response.json();
-          console.log("✅ 구글 시트 저장 성공:", result);
+          await response.json();
         } catch (error) {
           // 저장 실패해도 사용자에게는 오류 표시하지 않음 (백그라운드 작업)
           console.error("❌ 분석 결과 저장 실패:", error);

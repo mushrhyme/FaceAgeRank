@@ -86,6 +86,7 @@ export class GoogleSheetsService {
       await this.ensureHeaders();
 
       // 데이터 행 추가
+      // completedAt 앞에 작은따옴표(')를 붙여서 텍스트로 강제 저장 (구글 시트가 날짜로 변환하지 않도록)
       const values = [
         [
           data.company,
@@ -95,15 +96,9 @@ export class GoogleSheetsService {
           data.realAge.toString(),
           data.faceAge.toString(),
           data.ageDifference.toString(),
-          data.completedAt,
+          `'${data.completedAt}`, // 작은따옴표로 시작하여 텍스트로 강제 저장
         ],
       ];
-
-      console.log("📝 구글 시트에 데이터 추가 시도:", {
-        spreadsheetId: this.spreadsheetId,
-        range: "Sheet1!A:H",
-        values: values[0],
-      });
 
       const response = await this.sheets.spreadsheets.values.append({
         spreadsheetId: this.spreadsheetId,
@@ -113,11 +108,6 @@ export class GoogleSheetsService {
         requestBody: {
           values,
         },
-      });
-
-      console.log("✅ 구글 시트 API 응답:", {
-        updatedRows: response.data.updates?.updatedRows,
-        updatedCells: response.data.updates?.updatedCells,
       });
 
       return true;
@@ -171,6 +161,101 @@ export class GoogleSheetsService {
   }
 
   /**
+   * Excel 시리얼 번호를 날짜 문자열로 변환
+   * 구글 시트가 날짜를 숫자 형식(예: 45972.634212963)으로 저장하는 경우를 처리
+   * 
+   * @param value 날짜 값 (문자열 또는 숫자)
+   * @returns "YYYY-MM-DD HH:MM:SS" 형식의 날짜 문자열
+   */
+  private convertExcelSerialToDateString(value: any): string {
+    // 빈 값 처리
+    if (value === null || value === undefined || value === "") {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const seconds = String(now.getSeconds()).padStart(2, "0");
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+
+    // 문자열인 경우 작은따옴표로 시작하면 제거 (구글 시트에서 텍스트로 저장된 경우)
+    let processedValue = value;
+    if (typeof value === "string" && value.startsWith("'")) {
+      processedValue = value.substring(1);
+    }
+
+    // 이미 올바른 문자열 형식이면 그대로 반환
+    if (typeof processedValue === "string" && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(processedValue)) {
+      return processedValue;
+    }
+
+    // 숫자 형식이면 Excel 시리얼 번호로 간주하고 변환
+    let serialNumber: number;
+    if (typeof value === "number") {
+      serialNumber = value;
+    } else if (typeof processedValue === "string") {
+      // 문자열이 숫자로 변환 가능한지 확인
+      const parsed = parseFloat(processedValue);
+      if (isNaN(parsed)) {
+        // 숫자가 아닌 문자열이면 현재 시간 반환
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const seconds = String(now.getSeconds()).padStart(2, "0");
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      }
+      serialNumber = parsed;
+    } else {
+      // 변환 불가능한 타입이면 현재 시간 반환
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const seconds = String(now.getSeconds()).padStart(2, "0");
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+
+    // Excel 시리얼 번호를 JavaScript Date로 변환
+    // Excel 기준일: 1900년 1월 1일 = 1
+    // JavaScript Date 기준: 1899년 12월 30일 = Excel 1
+    const excelEpoch = new Date(1899, 11, 30); // 1899년 12월 30일 (월은 0부터 시작)
+    const days = Math.floor(serialNumber);
+    const timeFraction = serialNumber - days;
+    
+    const date = new Date(excelEpoch);
+    date.setDate(date.getDate() + days);
+    
+    // 시간 부분 추가 (소수점 부분을 시간으로 변환)
+    const hours = Math.floor(timeFraction * 24);
+    const minutes = Math.floor((timeFraction * 24 - hours) * 60);
+    const seconds = Math.floor(((timeFraction * 24 - hours) * 60 - minutes) * 60);
+    
+    date.setHours(hours, minutes, seconds);
+
+    // KST(UTC+9)로 변환하여 "YYYY-MM-DD HH:MM:SS" 형식으로 포맷팅
+    const kstOffset = 9 * 60; // KST는 UTC+9 (분 단위)
+    const kstTime = new Date(date.getTime() + (kstOffset + date.getTimezoneOffset()) * 60000);
+    
+    const year = kstTime.getFullYear();
+    const month = String(kstTime.getMonth() + 1).padStart(2, "0");
+    const day = String(kstTime.getDate()).padStart(2, "0");
+    const hoursStr = String(kstTime.getHours()).padStart(2, "0");
+    const minutesStr = String(kstTime.getMinutes()).padStart(2, "0");
+    const secondsStr = String(kstTime.getSeconds()).padStart(2, "0");
+    
+    const result = `${year}-${month}-${day} ${hoursStr}:${minutesStr}:${secondsStr}`;
+    
+    return result;
+  }
+
+  /**
    * 구글 시트에서 랭킹 데이터 조회
    * 나이 차이(실제 나이 - 얼굴 나이) 기준으로 내림차순 정렬
    * 
@@ -195,16 +280,10 @@ export class GoogleSheetsService {
 
       const rows = response.data.values;
 
-      console.log(`📊 구글 시트에서 ${rows ? rows.length : 0}개 행 읽음`);
-
       // 데이터가 없으면 빈 배열 반환
       if (!rows || rows.length <= 1) {
-        console.warn("⚠️ 구글 시트에 데이터가 없거나 헤더만 있습니다.");
         return [];
       }
-
-      console.log(`📋 헤더:`, rows[0]);
-      console.log(`📋 데이터 행 수:`, rows.length - 1);
 
       // 헤더 제외하고 데이터만 추출
       const dataRows = rows.slice(1);
@@ -212,8 +291,6 @@ export class GoogleSheetsService {
       // 헤더 확인하여 컬럼 구조 파악
       const header = rows[0] || [];
       const hasDepartment = header.includes("부서명");
-      console.log(`📋 헤더 구조:`, header);
-      console.log(`📋 부서명 컬럼 존재 여부:`, hasDepartment);
 
       // 데이터 파싱
       const parsedData = dataRows
@@ -230,7 +307,7 @@ export class GoogleSheetsService {
             realAge = parseInt(row[4] || "0", 10);
             faceAge = parseInt(row[5] || "0", 10);
             ageDifference = parseInt(row[6] || "0", 10);
-            completedAt = row[7] || "";
+            completedAt = this.convertExcelSerialToDateString(row[7] || ""); // Excel 시리얼 번호 변환
           } else {
             // 기존 형식: 회사, 사번, 이름, 실제 나이, 얼굴 나이, 나이 차이, 분석 완료 시각
             company = row[0] || "";
@@ -240,29 +317,12 @@ export class GoogleSheetsService {
             realAge = parseInt(row[3] || "0", 10);
             faceAge = parseInt(row[4] || "0", 10);
             ageDifference = parseInt(row[5] || "0", 10);
-            completedAt = row[6] || "";
+            completedAt = this.convertExcelSerialToDateString(row[6] || ""); // Excel 시리얼 번호 변환
           }
-
-          console.log(`📋 행 ${index + 2} 파싱 결과:`, {
-            company,
-            employeeId,
-            name,
-            department,
-            realAge,
-            faceAge,
-            ageDifference,
-            completedAt,
-            rawRow: row,
-          });
 
           // 유효한 데이터만 반환
           // name이 없거나, realAge나 faceAge가 유효하지 않은 경우 필터링
           if (!name || isNaN(realAge) || isNaN(faceAge) || realAge <= 0 || faceAge <= 0) {
-            console.warn(`⚠️ 행 ${index + 2} 필터링됨:`, {
-              name: name || "(없음)",
-              realAge,
-              faceAge,
-            });
             return null;
           }
 
@@ -318,10 +378,6 @@ export class GoogleSheetsService {
           
           if (shouldReplace) {
             uniqueByEmployeeId.set(item.employeeId, item);
-            console.log(`🔄 사번 ${item.employeeId} 데이터 교체:`, {
-              기존: { ageDifference: existing.ageDifference, completedAt: existing.completedAt },
-              신규: { ageDifference: item.ageDifference, completedAt: item.completedAt },
-            });
           }
         }
       }
@@ -349,7 +405,6 @@ export class GoogleSheetsService {
           return new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime();
         });
 
-      console.log(`✅ 총 ${parsedData.length}개 데이터 중 ${rankingData.length}개 랭킹 데이터 반환 (중복 제거 완료)`);
       return rankingData;
     } catch (error: any) {
       console.error("❌ 구글 시트 랭킹 데이터 조회 실패:");

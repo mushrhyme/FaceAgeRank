@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Trophy, RefreshCw, Wifi, WifiOff } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import {
@@ -36,14 +36,94 @@ interface RankedData extends RankingData {
 export default function RankingBoard() {
   const [isSSEConnected, setIsSSEConnected] = useState(false); // SSE 연결 상태
 
+  // Excel 시리얼 번호를 날짜 문자열로 변환하는 함수
+  const convertExcelSerialToDateString = useCallback((value: any): string => {
+    // 빈 값 처리
+    if (value === null || value === undefined || value === "") {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const seconds = String(now.getSeconds()).padStart(2, "0");
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+
+    // 문자열인 경우 작은따옴표로 시작하면 제거 (구글 시트에서 텍스트로 저장된 경우)
+    let processedValue = value;
+    if (typeof value === "string" && value.startsWith("'")) {
+      processedValue = value.substring(1);
+    }
+
+    // 이미 올바른 문자열 형식이면 그대로 반환
+    if (typeof processedValue === "string" && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(processedValue)) {
+      return processedValue;
+    }
+
+    // 숫자 형식이면 Excel 시리얼 번호로 간주하고 변환
+    let serialNumber: number;
+    if (typeof value === "number") {
+      serialNumber = value;
+    } else if (typeof processedValue === "string") {
+      const parsed = parseFloat(processedValue);
+      if (isNaN(parsed)) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const seconds = String(now.getSeconds()).padStart(2, "0");
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      }
+      serialNumber = parsed;
+    } else {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const seconds = String(now.getSeconds()).padStart(2, "0");
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+
+    // Excel 시리얼 번호를 JavaScript Date로 변환
+    const excelEpoch = new Date(1899, 11, 30); // 1899년 12월 30일
+    const days = Math.floor(serialNumber);
+    const timeFraction = serialNumber - days;
+    
+    const date = new Date(excelEpoch);
+    date.setDate(date.getDate() + days);
+    
+    const hours = Math.floor(timeFraction * 24);
+    const minutes = Math.floor((timeFraction * 24 - hours) * 60);
+    const seconds = Math.floor(((timeFraction * 24 - hours) * 60 - minutes) * 60);
+    
+    date.setHours(hours, minutes, seconds);
+
+    // KST(UTC+9)로 변환
+    const kstOffset = 9 * 60;
+    const kstTime = new Date(date.getTime() + (kstOffset + date.getTimezoneOffset()) * 60000);
+    
+    const year = kstTime.getFullYear();
+    const month = String(kstTime.getMonth() + 1).padStart(2, "0");
+    const day = String(kstTime.getDate()).padStart(2, "0");
+    const hoursStr = String(kstTime.getHours()).padStart(2, "0");
+    const minutesStr = String(kstTime.getMinutes()).padStart(2, "0");
+    const secondsStr = String(kstTime.getSeconds()).padStart(2, "0");
+    
+    return `${year}-${month}-${day} ${hoursStr}:${minutesStr}:${secondsStr}`;
+  }, []);
+
   // 랭킹 데이터 조회
-  const { data: rankingData = [], isLoading, error, refetch } = useQuery<RankingData[]>({
+  const { data: rawRankingData = [], isLoading, error, refetch } = useQuery<RankingData[]>({
     queryKey: ["/api/ranking"],
     queryFn: async () => {
       try {
         const response = await apiRequest("GET", "/api/ranking");
         const data = await response.json();
-        console.log("📊 랭킹 데이터 조회 성공:", data);
         return data;
       } catch (error) {
         console.error("❌ 랭킹 데이터 조회 실패:", error);
@@ -53,6 +133,14 @@ export default function RankingBoard() {
     refetchOnWindowFocus: true, // 창 포커스 시 갱신
   });
 
+  // completedAt 필드를 변환하여 정규화된 데이터 생성
+  const rankingData = useMemo(() => {
+    return rawRankingData.map(item => ({
+      ...item,
+      completedAt: convertExcelSerialToDateString(item.completedAt), // Excel 시리얼 번호 변환
+    }));
+  }, [rawRankingData, convertExcelSerialToDateString]);
+
   // SSE 연결 및 이벤트 처리
   useEffect(() => {
     const eventSource = new EventSource("/api/ranking/stream");
@@ -60,12 +148,10 @@ export default function RankingBoard() {
     // 연결 성공 이벤트
     eventSource.addEventListener("connected", () => {
       setIsSSEConnected(true);
-      console.log("✅ SSE 연결 성공");
     });
 
     // 랭킹 갱신 이벤트
     eventSource.addEventListener("ranking-updated", () => {
-      console.log("📢 랭킹 갱신 알림 수신 - 데이터 새로고침");
       refetch(); // 데이터 갱신
     });
 
