@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { GoogleSheetsService } from "./googleSheets";
 import { createFaceAgeService } from "./faceAgeService";
-import { z } from "zod";
+import { analysisResultSchema } from "../shared/schema";
 
 // SSE 연결된 클라이언트 목록 관리
 const sseClients: Set<Response> = new Set();
@@ -110,18 +110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 분석 결과 저장
   app.post("/api/analysis/save", async (req, res) => {
     try {
-      const schema = z.object({
-        company: z.string().min(1),
-        employeeId: z.string().min(1),
-        name: z.string().min(1),
-        department: z.string().min(1), // 부서명
-        realAge: z.number().int().positive(),
-        faceAge: z.number().int().positive(),
-        ageDifference: z.number().int(),
-        completedAt: z.string(), // ISO 8601 형식 날짜 문자열
-      });
-
-      const data = schema.parse(req.body);
+      const data = analysisResultSchema.parse(req.body);
 
       // 구글 시트 서비스가 초기화되지 않았으면 오류 반환
       if (!googleSheetsService) {

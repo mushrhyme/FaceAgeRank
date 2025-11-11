@@ -17,21 +17,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import Footer from "@/components/Footer";
 import EventHeader from "@/components/EventHeader";
-
-interface RankingData {
-  company: string;        // 회사명
-  employeeId: string;     // 사번
-  name: string;           // 이름
-  department: string;      // 부서명
-  realAge: number;        // 실제 나이
-  faceAge: number;        // 얼굴 나이
-  ageDifference: number;  // 나이 차이 (실제 나이 - 얼굴 나이)
-  completedAt: string;    // 분석 완료 시각
-}
-
-interface RankedData extends RankingData {
-  rank: number;           // 순위 (동점 처리 포함)
-}
+import type { RankingData, RankedData } from "@shared/types";
 
 export default function RankingBoard() {
   const [isSSEConnected, setIsSSEConnected] = useState(false); // SSE 연결 상태

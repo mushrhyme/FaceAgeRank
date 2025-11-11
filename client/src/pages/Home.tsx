@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
+import type { Step, LoginInfo } from "@shared/types";
 import LoginForm from "@/components/LoginForm";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import CaptureGuide from "@/components/CaptureGuide";
@@ -9,12 +10,10 @@ import WebcamCapture from "@/components/WebcamCapture";
 import LoadingAnalysis from "@/components/LoadingAnalysis";
 import ResultDisplay from "@/components/ResultDisplay";
 
-type Step = "login" | "welcome" | "guide" | "webcam" | "loading" | "result";
-
 export default function Home() {
   const [step, setStep] = useState<Step>("login");
   const [user, setUser] = useState<User | null>(null);
-  const [loginInfo, setLoginInfo] = useState<{ company: string; employeeId: string } | null>(null); // 로그인 시 입력한 정보 저장
+  const [loginInfo, setLoginInfo] = useState<LoginInfo | null>(null); // 로그인 시 입력한 정보 저장
   const [capturedImage, setCapturedImage] = useState<string>("");
   const [faceAge, setFaceAge] = useState<number>(0);
   const { toast } = useToast();

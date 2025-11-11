@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import type { RankingData, AnalysisResult } from "../shared/types";
 
 /**
  * 구글 시트에 분석 결과를 저장하는 서비스 클래스
@@ -71,16 +72,7 @@ export class GoogleSheetsService {
    * @param data 저장할 분석 결과 데이터
    * @returns 성공 여부
    */
-  async saveAnalysisResult(data: {
-    company: string;        // 회사명
-    employeeId: string;     // 사번
-    name: string;           // 이름
-    department: string;      // 부서명
-    realAge: number;        // 실제 나이
-    faceAge: number;        // 얼굴 나이
-    ageDifference: number;  // 나이 차이 (실제 나이 - 얼굴 나이)
-    completedAt: string;    // 분석 완료 시각 (ISO 8601 형식)
-  }): Promise<boolean> {
+  async saveAnalysisResult(data: AnalysisResult): Promise<boolean> {
     try {
       // 헤더가 없으면 먼저 헤더 추가
       await this.ensureHeaders();
@@ -261,16 +253,7 @@ export class GoogleSheetsService {
    * 
    * @returns 랭킹 데이터 배열
    */
-  async getRankingData(): Promise<Array<{
-    company: string;        // 회사명
-    employeeId: string;     // 사번
-    name: string;           // 이름
-    department: string;      // 부서명
-    realAge: number;        // 실제 나이
-    faceAge: number;        // 얼굴 나이
-    ageDifference: number;  // 나이 차이 (실제 나이 - 얼굴 나이)
-    completedAt: string;    // 분석 완료 시각
-  }>> {
+  async getRankingData(): Promise<RankingData[]> {
     try {
       // 전체 데이터 읽기 (헤더 포함)
       const response = await this.sheets.spreadsheets.values.get({
