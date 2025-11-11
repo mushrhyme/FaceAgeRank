@@ -83,15 +83,15 @@ export default function RankingBoard() {
     };
   }, [refetch]);
 
-  // 데이터를 상위/하위 랭킹으로 분리하고 정렬 및 순위 계산
+  // 데이터를 동안/노안 랭킹으로 분리하고 정렬 및 순위 계산
   const { youngRanking, oldRanking } = useMemo(() => {
     if (!rankingData || rankingData.length === 0) {
       return { youngRanking: [], oldRanking: [] };
     }
 
-    // 하위랭킹: ageDifference > 0 (얼굴 나이가 실제 나이보다 큼)
+    // 노안랭킹: ageDifference > 0 (얼굴 나이가 실제 나이보다 큼)
     const oldData = rankingData.filter(item => item.ageDifference > 0);
-    // 상위랭킹: ageDifference <= 0 (얼굴 나이가 실제 나이보다 작거나 같음)
+    // 동안랭킹: ageDifference <= 0 (얼굴 나이가 실제 나이보다 작거나 같음)
     const youngData = rankingData.filter(item => item.ageDifference <= 0);
 
     // 정렬 함수: 절댓값 기준 내림차순, 동점이면 최신순 (completedAt 내림차순)
@@ -187,7 +187,7 @@ export default function RankingBoard() {
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mx-auto mb-3">
           <Trophy className="w-12 h-12 text-primary" />
         </div>
-        <h1 className="text-5xl font-bold mb-6">오늘의 동안랭킹</h1>
+        <h1 className="text-5xl font-bold mb-6">명예의 전당</h1>
         <p className="text-xl text-muted-foreground">
           얼굴 나이와 실제 나이 차이가 클수록 선물 당첨 기회가 올라갑니다!
         </p>
@@ -240,11 +240,11 @@ export default function RankingBoard() {
 
       {/* 랭킹 테이블 */}
       <div className="flex-1 overflow-hidden grid grid-cols-2 gap-4 px-6">
-        {/* 동안랭킹 */}
+        {/* 명예의 전당 */}
         <Card className="overflow-hidden">
           <div className="h-full flex flex-col">
             <div className="bg-blue-100 px-4 py-3 border-b">
-              <h2 className="text-3xl font-bold text-blue-700 text-center">상위 랭킹</h2>
+              <h2 className="text-3xl font-bold text-blue-700 text-center">동안 랭킹</h2>
               <p className="text-sm text-blue-600 text-center mt-1">오늘 더 어려 보이게 나온 분들이에요! 축하드립니다~</p>
             </div>
             <div className="flex-1 overflow-auto">
@@ -300,11 +300,11 @@ export default function RankingBoard() {
           </div>
         </Card>
 
-        {/* 하위 */}
+        {/* 노안 */}
         <Card className="overflow-hidden">
           <div className="h-full flex flex-col">
             <div className="bg-gray-100 px-4 py-3 border-b">
-              <h2 className="text-3xl font-bold text-gray-700 text-center">하위 랭킹</h2>
+              <h2 className="text-3xl font-bold text-gray-700 text-center">노안 랭킹</h2>
               <p className="text-sm text-gray-600 text-center mt-1">오늘은 조금 성숙하게 보였지만 걱정 마세요! 선물 기회는 그대로에요~</p>
             </div>
             <div className="flex-1 overflow-auto">
