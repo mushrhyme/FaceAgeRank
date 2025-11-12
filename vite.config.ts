@@ -19,6 +19,7 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
+    // middlewareMode에서는 host/port 설정이 무시됨 (Express 서버가 사용)
     fs: {
       strict: true,
       deny: ["**/.*"],
