@@ -11,3 +11,6 @@ vite.config.ts.*
 .env.local
 .env.*.local
 .env.backup
+
+# HTTPS 인증서 파일 (로컬 개발용)
+*.pem

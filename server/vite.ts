@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
+import { type Server as HttpsServer } from "https";
 import viteConfig from "../vite.config";
 import { nanoid } from "nanoid";
 
@@ -19,7 +20,7 @@ export function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
-export async function setupVite(app: Express, server: Server) {
+export async function setupVite(app: Express, server: Server | HttpsServer) {
   const serverOptions = {
     middlewareMode: true,
     hmr: { 

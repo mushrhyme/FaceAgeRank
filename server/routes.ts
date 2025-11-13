@@ -1,5 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { createServer as createHttpsServer, type Server as HttpsServer } from "https";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 import { z } from "zod";
 import { storage } from "./storage";
 import { GoogleSheetsService } from "./googleSheets";
@@ -10,7 +13,7 @@ import { AnalysisService } from "./services/analysisService";
 import { RankingService } from "./services/rankingService";
 import { UserService } from "./services/userService";
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(app: Express): Promise<Server | HttpsServer> {
   // 구글 시트 서비스 초기화 (환경 변수가 없으면 null)
   let googleSheetsService: GoogleSheetsService | null = null;
   try {
@@ -130,7 +133,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     sseService.addClient(res);
   });
 
-  const httpServer = createServer(app);
+  // HTTPS 인증서 파일 경로
+  const certPath = resolve(import.meta.dirname, "..", "localhost+3.pem");
+  const keyPath = resolve(import.meta.dirname, "..", "localhost+3-key.pem");
 
-  return httpServer;
+  // HTTPS 인증서 파일이 존재하면 HTTPS 서버 생성, 없으면 HTTP 서버 생성
+  let server: Server | HttpsServer;
+  try {
+    const cert = readFileSync(certPath);
+    const key = readFileSync(keyPath);
+    server = createHttpsServer({ cert, key }, app);
+  } catch (error) {
+    // 인증서 파일이 없으면 HTTP 서버 사용
+    server = createServer(app);
+  }
+
+  return server;
 }
