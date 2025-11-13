@@ -17,8 +17,8 @@ export default function WelcomeScreen({
       <EventHeader />
       <div className="flex-1 flex items-center justify-center p-8">
       <div className="w-full max-w-6xl text-center space-y-12">
-        <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-primary/10 mx-auto">
-          <UserCheck className="w-20 h-20 text-primary" />
+        <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary/10 mx-auto">
+          <UserCheck className="w-16 h-16 text-primary" />
         </div>
 
         <div className="space-y-4">

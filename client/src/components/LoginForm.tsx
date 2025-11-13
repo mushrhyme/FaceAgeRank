@@ -72,57 +72,57 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
   return (
     <div className="h-screen flex flex-col bg-background relative">
       <EventHeader />
-      <div className="flex-1 flex items-center justify-center p-8">
-      <div className="w-full max-w-6xl">
+      <div className="flex-1 flex items-center justify-center p-6 overflow-y-auto">
+      <div className="w-full max-w-5xl">
         {/* 헤더 */}
-        <div className="text-center mb-12 pt-8">
-          <div className="mx-auto w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center">
-            <Bot className="w-20 h-20 text-primary" />
+        <div className="text-center mb-8 pt-4">
+          <div className="mx-auto w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
+            <Bot className="w-16 h-16 text-primary" />
           </div>
-          <div className="flex items-center justify-center gap-4 mt-12">
-            <span className="text-7xl font-bold text-primary leading-none">[</span>
-            <h1 className="text-7xl font-semibold">AI 얼굴 나이 측정</h1>
-            <span className="text-7xl font-bold text-primary leading-none">]</span>
+          <div className="flex items-center justify-center gap-3 mt-6">
+            <span className="text-6xl font-bold text-primary leading-none">[</span>
+            <h1 className="text-6xl font-semibold">AI 얼굴 나이 측정</h1>
+            <span className="text-6xl font-bold text-primary leading-none">]</span>
           </div>
-          <p className="text-3xl text-muted-foreground mt-8 min-h-[3rem]">
+          <p className="text-2xl text-muted-foreground mt-6 min-h-[2.5rem]">
             {displayedText}
             {isTyping && <span className="animate-pulse">|</span>}
           </p>
         </div>
-        <div className="my-16" />
+        <div className="my-8" />
         {/* 폼 */}
         <div className="max-w-2xl mx-auto">
           <Card className="shadow-lg border-2">
-            <CardContent className="p-10">
-              <form onSubmit={handleSubmit} className="space-y-8">
-                <div className="space-y-3">
-                  <Label htmlFor="company" className="text-2xl font-medium">
+            <CardContent className="p-8">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="company" className="text-xl font-medium">
                     회사명
                   </Label>
                   <Select value={company} onValueChange={setCompany} required>
                     <SelectTrigger
                       id="company"
-                      className="h-20 text-2xl"
+                      className="h-16 text-xl"
                       data-testid="input-company"
                     >
                       <SelectValue placeholder="회사명을 선택하세요" />
                     </SelectTrigger>
-                    <SelectContent className="text-2xl">
-                      <SelectItem value="농심" className="text-2xl">농심</SelectItem>
-                      <SelectItem value="율촌화학" className="text-2xl">율촌화학</SelectItem>
-                      <SelectItem value="메가마트" className="text-2xl">메가마트</SelectItem>
-                      <SelectItem value="농심태경" className="text-2xl">농심태경</SelectItem>
-                      <SelectItem value="농심엔지니어링" className="text-2xl">농심엔지니어링</SelectItem>
-                      <SelectItem value="엔디에스" className="text-2xl">엔디에스</SelectItem>
-                      <SelectItem value="호텔농심" className="text-2xl">호텔농심</SelectItem>
-                      <SelectItem value="농심캐피탈" className="text-2xl">농심캐피탈</SelectItem>
-                      <SelectItem value="농심미분" className="text-2xl">농심미분</SelectItem>
-                      <SelectItem value="농심홀딩스" className="text-2xl">농심홀딩스</SelectItem>
+                    <SelectContent className="text-xl">
+                      <SelectItem value="농심" className="text-xl">농심</SelectItem>
+                      <SelectItem value="율촌화학" className="text-xl">율촌화학</SelectItem>
+                      <SelectItem value="메가마트" className="text-xl">메가마트</SelectItem>
+                      <SelectItem value="농심태경" className="text-xl">농심태경</SelectItem>
+                      <SelectItem value="농심엔지니어링" className="text-xl">농심엔지니어링</SelectItem>
+                      <SelectItem value="엔디에스" className="text-xl">엔디에스</SelectItem>
+                      <SelectItem value="호텔농심" className="text-xl">호텔농심</SelectItem>
+                      <SelectItem value="농심캐피탈" className="text-xl">농심캐피탈</SelectItem>
+                      <SelectItem value="농심미분" className="text-xl">농심미분</SelectItem>
+                      <SelectItem value="농심홀딩스" className="text-xl">농심홀딩스</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-3">
-                  <Label htmlFor="employeeId" className="text-2xl font-medium">
+                <div className="space-y-2">
+                  <Label htmlFor="employeeId" className="text-xl font-medium">
                     사번
                   </Label>
                   <Input
@@ -131,15 +131,15 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
                     placeholder="사번을 입력하세요"
                     value={employeeId}
                     onChange={(e) => setEmployeeId(e.target.value)}
-                    className="h-20 text-2xl"
+                    className="h-16 text-xl"
                     data-testid="input-employee-id"
                     required
                   />
                 </div>
-                <div className="pt-4 flex justify-center">
+                <div className="pt-2 flex justify-center">
                   <Button
                     type="submit"
-                    className="h-20 px-16 text-2xl font-medium min-w-80"
+                    className="h-16 px-12 text-xl font-medium min-w-64"
                     data-testid="button-submit"
                   >
                     확인

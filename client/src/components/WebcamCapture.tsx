@@ -115,24 +115,24 @@ export default function WebcamCapture({
   }, [countdown, onCapture]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-background relative">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-background relative">
       <EventHeader />
       {onBack && (
         <Button
           variant="ghost"
           onClick={onBack}
-          className="absolute top-8 left-8 h-14 px-6 text-lg"
+          className="absolute top-6 left-6 h-12 px-5 text-base"
           data-testid="button-back"
         >
-          <ArrowLeft className="w-6 h-6 mr-2" />
+          <ArrowLeft className="w-5 h-5 mr-2" />
           뒤로
         </Button>
       )}
 
-      <div className="w-full max-w-6xl space-y-12">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-semibold">카메라 준비</h1>
-          <p className="text-xl text-muted-foreground">
+      <div className="w-full max-w-5xl space-y-8">
+        <div className="text-center space-y-3">
+          <h1 className="text-3xl font-semibold">카메라 준비</h1>
+          <p className="text-lg text-muted-foreground">
             얼굴이 화면 중앙에 오도록 위치를 조정하세요
           </p>
         </div>
@@ -275,12 +275,12 @@ export default function WebcamCapture({
         )}
 
         {/* 버튼 영역 - 고정 높이로 레이아웃 시프트 방지 */}
-        <div className="flex justify-center min-h-[120px] items-center">
+        <div className="flex justify-center min-h-[100px] items-center">
           {hasPermission === false ? (
             <Button
               variant="outline"
               onClick={() => window.location.reload()}
-              className="h-20 px-16 text-2xl font-medium"
+              className="h-16 px-12 text-xl font-medium"
               data-testid="button-retry"
             >
               다시 시도
@@ -289,10 +289,10 @@ export default function WebcamCapture({
             <Button
               onClick={handleStartCountdown}
               disabled={!hasPermission || countdown !== null}
-              className="h-20 px-16 text-2xl font-medium min-w-80"
+              className="h-16 px-12 text-xl font-medium min-w-64"
               data-testid="button-start"
             >
-              <Camera className="w-6 h-6 mr-2" />
+              <Camera className="w-5 h-5 mr-2" />
               시작
             </Button>
           )}

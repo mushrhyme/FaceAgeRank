@@ -256,8 +256,8 @@ export default function RankingBoard() {
       <div className="flex-1 overflow-y-auto p-6">
       {/* 헤더 */}
       <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mx-auto mb-3">
-          <Trophy className="w-12 h-12 text-primary" />
+        <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary/10 mx-auto mb-3">
+          <Trophy className="w-16 h-16 text-primary" />
         </div>
         <h1 className="text-5xl font-bold mb-6">명예의 전당</h1>
         <p className="text-xl text-muted-foreground">

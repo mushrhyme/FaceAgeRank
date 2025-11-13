@@ -21,7 +21,7 @@ export default function LoadingAnalysis() {
             />
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-28 h-28 rounded-full bg-primary/10 animate-pulse" />
+            <div className="w-24 h-24 rounded-full bg-primary/10 animate-pulse" />
           </div>
         </div>
         <div className="space-y-4">

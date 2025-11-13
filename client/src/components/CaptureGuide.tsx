@@ -15,8 +15,8 @@ export default function CaptureGuide({ onStart }: CaptureGuideProps) {
       <div className="w-full max-w-6xl">
         {/* 헤더 */}
         <div className="text-center pb-8 mb-8">
-          <div className="mx-auto w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-            <Camera className="w-20 h-20 text-primary" />
+          <div className="mx-auto w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+            <Camera className="w-16 h-16 text-primary" />
           </div>
           <h1 className="text-5xl font-semibold mb-4">촬영 안내</h1>
           <p className="text-3xl text-muted-foreground">
