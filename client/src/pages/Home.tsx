@@ -51,22 +51,12 @@ export default function Home() {
     setStep("loading");
     
     try {
-      // 최소 로딩 시간 보장 (로딩 화면이 최소 3초는 보이도록)
-      const loadingStartTime = Date.now();
-      const minLoadingTime = 3000; // 3초
-      
-      // 얼굴 나이 분석 API 호출
+      // 얼굴 나이 분석 API 호출 (실제 분석 시간 사용)
       const response = await apiRequest("POST", "/api/analysis/face-age", {
         image: imageSrc, // Base64 이미지 문자열
       });
 
       const { faceAge } = await response.json();
-      
-      // 최소 로딩 시간이 지나지 않았다면 대기
-      const elapsedTime = Date.now() - loadingStartTime;
-      if (elapsedTime < minLoadingTime) {
-        await new Promise(resolve => setTimeout(resolve, minLoadingTime - elapsedTime));
-      }
       
       setFaceAge(faceAge);
       setStep("result");

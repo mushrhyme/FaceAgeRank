@@ -26,6 +26,15 @@ export async function registerRoutes(app: Express): Promise<Server | HttpsServer
   const faceAgeService = createFaceAgeService();
   if (!faceAgeService) {
     console.warn("⚠️ 얼굴 나이 분석 서비스 비활성화됨 (시뮬레이션 모드)");
+  } else {
+    // 서비스 타입 확인
+    const serviceType = faceAgeService.constructor.name;
+    console.log(`✅ 얼굴 나이 분석 서비스 활성화: ${serviceType}`);
+    if (serviceType === "LocalFaceAgeService") {
+      console.log("   → Python 스크립트를 사용하여 ONNX 모델로 분석합니다");
+    } else if (serviceType === "RemoteFaceAgeService") {
+      console.log("   → 원격 API를 사용합니다 (현재 랜덤 모드)");
+    }
   }
 
   // 서비스 레이어 초기화
