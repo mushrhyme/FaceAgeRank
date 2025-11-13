@@ -11,11 +11,12 @@ declare module 'http' {
   }
 }
 app.use(express.json({
+  limit: '10mb', // Base64 이미지 처리를 위해 10MB로 증가
   verify: (req, _res, buf) => {
     req.rawBody = buf;
   }
 }));
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
 app.use((req, res, next) => {
   const start = Date.now();

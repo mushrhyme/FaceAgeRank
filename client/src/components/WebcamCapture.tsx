@@ -25,11 +25,68 @@ export default function WebcamCapture({
     setError("");
   }, []);
 
-  const handleUserMediaError = useCallback(() => {
+  const handleUserMediaError = useCallback((error: string | DOMException) => {
     setHasPermission(false);
-    setError(
-      "카메라 접근 권한이 필요합니다. 브라우저 설정에서 카메라를 허용해주세요."
-    );
+    
+    // 에러 타입에 따라 다른 메시지 표시
+    let errorMessage = "카메라 접근에 실패했습니다.";
+    
+    if (error instanceof DOMException) {
+      switch (error.name) {
+        case "NotAllowedError":
+          errorMessage = "카메라 접근 권한이 거부되었습니다. 브라우저 설정에서 카메라를 허용해주세요.";
+          break;
+        case "NotFoundError":
+          errorMessage = "카메라를 찾을 수 없습니다. 카메라가 연결되어 있는지 확인해주세요.";
+          break;
+        case "NotReadableError":
+          errorMessage = "카메라가 다른 앱에서 사용 중이거나 접근할 수 없습니다.";
+          break;
+        case "OverconstrainedError":
+          errorMessage = "요청한 카메라 설정을 지원하지 않습니다.";
+          break;
+        default:
+          errorMessage = `카메라 오류: ${error.message || error.name}`;
+      }
+    } else if (typeof error === "string") {
+      errorMessage = error;
+    }
+    
+    console.error("카메라 접근 오류:", error);
+    setError(errorMessage);
+  }, []);
+
+  // 이미지 압축 함수 (Base64 이미지 크기 줄이기)
+  const compressImage = useCallback((base64Image: string, maxWidth = 800, quality = 0.7): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // 비율 유지하면서 크기 조정
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          // JPEG로 압축 (quality로 품질 조절)
+          const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressedBase64);
+        } else {
+          resolve(base64Image); // 실패 시 원본 반환
+        }
+      };
+      img.onerror = () => resolve(base64Image); // 에러 시 원본 반환
+      img.src = base64Image;
+    });
   }, []);
 
   const handleStartCountdown = useCallback(() => {
@@ -42,7 +99,10 @@ export default function WebcamCapture({
     if (countdown === 0) {
       const imageSrc = webcamRef.current?.getScreenshot();
       if (imageSrc) {
-        onCapture(imageSrc);
+        // 이미지 압축 후 전달
+        compressImage(imageSrc).then((compressedImage) => {
+          onCapture(compressedImage);
+        });
       }
       return;
     }
