@@ -19,12 +19,24 @@ interface ParticlesBackgroundProps {
 export default function ParticlesBackground({ className = "" }: ParticlesBackgroundProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const particlesLoadedRef = useRef(false);
+  const timeoutRefsRef = useRef<NodeJS.Timeout[]>([]); // 모든 timeout 저장
+  const intervalRefRef = useRef<NodeJS.Timeout | null>(null); // interval 저장
 
   useEffect(() => {
+    // 이미 초기화된 경우 중복 초기화 방지
+    if (particlesLoadedRef.current) {
+      return;
+    }
+
     // particles.js가 로드될 때까지 대기 후 초기화
     const initializeParticles = () => {
-      if (!containerRef.current || !window.particlesJS) {
-        console.log("particles.js not available or container not ready");
+      if (!containerRef.current || typeof window.particlesJS !== "function" || particlesLoadedRef.current) {
+        return;
+      }
+      
+      // id 확인
+      if (!containerRef.current.id) {
+        console.error("Container element must have an id");
         return;
       }
       
@@ -133,36 +145,59 @@ export default function ParticlesBackground({ className = "" }: ParticlesBackgro
     };
 
     // particles.js가 이미 로드되어 있는지 확인
-    if (typeof window !== "undefined" && window.particlesJS) {
+    if (typeof window !== "undefined" && typeof window.particlesJS === "function") {
       // 약간의 지연을 두고 초기화 (DOM이 완전히 준비될 때까지)
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         initializeParticles();
       }, 100);
+      timeoutRefsRef.current.push(timeoutId);
     } else {
       console.log("Waiting for particles.js to load...");
       // particles.js가 로드될 때까지 대기
       const checkParticles = setInterval(() => {
-        if (typeof window !== "undefined" && window.particlesJS) {
+        if (typeof window !== "undefined" && typeof window.particlesJS === "function") {
           console.log("particles.js loaded, initializing...");
-          clearInterval(checkParticles);
-          setTimeout(() => {
+          if (intervalRefRef.current) {
+            clearInterval(intervalRefRef.current);
+            intervalRefRef.current = null;
+          }
+          const timeoutId = setTimeout(() => {
             initializeParticles();
           }, 100);
+          timeoutRefsRef.current.push(timeoutId);
         }
       }, 50);
+      intervalRefRef.current = checkParticles;
 
       // 최대 5초 대기 후 타임아웃
-      setTimeout(() => {
-        clearInterval(checkParticles);
+      const timeoutId = setTimeout(() => {
+        if (intervalRefRef.current) {
+          clearInterval(intervalRefRef.current);
+          intervalRefRef.current = null;
+        }
         if (!particlesLoadedRef.current) {
           console.warn("particles.js failed to load after 5 seconds");
           console.log("window.particlesJS:", window.particlesJS);
         }
       }, 5000);
+      timeoutRefsRef.current.push(timeoutId);
     }
 
     // 컴포넌트 언마운트 시 정리
     return () => {
+      // 모든 timeout 정리
+      timeoutRefsRef.current.forEach((timeoutId) => {
+        clearTimeout(timeoutId);
+      });
+      timeoutRefsRef.current = [];
+
+      // interval 정리
+      if (intervalRefRef.current) {
+        clearInterval(intervalRefRef.current);
+        intervalRefRef.current = null;
+      }
+
+      // particles.js 인스턴스 정리
       if (window.pJSDom && window.pJSDom.length > 0) {
         window.pJSDom.forEach((pJS) => {
           if (pJS.pJS && pJS.pJS.fn && pJS.pJS.fn.vendors) {
@@ -171,6 +206,7 @@ export default function ParticlesBackground({ className = "" }: ParticlesBackgro
         });
         window.pJSDom = [];
       }
+      
       if (containerRef.current) {
         // particles.js 인스턴스 정리
         const canvas = containerRef.current.querySelector("canvas");
@@ -178,6 +214,8 @@ export default function ParticlesBackground({ className = "" }: ParticlesBackgro
           canvas.parentNode.removeChild(canvas);
         }
       }
+
+      particlesLoadedRef.current = false;
     };
   }, []);
 
