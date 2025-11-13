@@ -24,12 +24,16 @@ import Footer from "@/components/Footer";
 import EventHeader from "@/components/EventHeader";
 
 interface LoginFormProps {
-  onSubmit: (company: string, employeeId: string) => void;
+  onSubmit: (company: string, employeeId: string, devData?: { name: string; realAge: number; department: string }) => void;
+  isDevMode?: boolean; // 개발 모드 여부
 }
 
-export default function LoginForm({ onSubmit }: LoginFormProps) {
+export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProps) {
   const [company, setCompany] = useState("");
   const [employeeId, setEmployeeId] = useState("");
+  const [name, setName] = useState(""); // 개발 모드: 이름
+  const [realAge, setRealAge] = useState<number | "">(""); // 개발 모드: 실제 나이
+  const [department, setDepartment] = useState(""); // 개발 모드: 부서
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
   const [isPrivacyAgreed, setIsPrivacyAgreed] = useState(false); // 개인정보 동의 체크 상태
@@ -37,7 +41,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
   
   const texts = [
     "지금 이 순간의 얼굴 나이, 과연 몇 살일까요?",
-    "오늘의 얼굴 나이 랭킹! Top3까지 상품도 드려요!",
+    "오늘의 얼굴 나이 랭킹! 1위하면 선물도 드려요!",
     "내가 동안일지 궁금하다면 바로 확인해보세요!",
     "생각보다 높게 나왔나요? 그냥 재미로 보는 결과니깐 걱정마세요!",
     "생각보다 어리게 나왔다면? 오늘 기분 좋은 날이네요!",
@@ -76,7 +80,15 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (company && employeeId && isPrivacyAgreed) { // 개인정보 동의 체크 확인
-      onSubmit(company, employeeId);
+      if (isDevMode) {
+        // 개발 모드: 추가 필드 검증
+        if (name && realAge && department) {
+          onSubmit(company, employeeId, { name, realAge: Number(realAge), department });
+        }
+      } else {
+        // 일반 모드: 기존 로직
+        onSubmit(company, employeeId);
+      }
     }
   };
 
@@ -153,6 +165,54 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
                     required
                   />
                 </div>
+                {/* 개발 모드: 추가 필드 */}
+                {isDevMode && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="name" className="text-xl font-medium">
+                        이름
+                      </Label>
+                      <Input
+                        id="name"
+                        type="text"
+                        placeholder="이름을 입력하세요"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="h-16 text-xl"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="realAge" className="text-xl font-medium">
+                        실제 나이
+                      </Label>
+                      <Input
+                        id="realAge"
+                        type="number"
+                        placeholder="실제 나이를 입력하세요"
+                        value={realAge}
+                        onChange={(e) => setRealAge(e.target.value === "" ? "" : Number(e.target.value))}
+                        className="h-16 text-xl"
+                        min="1"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="department" className="text-xl font-medium">
+                        부서
+                      </Label>
+                      <Input
+                        id="department"
+                        type="text"
+                        placeholder="부서를 입력하세요"
+                        value={department}
+                        onChange={(e) => setDepartment(e.target.value)}
+                        className="h-16 text-xl"
+                        required
+                      />
+                    </div>
+                  </>
+                )}
                 <div className="flex items-center space-x-2 pt-2">
                   <Checkbox
                     id="privacy-agreement"
@@ -189,7 +249,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
                     type="submit"
                     className="h-16 px-12 text-xl font-medium min-w-64"
                     data-testid="button-submit"
-                    disabled={!isPrivacyAgreed} // 개인정보 동의 체크 안 되면 비활성화
+                    disabled={!isPrivacyAgreed || (isDevMode && (!name || !realAge || !department))} // 개인정보 동의 체크 및 개발 모드 필드 검증
                   >
                     확인
                   </Button>

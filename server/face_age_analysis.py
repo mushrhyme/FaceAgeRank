@@ -2,23 +2,49 @@
 얼굴 나이 분석 서비스
 이미지 경로를 받아서 얼굴을 감지하고 나이를 추정합니다.
 """
-import cv2
 import sys
-import json
+import time
+
+# 스크립트 시작 시간 (가장 먼저 측정)
+script_start_time = time.time()
+
+import warnings
 import os
+
+# 모든 경고 억제 (라이브러리 업데이트 경고 등)
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
+
+# Albumentations 업데이트 체크 비활성화
+os.environ["NO_ALBUMENTATIONS_UPDATE"] = "1"
+
+# import 시작 시간
+import_start_time = time.time()
+
+import cv2
+import json
 import numpy as np
 from insightface.app import FaceAnalysis
 import onnxruntime as ort
 from torchvision import transforms
 from PIL import Image
 
+# import 완료 시간
+import_end_time = time.time()
+import_time = import_end_time - import_start_time
+
+# 모델 로드 시간 측정
+model_load_start = time.time()
+
 # -----------------------------
 # 1️⃣ 얼굴 감지 모델 로드 (InsightFace) CPU 전용
 # -----------------------------
 # InsightFace 초기화 (모델 다운로드 시 stdout에 출력할 수 있음)
 # stdout 출력은 TypeScript에서 필터링됨
+insightface_load_start = time.time()
 face_app = FaceAnalysis(name="buffalo_s")
 face_app.prepare(ctx_id=-1, det_size=(640, 640))  # CPU 전용 (ctx_id=-1)
+insightface_load_time = time.time() - insightface_load_start
 
 # -----------------------------
 # 2️⃣ 나이 추정 모델 (ONNX, CPU)
@@ -42,16 +68,23 @@ if not os.path.isabs(onnx_model_path):
 # ONNX 모델 파일 존재 확인 및 로드 (에러 발생 시 나중에 처리)
 onnx_session = None
 onnx_load_error = None
+onnx_load_time = 0
 
 if not os.path.exists(onnx_model_path):
     onnx_load_error = f"ONNX 모델 파일을 찾을 수 없습니다: {onnx_model_path}"
 else:
     # ONNX 모델 로드
     try:
+        onnx_load_start = time.time()
         onnx_session = ort.InferenceSession(onnx_model_path, providers=["CPUExecutionProvider"])
+        onnx_load_time = time.time() - onnx_load_start
         print(f"✅ ONNX 모델 로드 성공: {onnx_model_path}", file=sys.stderr)
     except Exception as e:
         onnx_load_error = f"ONNX 모델 로드 실패: {str(e)}"
+
+model_load_time = time.time() - model_load_start
+# 모델 로드 시간을 stderr에 출력 (디버깅용)
+print(f"[타이밍] import: {import_time:.2f}초 | InsightFace 로드: {insightface_load_time:.2f}초 | ONNX 로드: {onnx_load_time:.2f}초 | 모델 로드 전체: {model_load_time:.2f}초", file=sys.stderr)
 
 # 학습 시 사용한 전처리와 동일해야 함
 transform = transforms.Compose([
@@ -95,19 +128,28 @@ def analyze_face_age_from_buffer(image_buffer):
         dict: {
             "success": bool,
             "age": float (성공 시),
-            "error": str (실패 시)
+            "error": str (실패 시),
+            "analysis_time": float (성공 시, 실제 모델 러닝 타임)
         }
     """
+    import time
+    
+    decode_start_time = time.time()
     try:
         # 바이너리 데이터를 numpy array로 변환
         nparr = np.frombuffer(image_buffer, np.uint8)
         # OpenCV로 이미지 디코딩
         frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        decode_time = time.time() - decode_start_time
+        
         if frame is None:
             return {
                 "success": False,
                 "error": "이미지를 디코딩할 수 없습니다."
             }
+
+        # 실제 모델 러닝 타임 측정 시작 (얼굴 감지부터)
+        model_start_time = time.time()
 
         # 얼굴 탐지
         faces = face_app.get(frame)
@@ -150,12 +192,16 @@ def analyze_face_age_from_buffer(image_buffer):
         # ONNX 나이 예측
         age = predict_age_from_array(face_img)
 
-        # 약간 보정
-        adjusted_age = round(age * 1.001)
+        # 실제 모델 러닝 타임 측정 종료 (얼굴 감지 ~ 나이 추정 완료)
+        model_time = time.time() - model_start_time
+        
+        # 디버깅용 타이밍 정보 출력
+        print(f"[타이밍] 이미지 디코딩: {decode_time:.3f}초 | 모델 러닝: {model_time:.3f}초", file=sys.stderr)
 
         return {
             "success": True,
-            "age": adjusted_age
+            "age": round(age),  # 반올림만 수행
+            "analysis_time": round(model_time, 2)  # 실제 모델 러닝 타임 (소수점 둘째 자리)
         }
 
     except Exception as e:
@@ -167,16 +213,13 @@ def analyze_face_age_from_buffer(image_buffer):
 
 if __name__ == "__main__":
     # stdin에서 이미지 데이터 읽기 (바이너리 모드)
-    import time
-    
+    stdin_read_start = time.time()
     try:
-        # 분석 시작 시간 측정
-        start_time = time.time()
-        
         # ONNX 모델 로드 에러 확인
         if onnx_load_error:
             # 모델 로드 실패 시에도 stdin을 읽어서 EPIPE 방지
             image_buffer = sys.stdin.buffer.read()
+            stdin_read_time = time.time() - stdin_read_start
             result = {
                 "success": False,
                 "error": onnx_load_error
@@ -184,6 +227,7 @@ if __name__ == "__main__":
         else:
             # stdin에서 모든 데이터 읽기
             image_buffer = sys.stdin.buffer.read()
+            stdin_read_time = time.time() - stdin_read_start
             
             if len(image_buffer) == 0:
                 result = {
@@ -191,18 +235,18 @@ if __name__ == "__main__":
                     "error": "이미지 데이터가 필요합니다."
                 }
             else:
+                # analyze_face_age_from_buffer 내부에서 실제 모델 러닝 타임 측정
                 result = analyze_face_age_from_buffer(image_buffer)
-                
-                # 분석 시간 추가
-                analysis_time = time.time() - start_time
-                if result.get("success"):
-                    result["analysis_time"] = round(analysis_time, 2)  # 소수점 둘째 자리까지
                 
     except Exception as e:
         result = {
             "success": False,
             "error": f"이미지 처리 중 오류 발생: {str(e)}"
         }
+    
+    # 전체 스크립트 실행 시간
+    script_total_time = time.time() - script_start_time
+    print(f"[타이밍] stdin 읽기: {stdin_read_time:.3f}초 | 스크립트 전체: {script_total_time:.2f}초", file=sys.stderr)
 
     # JSON으로 결과 출력
     # InsightFace가 stdout에 출력할 수 있으므로, TypeScript에서 마지막 JSON 라인을 추출함

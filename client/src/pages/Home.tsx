@@ -18,12 +18,33 @@ export default function Home() {
   const [faceAge, setFaceAge] = useState<number>(0);
   const { toast } = useToast();
 
-  const handleLogin = async (company: string, employeeId: string) => {
+  // 개발 모드 여부 확인 (Vite 환경 변수)
+  const isDevMode = import.meta.env.VITE_DEV_MODE === "true";
+
+  const handleLogin = async (
+    company: string, 
+    employeeId: string, 
+    devData?: { name: string; realAge: number; department: string }
+  ) => {
     try {
-      const response = await apiRequest("POST", "/api/user/lookup", {
-        company,
-        employeeId,
-      });
+      let response: Response;
+      
+      if (isDevMode && devData) {
+        // 개발 모드: /api/user/lookup-dev 호출
+        response = await apiRequest("POST", "/api/user/lookup-dev", {
+          company,
+          employeeId,
+          name: devData.name,
+          realAge: devData.realAge,
+          department: devData.department,
+        });
+      } else {
+        // 일반 모드: /api/user/lookup 호출
+        response = await apiRequest("POST", "/api/user/lookup", {
+          company,
+          employeeId,
+        });
+      }
       
       const userData = await response.json() as User;
       setUser(userData);
@@ -138,7 +159,7 @@ export default function Home() {
 
   return (
     <>
-      {step === "login" && <LoginForm onSubmit={handleLogin} />}
+      {step === "login" && <LoginForm onSubmit={handleLogin} isDevMode={isDevMode} />}
       
       {step === "welcome" && user && (
         <WelcomeScreen name={user.name} onContinue={handleWelcomeContinue} />

@@ -28,11 +28,13 @@ export class AnalysisService {
   }
 
   /**
-   * 얼굴 나이 분석
-   * @param imageBuffer 이미지 버퍼
-   * @returns 얼굴 나이 (정수)
+   * Base64 이미지로부터 얼굴 나이 분석
+   * @param base64Image Base64 인코딩된 이미지 데이터
+   * @returns 얼굴 나이와 분석 시간
    */
-  async analyzeFaceAge(imageBuffer: Buffer): Promise<number> {
+  async analyzeFaceAgeFromBase64(base64Image: string): Promise<number | { age: number; analysisTime?: number }> {
+    const imageBuffer = this.parseBase64Image(base64Image);
+    
     if (this.faceAgeService) {
       return await this.faceAgeService.predictAge(imageBuffer);
     } else {
@@ -41,16 +43,6 @@ export class AnalysisService {
       console.warn(`⚠️ 얼굴 나이 분석 서비스가 없어 랜덤 값 반환: ${randomAge}세`);
       return randomAge;
     }
-  }
-
-  /**
-   * Base64 이미지로부터 얼굴 나이 분석
-   * @param base64Image Base64 인코딩된 이미지 데이터
-   * @returns 얼굴 나이 (정수)
-   */
-  async analyzeFaceAgeFromBase64(base64Image: string): Promise<number> {
-    const imageBuffer = this.parseBase64Image(base64Image);
-    return await this.analyzeFaceAge(imageBuffer);
   }
 
   /**

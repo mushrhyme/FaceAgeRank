@@ -19,7 +19,7 @@ import Footer from "@/components/Footer";
 import EventHeader from "@/components/EventHeader";
 import type { RankingData, RankedData } from "@shared/types";
 
-export default function RankingBoard() {
+export default function RankingBoardWithoutOld() {
   const [isSSEConnected, setIsSSEConnected] = useState(false); // SSE 연결 상태
 
   // Excel 시리얼 번호를 날짜 문자열로 변환하는 함수
@@ -155,15 +155,13 @@ export default function RankingBoard() {
     };
   }, [refetch]);
 
-  // 데이터를 동안/노안 랭킹으로 분리하고 정렬 및 순위 계산
-  const { youngRanking, oldRanking } = useMemo(() => {
+  // 데이터를 동안 랭킹으로만 필터링하고 정렬 및 순위 계산 (노안 랭킹 제외)
+  const youngRanking = useMemo(() => {
     if (!rankingData || rankingData.length === 0) {
-      return { youngRanking: [], oldRanking: [] };
+      return [];
     }
 
-    // 노안랭킹: ageDifference > 0 (얼굴 나이가 실제 나이보다 큼)
-    const oldData = rankingData.filter(item => item.ageDifference > 0);
-    // 동안랭킹: ageDifference <= 0 (얼굴 나이가 실제 나이보다 작거나 같음)
+    // 동안랭킹만: ageDifference <= 0 (얼굴 나이가 실제 나이보다 작거나 같음)
     const youngData = rankingData.filter(item => item.ageDifference <= 0);
 
     // 정렬 함수: 절댓값 기준 내림차순, 동점이면 최신순 (completedAt 내림차순)
@@ -180,7 +178,6 @@ export default function RankingBoard() {
 
     // 정렬
     youngData.sort(sortByAgeDifference);
-    oldData.sort(sortByAgeDifference);
 
     // 순위 계산 함수 (동점 처리 포함)
     const calculateRanks = (data: RankingData[]): RankedData[] => {
@@ -209,14 +206,10 @@ export default function RankingBoard() {
       return ranked;
     };
 
-    const youngRanked = calculateRanks(youngData);
-    const oldRanked = calculateRanks(oldData);
+    const ranked = calculateRanks(youngData);
     
     // 10위까지만 필터링 (동점 포함)
-    return {
-      youngRanking: youngRanked.filter(item => item.rank <= 10),
-      oldRanking: oldRanked.filter(item => item.rank <= 10),
-    };
+    return ranked.filter(item => item.rank <= 10);
   }, [rankingData]);
 
   // 순위 표시 (1위, 2위, 3위는 특별 스타일, 모든 순위 카드 크기 일정하게)
@@ -256,58 +249,58 @@ export default function RankingBoard() {
 
   return (
     <div className="h-screen flex flex-col bg-background relative">
-      <EventHeader />
+      {/* <EventHeader /> */}
       <div className="flex-1 overflow-y-auto p-6">
       {/* 헤더 */}
+      
       <div className="text-center mb-6">
-        {/* 참여 안내 - 시각적으로 강조 (맨 위로 이동) */}
+        {/* 명예의 전당 제목 */}
+        <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-yellow-100 mx-auto mb-3">
+          <Trophy className="w-16 h-16 text-yellow-500" />
+        </div>
+        {/* <h1 className="text-5xl font-bold mb-6">명예의 전당</h1>
+        <p className="text-xl text-muted-foreground">
+          얼굴 나이와 실제 나이 차이가 클수록 선물 당첨 기회가 올라갑니다!
+        </p> */}
         <div className="mb-8 max-w-5xl mx-auto">
           <div className="bg-gradient-to-r from-yellow-50 via-orange-50 to-pink-50 border-2 border-yellow-300 rounded-2xl p-6 shadow-lg">
             <div className="flex items-center justify-center gap-3 mb-4">
               <Gift className="w-8 h-8 text-yellow-600 animate-pulse" />
-              <h2 className="text-3xl font-bold text-yellow-700">🎁 이벤트 참여 안내</h2>
+              <h2 className="text-3xl font-bold text-yellow-700">🎁 이벤트 안내</h2>
               <Sparkles className="w-8 h-8 text-yellow-600 animate-pulse" />
+            </div>
+            {/* 참여 제한 안내 */}
+            <div className="mt-6 text-center">
+              <p className="text-base text-gray-600 font-medium">
+              본 프로그램 체험 시 1인 1회 참여로 자동 집계됩니다.
+              </p>
             </div>
             <div className="grid md:grid-cols-2 gap-4 mt-4">
               <div className="bg-white/80 rounded-xl p-5 border-2 border-yellow-400 shadow-md">
                 <div className="flex items-center gap-2 mb-2">
                   <Trophy className="w-6 h-6 text-yellow-500" />
-                  <h3 className="text-xl font-bold text-yellow-700">1등 상품</h3>
+                  <h3 className="text-xl font-bold text-yellow-700">1위 선물</h3>
                 </div>
                 <p className="text-lg text-gray-700 font-semibold">
-                  동안 랭킹 <span className="text-yellow-600 text-2xl">1등</span>에게<br />
+                  가장 높은 순위를 달성한 <span className="text-yellow-600 text-2xl">1명</span>에게<br />
                   선물을 드립니다!
                 </p>
               </div>
               <div className="bg-white/80 rounded-xl p-5 border-2 border-purple-400 shadow-md">
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="w-6 h-6 text-purple-500" />
-                  <h3 className="text-xl font-bold text-purple-700">추첨 상품</h3>
+                  <h3 className="text-xl font-bold text-purple-700">랜덤 선물</h3>
                 </div>
                 <p className="text-lg text-gray-700 font-semibold">
-                  참여자 중 <span className="text-purple-600 text-2xl">3명</span>을 추첨하여<br />
-                  선물을 드립니다!
+                 참여자 중 <span className="text-purple-600 text-2xl">3명</span>을 추첨하여 선물을 드립니다.
+                  <br />
+                  참여만 해도 당첨 기회가 생겨요!
                 </p>
               </div>
             </div>
-            {/* 참여 제한 안내 */}
-            <div className="mt-6 text-center">
-              <p className="text-base text-gray-600 font-medium">
-                참여는 1회만 가능해요
-              </p>
-            </div>
+            
           </div>
         </div>
-        
-        {/* 명예의 전당 제목 */}
-        <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary/10 mx-auto mb-3">
-          <Trophy className="w-16 h-16 text-primary" />
-        </div>
-        <h1 className="text-5xl font-bold mb-6">명예의 전당</h1>
-        <p className="text-xl text-muted-foreground">
-          얼굴 나이와 실제 나이 차이가 클수록 선물 당첨 기회가 올라갑니다!
-        </p>
-        
       </div>
 
       {/* 에러 표시 */}
@@ -330,13 +323,13 @@ export default function RankingBoard() {
         </Alert>
       )}
 
-      {/* 랭킹 테이블 */}
-      <div className="flex-1 overflow-hidden grid grid-cols-2 gap-4 px-6">
-        {/* 명예의 전당 */}
-        <Card className="overflow-hidden">
+      {/* 랭킹 테이블 - 동안 랭킹만 표시 (1열 레이아웃) */}
+      <div className="flex-1 overflow-hidden flex justify-center px-6">
+        {/* 동안 랭킹 */}
+        <Card className="overflow-hidden max-w-5xl w-full">
           <div className="h-full flex flex-col">
             <div className="bg-blue-100 px-4 py-3 border-b">
-              <h2 className="text-3xl font-bold text-blue-700 text-center">동안 랭킹 (상위 10위)</h2>
+              <h2 className="text-3xl font-bold text-blue-700 text-center">명예의 전당</h2>
               <p className="text-sm text-blue-600 text-center mt-1">오늘 더 어려 보이게 나온 분들이에요! 축하드립니다~</p>
             </div>
             <div className="flex-1 overflow-auto">
@@ -389,95 +382,34 @@ export default function RankingBoard() {
                 </Table>
               )}
             </div>
+            {/* SSE 연결 상태 및 새로고침 버튼 - 랭킹 하단 */}
+            <div className="border-t bg-blue-50 px-4 py-3 flex items-center justify-center gap-4">
+              {/* SSE 연결 상태 표시 */}
+              <div className="flex items-center gap-2">
+                {isSSEConnected ? (
+                  <>
+                    <Wifi className="w-4 h-4 text-green-500" />
+                    <span className="text-sm text-muted-foreground">실시간 연결됨</span>
+                  </>
+                ) : (
+                  <>
+                    <WifiOff className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">연결 중...</span>
+                  </>
+                )}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refetch()}
+                className="gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                새로고침
+              </Button>
+            </div>
           </div>
         </Card>
-
-        {/* 노안 */}
-        <Card className="overflow-hidden">
-          <div className="h-full flex flex-col">
-            <div className="bg-gray-100 px-4 py-3 border-b">
-              <h2 className="text-3xl font-bold text-gray-700 text-center">노안 랭킹 (상위 10위)</h2>
-              <p className="text-sm text-gray-600 text-center mt-1">오늘은 조금 성숙하게 보였지만 걱정 마세요! 선물 기회는 그대로에요~</p>
-            </div>
-            <div className="flex-1 overflow-auto">
-              {isLoading ? (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center space-y-4">
-                    <RefreshCw className="w-12 h-12 animate-spin mx-auto text-primary" />
-                    <p className="text-xl text-muted-foreground">랭킹 데이터를 불러오는 중...</p>
-                  </div>
-                </div>
-              ) : oldRanking.length === 0 ? (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center space-y-4">
-                    <Trophy className="w-16 h-16 mx-auto text-muted-foreground" />
-                    <p className="text-2xl text-muted-foreground">아직 랭킹 데이터가 없습니다</p>
-                  </div>
-                </div>
-              ) : (
-                <Table className="text-xl">
-                  <TableHeader>
-                    <TableRow className="bg-muted/50">
-                      <TableHead className="w-8 text-center text-2xl font-bold py-3">순위</TableHead>
-                      <TableHead className="w-16 text-2xl font-bold py-3">이름</TableHead>
-                      <TableHead className="w-20 text-2xl font-bold py-3">회사</TableHead>
-                      <TableHead className="w-20 text-2xl font-bold py-3">부서명</TableHead>
-                      <TableHead className="w-20 text-center text-2xl font-bold py-3">나이 차이</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {oldRanking.map((item, index) => (
-                      <TableRow 
-                        key={`old-${item.company}-${item.employeeId}-${item.completedAt}`}
-                        className="bg-gray-50 hover:bg-gray-100 border-l-4 border-l-gray-500"
-                        style={index === oldRanking.length - 1 ? { borderLeft: '4px solid rgb(107 114 128)' } : undefined}
-                      >
-                        <TableCell className="text-center py-3">
-                          <div className="text-2xl font-bold">
-                            {getRankBadge(item.rank)}
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-bold text-2xl py-3">{item.name}</TableCell>
-                        <TableCell className="text-muted-foreground text-xl py-3">{item.company}</TableCell>
-                        <TableCell className="text-muted-foreground text-xl py-3">{item.department}</TableCell>
-                        <TableCell className="text-center py-3">
-                          {getAgeDifferenceMessage(item.ageDifference)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-              </TableBody>
-            </Table>
-          )}
-            </div>
-        </div>
-      </Card>
-      </div>
-      
-      {/* SSE 연결 상태 및 새로고침 버튼 - 랭킹 하단 */}
-      <div className="px-6 py-4 flex items-center justify-center gap-4">
-        {/* SSE 연결 상태 표시 */}
-        <div className="flex items-center gap-2">
-          {isSSEConnected ? (
-            <>
-              <Wifi className="w-4 h-4 text-green-500" />
-              <span className="text-sm text-muted-foreground">실시간 연결됨</span>
-            </>
-          ) : (
-            <>
-              <WifiOff className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">연결 중...</span>
-            </>
-          )}
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => refetch()}
-          className="gap-2"
-        >
-          <RefreshCw className="w-4 h-4" />
-          새로고침
-        </Button>
       </div>
       </div>
       <Footer />

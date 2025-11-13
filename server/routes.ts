@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { createServer as createHttpsServer, type Server as HttpsServer } from "https";
 import { readFileSync } from "fs";
 import { resolve } from "path";
+import { randomUUID } from "crypto";
 import { z } from "zod";
 import { storage } from "./storage";
 import { GoogleSheetsService } from "./googleSheets";
@@ -26,15 +27,6 @@ export async function registerRoutes(app: Express): Promise<Server | HttpsServer
   const faceAgeService = createFaceAgeService();
   if (!faceAgeService) {
     console.warn("⚠️ 얼굴 나이 분석 서비스 비활성화됨 (시뮬레이션 모드)");
-  } else {
-    // 서비스 타입 확인
-    const serviceType = faceAgeService.constructor.name;
-    console.log(`✅ 얼굴 나이 분석 서비스 활성화: ${serviceType}`);
-    if (serviceType === "LocalFaceAgeService") {
-      console.log("   → Python 스크립트를 사용하여 ONNX 모델로 분석합니다");
-    } else if (serviceType === "RemoteFaceAgeService") {
-      console.log("   → 원격 API를 사용합니다 (현재 랜덤 모드)");
-    }
   }
 
   // 서비스 레이어 초기화
@@ -45,17 +37,35 @@ export async function registerRoutes(app: Express): Promise<Server | HttpsServer
   // 얼굴 나이 분석 API (Base64 이미지)
   // POST /api/analysis/face-age (JSON body: { image: "data:image/jpeg;base64,..." })
   app.post("/api/analysis/face-age", async (req, res) => {
+    const totalStartTime = Date.now();
     try {
       // Base64 이미지 처리
       if (!req.body.image) {
         return res.status(400).json({ error: "이미지 데이터가 필요합니다." });
       }
 
+      const serviceStartTime = Date.now();
       // 얼굴 나이 분석
-      const faceAge = await analysisService.analyzeFaceAgeFromBase64(req.body.image);
-      res.json({ faceAge });
+      const result = await analysisService.analyzeFaceAgeFromBase64(req.body.image);
+      const serviceTime = Date.now() - serviceStartTime;
+      
+      // result가 객체인 경우 (분석 시간 포함) 또는 숫자인 경우 (나이만)
+      if (typeof result === "object" && result !== null && "age" in result) {
+        const faceAge = result.age;
+        const analysisTime = result.analysisTime;
+        const totalTime = Date.now() - totalStartTime;
+        
+        // 오버헤드 분석
+        if (analysisTime) {
+          const overhead = (totalTime / 1000) - analysisTime;
+          console.log(`   → 모델 러닝 타임: ${analysisTime}초 | 서비스 레이어: ${(serviceTime / 1000).toFixed(2)}초 | 전체: ${(totalTime / 1000).toFixed(2)}초 | 오버헤드: ${overhead.toFixed(2)}초`);
+        }
+        
+        res.json({ faceAge, analysisTime });
+      } else {
+        res.json({ faceAge: result });
+      }
     } catch (error: any) {
-      console.error("❌ 얼굴 나이 분석 실패:", error);
       res.status(500).json({ 
         error: "얼굴 나이 분석 중 오류가 발생했습니다.",
         details: error?.message || String(error)
@@ -88,6 +98,46 @@ export async function registerRoutes(app: Express): Promise<Server | HttpsServer
     }
   });
 
+  // 개발 환경 전용: 성능 테스트용 임시 사용자 조회 (사번과 실제 나이를 직접 받음)
+  // 환경 변수 DEV_MODE 또는 VITE_DEV_MODE=true일 때만 활성화
+  const isDevMode = process.env.DEV_MODE === "true" || process.env.VITE_DEV_MODE === "true";
+  if (isDevMode) {
+    app.post("/api/user/lookup-dev", async (req, res) => {
+      try {
+        const schema = z.object({
+          company: z.string().min(1),
+          employeeId: z.string().min(1),
+          name: z.string().min(1),
+          realAge: z.number().int().positive(), // 실제 나이
+          department: z.string().min(1),
+        });
+
+        const { company, employeeId, name, realAge, department } = schema.parse(req.body);
+        
+        // 임시 User 객체 생성 (ID는 랜덤 생성)
+        const user = {
+          id: randomUUID(), // 예: "550e8400-e29b-41d4-a716-446655440000"
+          company,          // 예: "농심"
+          employeeId,       // 예: "12345"
+          name,             // 예: "홍길동"
+          realAge,          // 예: 30
+          department,       // 예: "개발팀"
+        };
+
+        console.log(`[개발 모드] 임시 사용자 생성: ${name} (${company}/${employeeId}) - 실제 나이: ${realAge}세`);
+        res.json(user);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          return res.status(400).json({ 
+            error: "잘못된 요청입니다.",
+            details: error.errors 
+          });
+        }
+        res.status(500).json({ error: "서버 오류가 발생했습니다." });
+      }
+    });
+  }
+
   // 분석 결과 저장
   app.post("/api/analysis/save", async (req, res) => {
     try {
@@ -96,15 +146,13 @@ export async function registerRoutes(app: Express): Promise<Server | HttpsServer
       // 분석 결과 저장 (서비스에서 SSE 브로드캐스트도 처리)
       await analysisService.saveAnalysisResult(data);
 
+      // 사용자 정보와 나이만 로깅
+      console.log(`${data.name} (${data.company}/${data.employeeId}) - 분석 나이: ${data.faceAge}세`);
+
       res.json({ success: true });
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: "잘못된 요청입니다." });
-      }
-      console.error("❌ 분석 결과 저장 실패:");
-      console.error("에러:", error);
-      if (error?.message) {
-        console.error("에러 메시지:", error.message);
       }
       
       // 구글 시트 서비스 관련 에러는 503 반환

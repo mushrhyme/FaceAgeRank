@@ -26,7 +26,7 @@ export default function ResultDisplay({
 }: ResultDisplayProps) {
   const ageDifference = faceAge - realAge; // 얼굴 나이 - 실제 나이
   const isYoungerLook = ageDifference < 0; // 얼굴 나이가 실제 나이보다 작으면 동안
-  const message = isYoungerLook ? "동안이시네요~" : ageDifference > 0 ? "노안이시네요~" : "실제 나이와 같아요!";
+  const message = isYoungerLook ? "오늘 더 어려 보이세요!" : ageDifference > 0 ? "오늘은 조금 진지하게 나오셨네요!" : "실제 나이랑 딱 맞게 나오셨어요!";
 
   // 결과 화면이 나타날 때 팡파레 효과 (동안일 때만)
   useEffect(() => {

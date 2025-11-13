@@ -12,9 +12,9 @@ export interface FaceAgeService {
   /**
    * 이미지 버퍼를 받아서 얼굴 나이를 반환합니다.
    * @param imageBuffer 이미지 바이너리 데이터
-   * @returns 얼굴 나이 (정수)
+   * @returns 얼굴 나이와 분석 시간
    */
-  predictAge(imageBuffer: Buffer): Promise<number>;
+  predictAge(imageBuffer: Buffer): Promise<number | { age: number; analysisTime?: number }>;
 }
 
 /**
@@ -30,24 +30,17 @@ export class LocalFaceAgeService implements FaceAgeService {
     this.pythonScriptPath = join(import.meta.dirname, "face_age_analysis.py");
     // ONNX 모델 경로 설정 (프로젝트 루트 또는 환경 변수)
     this.onnxModelPath = modelPath || join(import.meta.dirname, "..", "age_estimation.onnx");
-    
-    console.log("📦 로컬 얼굴 인식 모델 서비스 초기화");
-    console.log(`   Python 스크립트: ${this.pythonScriptPath}`);
-    console.log(`   ONNX 모델: ${this.onnxModelPath}`);
   }
 
   /**
    * 이미지 버퍼를 stdin으로 전달하여 Python 스크립트를 실행하고 나이를 분석합니다.
    * 파일 저장 없이 메모리에서 직접 처리하여 성능을 최적화합니다.
    * @param imageBuffer 이미지 바이너리 데이터
-   * @returns 얼굴 나이 (정수)
+   * @returns 얼굴 나이와 분석 시간
    */
-  async predictAge(imageBuffer: Buffer): Promise<number> {
-    console.log("🔍 얼굴 나이 분석 시작 (Python 스크립트 실행)");
-    console.log(`   스크립트: ${this.pythonScriptPath}`);
-    console.log(`   ONNX 모델: ${this.onnxModelPath}`);
-    
-    return new Promise((resolve, reject) => {
+  async predictAge(imageBuffer: Buffer): Promise<number | { age: number; analysisTime?: number }> {
+    const processStartTime = Date.now();
+    return new Promise<number | { age: number; analysisTime?: number }>((resolve, reject) => {
       const projectRoot = join(import.meta.dirname, "..");
       
       // Python 스크립트 실행 (stdin으로 이미지 데이터 전달)
@@ -56,6 +49,7 @@ export class LocalFaceAgeService implements FaceAgeService {
       const pythonCommand = process.env.PYTHON_PATH || "/opt/anaconda3/envs/easy_label/bin/python";
       const pythonArgs = [this.pythonScriptPath, this.onnxModelPath];
       
+      const spawnStartTime = Date.now();
       const pythonProcess = spawn(
         pythonCommand,
         pythonArgs,
@@ -65,11 +59,11 @@ export class LocalFaceAgeService implements FaceAgeService {
           shell: false, // shell 사용 안 함
         }
       );
+      const spawnTime = Date.now() - spawnStartTime;
       
-      console.log(`   Python 프로세스 시작: ${pythonCommand} ${this.pythonScriptPath} ${this.onnxModelPath}`);
-
       let stdout = "";
       let stderr = "";
+      let stdinWriteTime = 0;
 
       // stdout 수집
       pythonProcess.stdout.on("data", (data) => {
@@ -83,28 +77,19 @@ export class LocalFaceAgeService implements FaceAgeService {
 
       // 프로세스 종료 처리
       pythonProcess.on("close", (code) => {
-        console.log(`   Python 프로세스 종료 코드: ${code}`);
+        const processEndTime = Date.now();
+        const totalProcessTime = (processEndTime - processStartTime) / 1000;
         
         if (code !== 0) {
-          console.error("❌ Python 스크립트 실행 실패");
-          console.error("   종료 코드:", code);
-          console.error("   stderr:", stderr);
-          console.error("   stdout:", stdout);
+          console.error("❌ Python 스크립트 실행 실패:", stderr || "알 수 없는 오류");
           reject(new Error(`Python 스크립트가 종료 코드 ${code}로 종료되었습니다: ${stderr || "알 수 없는 오류"}`));
           return;
         }
 
         try {
-          // stderr에 로그가 있으면 출력 (ONNX 모델 로드 확인 등)
-          if (stderr.trim()) {
-            console.log("📝 Python 스크립트 로그 (stderr):");
-            console.log(stderr.trim().split('\n').map(line => `   ${line}`).join('\n'));
-          }
-
           // stdout 확인
           if (!stdout.trim()) {
             console.error("❌ Python 스크립트가 출력을 반환하지 않았습니다");
-            console.error("   stderr:", stderr);
             reject(new Error("Python 스크립트가 결과를 반환하지 않았습니다."));
             return;
           }
@@ -132,37 +117,65 @@ export class LocalFaceAgeService implements FaceAgeService {
           const result = JSON.parse(jsonLine);
           
           if (!result.success) {
-            // 얼굴을 감지하지 못한 경우는 정상적인 상황일 수 있음
-            if (result.error && result.error.includes("얼굴을 감지할 수 없습니다")) {
-              console.warn("⚠️ 얼굴을 감지하지 못했습니다:", result.error);
-            } else {
-              console.error("❌ Python 스크립트 분석 실패:", result.error);
-            }
             reject(new Error(result.error || "얼굴 나이 분석에 실패했습니다."));
             return;
           }
 
-          // 분석 시간 로그 출력
-          if (result.analysis_time) {
-            console.log(`⏱️  얼굴 나이 분석 완료: ${result.age}세 (소요 시간: ${result.analysis_time}초)`);
-          } else {
-            console.log(`✅ 얼굴 나이 분석 완료: ${result.age}세`);
-          }
+          // 오버헤드 분석 (디버깅용)
+          const modelTime = result.analysis_time || 0;
+          const overhead = totalProcessTime - modelTime;
+          
+          // stderr에서 타이밍 정보 추출
+          const timingInfo: Record<string, number> = {};
+          
+          // import 시간
+          const importMatch = stderr.match(/\[타이밍\] import: ([\d.]+)초/);
+          if (importMatch) timingInfo.import = parseFloat(importMatch[1]);
+          
+          // 모델 로드 시간들
+          const modelLoadMatch = stderr.match(/\[타이밍\].*?모델 로드 전체: ([\d.]+)초/);
+          if (modelLoadMatch) timingInfo.modelLoad = parseFloat(modelLoadMatch[1]);
+          
+          // stdin 읽기 시간
+          const stdinReadMatch = stderr.match(/\[타이밍\].*?stdin 읽기: ([\d.]+)초/);
+          if (stdinReadMatch) timingInfo.stdinRead = parseFloat(stdinReadMatch[1]);
+          
+          // 이미지 디코딩 시간
+          const decodeMatch = stderr.match(/\[타이밍\].*?이미지 디코딩: ([\d.]+)초/);
+          if (decodeMatch) timingInfo.decode = parseFloat(decodeMatch[1]);
+          
+          // 스크립트 전체 시간
+          const scriptTotalMatch = stderr.match(/\[타이밍\].*?스크립트 전체: ([\d.]+)초/);
+          if (scriptTotalMatch) timingInfo.scriptTotal = parseFloat(scriptTotalMatch[1]);
+          
+          // 상세 타이밍 로그
+          const timingParts = [
+            `프로세스 시작: ${(spawnTime / 1000).toFixed(3)}초`,
+            timingInfo.import ? `import: ${timingInfo.import.toFixed(2)}초` : null,
+            timingInfo.modelLoad ? `모델 로드: ${timingInfo.modelLoad.toFixed(2)}초` : null,
+            `stdin 쓰기: ${(stdinWriteTime / 1000).toFixed(3)}초`,
+            timingInfo.stdinRead ? `stdin 읽기: ${timingInfo.stdinRead.toFixed(3)}초` : null,
+            timingInfo.decode ? `이미지 디코딩: ${timingInfo.decode.toFixed(3)}초` : null,
+            `모델 러닝: ${modelTime.toFixed(3)}초`,
+            `전체 프로세스: ${totalProcessTime.toFixed(2)}초`,
+            `오버헤드: ${overhead.toFixed(2)}초`
+          ].filter(Boolean);
+          
+          console.log(`   [디버그] ${timingParts.join(' | ')}`);
 
-          // 나이 반환 (정수로 반올림)
-          resolve(Math.round(result.age));
+          // 나이와 분석 시간 반환
+          resolve({
+            age: Math.round(result.age),
+            analysisTime: result.analysis_time || undefined
+          });
         } catch (error: any) {
-          console.error("❌ 결과 파싱 실패");
-          console.error("   stdout:", stdout);
-          console.error("   stderr:", stderr);
-          console.error("   에러:", error);
+          console.error("❌ 결과 파싱 실패:", error.message);
           reject(new Error(`결과 파싱 실패: ${error.message}`));
         }
       });
 
       // 에러 처리
       pythonProcess.on("error", (error: any) => {
-        console.error("❌ Python 프로세스 에러:", error);
         if (error.code === "ENOENT") {
           reject(new Error(`Python 실행 파일을 찾을 수 없습니다. (${pythonCommand}) PYTHON_PATH 환경 변수를 설정하거나 conda가 설치되어 있는지 확인하세요.`));
         } else {
@@ -178,24 +191,21 @@ export class LocalFaceAgeService implements FaceAgeService {
         }
       });
 
-      // 프로세스가 종료되기 전에 stdin에 쓰기
-      // 모델 로드가 완료될 때까지 기다리기 위해 약간의 지연 후 전송
-      // 하지만 더 나은 방법은 Python 스크립트가 준비되었다는 신호를 받는 것
-      setTimeout(() => {
+      // 이미지 데이터를 stdin으로 전송
+      try {
         if (!pythonProcess.killed && pythonProcess.stdin && !pythonProcess.stdin.destroyed) {
-          try {
-            pythonProcess.stdin.write(imageBuffer);
-            pythonProcess.stdin.end();
-          } catch (error: any) {
-            if (error.code !== "EPIPE") {
-              console.error("❌ stdin 쓰기 실패:", error);
-              reject(new Error(`이미지 데이터 전송 실패: ${error.message}`));
-            }
-          }
+          const stdinStartTime = Date.now();
+          pythonProcess.stdin.write(imageBuffer);
+          pythonProcess.stdin.end();
+          stdinWriteTime = Date.now() - stdinStartTime;
         } else {
           reject(new Error("Python 프로세스가 종료되었습니다. 모델 로드에 실패했을 수 있습니다."));
         }
-      }, 100); // 100ms 대기 (모델 로드 시간 확보)
+      } catch (error: any) {
+        if (error.code !== "EPIPE") {
+          reject(new Error(`이미지 데이터 전송 실패: ${error.message}`));
+        }
+      }
     });
   }
 }
@@ -207,11 +217,9 @@ export class RemoteFaceAgeService implements FaceAgeService {
   constructor(
     private apiUrl: string,
     private apiKey?: string
-  ) {
-    console.log(`🌐 원격 얼굴 인식 API 서비스 초기화: ${apiUrl}`);
-  }
+  ) {}
 
-  async predictAge(imageBuffer: Buffer): Promise<number> {
+  async predictAge(imageBuffer: Buffer): Promise<number | { age: number; analysisTime?: number }> {
     try {
       // TODO: 실제 API 호출 로직 구현
       // 예시:
