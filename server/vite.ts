@@ -25,7 +25,8 @@ export async function setupVite(app: Express, server: Server | HttpsServer) {
     middlewareMode: true,
     hmr: { 
       server,
-      host: "0.0.0.0", // 외부 접속 허용
+      // host를 명시하지 않으면 클라이언트가 접속한 호스트를 자동으로 사용
+      // 0.0.0.0은 서버 바인딩용이므로 클라이언트 접속 주소로 사용할 수 없음
     },
     allowedHosts: true as const,
   };
