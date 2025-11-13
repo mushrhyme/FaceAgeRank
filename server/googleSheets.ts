@@ -323,10 +323,7 @@ export class GoogleSheetsService {
         .filter((item): item is NonNullable<typeof item> => item !== null); // null 제거
 
       // 사번 기준 중복 제거
-      // 같은 사번이 여러 개 있으면:
-      // 1. 절댓값이 가장 큰 것 선택
-      // 2. 절댓값이 같으면 양수(+) 우선
-      // 3. 그것도 같으면 가장 최신 시간 선택
+      // 같은 사번이 여러 개 있으면 무조건 최신 시간만 선택
       const uniqueByEmployeeId = new Map<string, typeof parsedData[0]>();
       
       for (const item of parsedData) {
@@ -336,30 +333,8 @@ export class GoogleSheetsService {
           // 첫 번째 데이터는 그대로 추가
           uniqueByEmployeeId.set(item.employeeId, item);
         } else {
-          const absItem = Math.abs(item.ageDifference);
-          const absExisting = Math.abs(existing.ageDifference);
-          
-          // 기존 데이터와 비교
-          let shouldReplace = false;
-          
-          // 절댓값이 더 크면 교체
-          if (absItem > absExisting) {
-            shouldReplace = true;
-          }
-          // 절댓값이 같으면
-          else if (absItem === absExisting) {
-            // 양수(+)를 우선
-            if (item.ageDifference > 0 && existing.ageDifference < 0) {
-              shouldReplace = true;
-            }
-            // 둘 다 양수이거나 둘 다 음수면 최신 시간 우선
-            else if ((item.ageDifference > 0 && existing.ageDifference > 0) || 
-                     (item.ageDifference < 0 && existing.ageDifference < 0)) {
-              shouldReplace = new Date(item.completedAt) > new Date(existing.completedAt);
-            }
-          }
-          
-          if (shouldReplace) {
+          // 최신 시간만 선택
+          if (new Date(item.completedAt) > new Date(existing.completedAt)) {
             uniqueByEmployeeId.set(item.employeeId, item);
           }
         }
