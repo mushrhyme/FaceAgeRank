@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { UserCheck } from "lucide-react";
 import Footer from "@/components/Footer";
 import EventHeader from "@/components/EventHeader";
+import { soundManager, SOUNDS } from "@/lib/sound";
 
 interface WelcomeScreenProps {
   name: string;
@@ -12,6 +14,11 @@ export default function WelcomeScreen({
   name,
   onContinue,
 }: WelcomeScreenProps) {
+  // 컴포넌트가 마운트될 때 웰컴 음악 재생
+  useEffect(() => {
+    soundManager.play(SOUNDS.WELCOME, 0.6); // 웰컴 화면 배경음악
+  }, []);
+
   return (
     <div className="h-screen flex flex-col bg-background relative">
       <EventHeader />

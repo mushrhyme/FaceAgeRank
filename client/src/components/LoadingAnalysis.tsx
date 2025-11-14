@@ -1,9 +1,33 @@
+import { useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import Footer from "@/components/Footer";
 import EventHeader from "@/components/EventHeader";
 import ParticlesBackground from "@/components/ParticlesBackground";
+import { soundManager, SOUNDS } from "@/lib/sound";
 
-export default function LoadingAnalysis() {
+interface LoadingAnalysisProps {
+  capturedImage?: string; // Home.tsx에서 전달하지만 현재 사용하지 않음
+}
+
+export default function LoadingAnalysis({ capturedImage }: LoadingAnalysisProps) {
+  const audioRef = useRef<HTMLAudioElement | null>(null); // 배경음악 제어를 위한 ref
+
+  // 컴포넌트가 마운트될 때 배경음악 재생
+  useEffect(() => {
+    // 분석 중 배경음악 재생 (반복 재생)
+    const audio = soundManager.playBackground(SOUNDS.DIGITAL, 0.5);
+    audioRef.current = audio;
+
+    // 컴포넌트가 언마운트될 때 음악 정지
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
   return (
     <div className="h-screen flex flex-col bg-background relative overflow-hidden">
       {/* 배경 파티클 레이어 - z-index로 콘텐츠 뒤에 배치 */}

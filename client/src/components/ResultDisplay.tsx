@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Sparkles, RotateCcw, Home } from "lucide-react";
@@ -5,6 +6,7 @@ import Footer from "@/components/Footer";
 import EventHeader from "@/components/EventHeader";
 import { useYoungerConfetti } from "@/hooks/useYoungerConfetti";
 import { getResultMessage, isYoungerLook } from "@/lib/resultUtils";
+import { soundManager, SOUNDS } from "@/lib/sound";
 
 interface ResultDisplayProps {
   realAge: number;
@@ -29,6 +31,18 @@ export default function ResultDisplay({
 
   // 팡파레 효과 hook
   useYoungerConfetti(youngerLook);
+
+  // 결과에 따른 음향 효과 재생
+  useEffect(() => {
+    if (youngerLook) {
+      // 동안일 때 firework 효과음 재생
+      soundManager.play(SOUNDS.FIREWORK, 0.7);
+    } else if (ageDifference > 0) {
+      // 노안일 때 fail 효과음 재생
+      soundManager.play(SOUNDS.FAIL, 0.7);
+    }
+    // ageDifference === 0일 때는 음향 효과 없음
+  }, [youngerLook, ageDifference]);
 
   return (
     <div className="h-screen flex flex-col bg-background relative">

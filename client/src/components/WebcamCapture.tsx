@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Camera, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import EventHeader from "@/components/EventHeader";
+import { soundManager, SOUNDS } from "@/lib/sound";
 
 interface WebcamCaptureProps {
   onCapture: (imageSrc: string) => void;
@@ -91,28 +92,39 @@ export default function WebcamCapture({
 
   const handleStartCountdown = useCallback(() => {
     setCountdown(3);
+    // 카운트다운 시작 시 첫 번째 효과음 재생 (3 표시)
+    soundManager.play(SOUNDS.COUNTDOWN, 0.6);
   }, []);
 
   useEffect(() => {
     if (countdown === null) return;
 
     if (countdown === 0) {
+      // 카운트다운이 0이 되면 촬영 효과음 재생
+      soundManager.play(SOUNDS.CAMERA, 0.7); // 촬영 찰칵 소리
+      
       const imageSrc = webcamRef.current?.getScreenshot();
       if (imageSrc) {
         // 이미지 압축 후 전달
         compressImage(imageSrc).then((compressedImage) => {
-          onCapture(compressedImage);
+          // 찰칵 소리를 들을 수 있도록 약간의 딜레이 추가 (800ms)
+          setTimeout(() => {
+            onCapture(compressedImage);
+          }, 800);
         });
       }
       return;
     }
+
+    // 카운트다운 숫자가 변경될 때마다 카운트다운 효과음 재생
+    soundManager.play(SOUNDS.COUNTDOWN, 0.6); // 카운트다운 효과음
 
     const timer = setTimeout(() => {
       setCountdown(countdown - 1);
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [countdown, onCapture]);
+  }, [countdown, onCapture, compressImage]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-background relative">
