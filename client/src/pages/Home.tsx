@@ -137,9 +137,12 @@ export default function Home() {
     } catch (error) {
       // 얼굴 나이 분석 실패 시 오류 처리
       console.error("❌ 얼굴 나이 분석 실패:", error);
-      setStep("result"); // 일단 결과 화면으로 이동 (에러 표시는 ResultDisplay에서 처리 가능)
-      // 임시로 랜덤 값 사용 (나중에 에러 처리 개선)
-      setFaceAge(Math.floor(Math.random() * 30) + 20);
+      toast({
+        title: "오류",
+        description: "얼굴 나이 분석에 실패했습니다. 다시 시도해주세요.",
+        variant: "destructive",
+      });
+      setStep("webcam"); // 웹캠 화면으로 돌아가기
     }
   };
 

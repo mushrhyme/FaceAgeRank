@@ -23,11 +23,8 @@ export async function registerRoutes(app: Express): Promise<Server | HttpsServer
     console.warn("⚠️ 구글 시트 서비스 초기화 실패 (결과 저장 기능 비활성화):", error instanceof Error ? error.message : String(error));
   }
 
-  // 얼굴 나이 분석 서비스 초기화 (환경 변수가 없으면 null)
+  // 얼굴 나이 분석 서비스 초기화
   const faceAgeService = createFaceAgeService();
-  if (!faceAgeService) {
-    console.warn("⚠️ 얼굴 나이 분석 서비스 비활성화됨 (시뮬레이션 모드)");
-  }
 
   // 서비스 레이어 초기화
   const analysisService = new AnalysisService(faceAgeService, googleSheetsService);

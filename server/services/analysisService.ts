@@ -10,7 +10,7 @@ import { sseService } from "./sseService";
 
 export class AnalysisService {
   constructor(
-    private faceAgeService: FaceAgeService | null,
+    private faceAgeService: FaceAgeService,
     private googleSheetsService: GoogleSheetsService | null
   ) {}
 
@@ -34,15 +34,7 @@ export class AnalysisService {
    */
   async analyzeFaceAgeFromBase64(base64Image: string): Promise<number | { age: number; analysisTime?: number }> {
     const imageBuffer = this.parseBase64Image(base64Image);
-    
-    if (this.faceAgeService) {
-      return await this.faceAgeService.predictAge(imageBuffer);
-    } else {
-      // 서비스가 없으면 시뮬레이션 (임시)
-      const randomAge = Math.floor(Math.random() * 30) + 20;
-      console.warn(`⚠️ 얼굴 나이 분석 서비스가 없어 랜덤 값 반환: ${randomAge}세`);
-      return randomAge;
-    }
+    return await this.faceAgeService.predictAge(imageBuffer);
   }
 
   /**
