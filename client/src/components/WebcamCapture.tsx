@@ -100,7 +100,7 @@ export default function WebcamCapture({
     if (countdown === null) return;
 
     if (countdown === 0) {
-      // 카운트다운이 0이 되면 촬영 효과음 재생
+      // 카운트다운이 0이 되면 촬영 효과음만 재생 (countdown 효과음은 재생하지 않음)
       soundManager.play(SOUNDS.CAMERA, 0.7); // 촬영 찰칵 소리
       
       const imageSrc = webcamRef.current?.getScreenshot();
@@ -116,7 +116,7 @@ export default function WebcamCapture({
       return;
     }
 
-    // 카운트다운 숫자가 변경될 때마다 카운트다운 효과음 재생
+    // 카운트다운 숫자가 변경될 때마다 카운트다운 효과음 재생 (0이 아닐 때만)
     soundManager.play(SOUNDS.COUNTDOWN, 0.6); // 카운트다운 효과음
 
     const timer = setTimeout(() => {
