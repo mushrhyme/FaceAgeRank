@@ -3,6 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
 import type { Step, LoginInfo } from "@shared/types";
+import { formatKSTDateTime } from "@shared/utils";
 import LoginForm from "@/components/LoginForm";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import CaptureGuide from "@/components/CaptureGuide";
@@ -87,16 +88,7 @@ export default function Home() {
         try {
           const ageDifference = faceAge - user.realAge; // 얼굴 나이 - 실제 나이
           // 한국 시간대(KST)로 변환하여 읽기 쉬운 형식으로 포맷팅: "2025-11-07 22:20:47"
-          const now = new Date();
-          const kstOffset = 9 * 60; // KST는 UTC+9 (분 단위)
-          const kstTime = new Date(now.getTime() + (kstOffset + now.getTimezoneOffset()) * 60000);
-          const year = kstTime.getFullYear();
-          const month = String(kstTime.getMonth() + 1).padStart(2, "0");
-          const day = String(kstTime.getDate()).padStart(2, "0");
-          const hours = String(kstTime.getHours()).padStart(2, "0");
-          const minutes = String(kstTime.getMinutes()).padStart(2, "0");
-          const seconds = String(kstTime.getSeconds()).padStart(2, "0");
-          const completedAt = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+          const completedAt = formatKSTDateTime();
 
           const response = await apiRequest("POST", "/api/analysis/save", {
             company: loginInfo.company,

@@ -18,6 +18,7 @@ import { AlertCircle } from "lucide-react";
 import Footer from "@/components/Footer";
 import EventHeader from "@/components/EventHeader";
 import type { RankingData, RankedData } from "@shared/types";
+import { formatKSTDateTime, getErrorMessage } from "@shared/utils";
 
 export default function RankingBoardWithoutOld() {
   const [isSSEConnected, setIsSSEConnected] = useState(false); // SSE 연결 상태
@@ -26,14 +27,7 @@ export default function RankingBoardWithoutOld() {
   const convertExcelSerialToDateString = useCallback((value: any): string => {
     // 빈 값 처리
     if (value === null || value === undefined || value === "") {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, "0");
-      const day = String(now.getDate()).padStart(2, "0");
-      const hours = String(now.getHours()).padStart(2, "0");
-      const minutes = String(now.getMinutes()).padStart(2, "0");
-      const seconds = String(now.getSeconds()).padStart(2, "0");
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      return formatKSTDateTime();
     }
 
     // 문자열인 경우 작은따옴표로 시작하면 제거 (구글 시트에서 텍스트로 저장된 경우)
@@ -54,25 +48,11 @@ export default function RankingBoardWithoutOld() {
     } else if (typeof processedValue === "string") {
       const parsed = parseFloat(processedValue);
       if (isNaN(parsed)) {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, "0");
-        const day = String(now.getDate()).padStart(2, "0");
-        const hours = String(now.getHours()).padStart(2, "0");
-        const minutes = String(now.getMinutes()).padStart(2, "0");
-        const seconds = String(now.getSeconds()).padStart(2, "0");
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        return formatKSTDateTime();
       }
       serialNumber = parsed;
     } else {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, "0");
-      const day = String(now.getDate()).padStart(2, "0");
-      const hours = String(now.getHours()).padStart(2, "0");
-      const minutes = String(now.getMinutes()).padStart(2, "0");
-      const seconds = String(now.getSeconds()).padStart(2, "0");
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      return formatKSTDateTime();
     }
 
     // Excel 시리얼 번호를 JavaScript Date로 변환
@@ -89,18 +69,8 @@ export default function RankingBoardWithoutOld() {
     
     date.setHours(hours, minutes, seconds);
 
-    // KST(UTC+9)로 변환
-    const kstOffset = 9 * 60;
-    const kstTime = new Date(date.getTime() + (kstOffset + date.getTimezoneOffset()) * 60000);
-    
-    const year = kstTime.getFullYear();
-    const month = String(kstTime.getMonth() + 1).padStart(2, "0");
-    const day = String(kstTime.getDate()).padStart(2, "0");
-    const hoursStr = String(kstTime.getHours()).padStart(2, "0");
-    const minutesStr = String(kstTime.getMinutes()).padStart(2, "0");
-    const secondsStr = String(kstTime.getSeconds()).padStart(2, "0");
-    
-    return `${year}-${month}-${day} ${hoursStr}:${minutesStr}:${secondsStr}`;
+    // KST(UTC+9)로 변환하여 포맷팅
+    return formatKSTDateTime(date);
   }, []);
 
   // 랭킹 데이터 조회
@@ -309,7 +279,7 @@ export default function RankingBoardWithoutOld() {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>데이터 로딩 오류</AlertTitle>
           <AlertDescription>
-            {error instanceof Error ? error.message : "랭킹 데이터를 불러오는 중 오류가 발생했습니다."}
+            {getErrorMessage(error) || "랭킹 데이터를 불러오는 중 오류가 발생했습니다."}
             <br />
             <Button
               variant="outline"

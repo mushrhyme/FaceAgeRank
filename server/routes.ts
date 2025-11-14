@@ -9,6 +9,7 @@ import { storage } from "./storage";
 import { GoogleSheetsService } from "./googleSheets";
 import { createFaceAgeService } from "./faceAgeService";
 import { analysisResultSchema } from "../shared/schema";
+import { getErrorMessage } from "../shared/utils";
 import { sseService } from "./services/sseService";
 import { AnalysisService } from "./services/analysisService";
 import { RankingService } from "./services/rankingService";
@@ -20,7 +21,7 @@ export async function registerRoutes(app: Express): Promise<Server | HttpsServer
   try {
     googleSheetsService = new GoogleSheetsService();
   } catch (error) {
-    console.warn("⚠️ 구글 시트 서비스 초기화 실패 (결과 저장 기능 비활성화):", error instanceof Error ? error.message : String(error));
+    console.warn("⚠️ 구글 시트 서비스 초기화 실패 (결과 저장 기능 비활성화):", getErrorMessage(error));
   }
 
   // 얼굴 나이 분석 서비스 초기화

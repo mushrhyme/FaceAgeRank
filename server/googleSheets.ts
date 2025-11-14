@@ -1,5 +1,6 @@
 import { google } from "googleapis";
 import type { RankingData, AnalysisResult } from "../shared/types";
+import { formatKSTDateTime, getErrorMessage } from "../shared/utils";
 
 /**
  * 구글 시트에 분석 결과를 저장하는 서비스 클래스
@@ -62,7 +63,7 @@ export class GoogleSheetsService {
 
       this.sheets = google.sheets({ version: "v4", auth });
     } catch (error) {
-      throw new Error(`구글 시트 인증 실패: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(`구글 시트 인증 실패: ${getErrorMessage(error)}`);
     }
   }
 
@@ -232,19 +233,7 @@ export class GoogleSheetsService {
     date.setHours(hours, minutes, seconds);
 
     // KST(UTC+9)로 변환하여 "YYYY-MM-DD HH:MM:SS" 형식으로 포맷팅
-    const kstOffset = 9 * 60; // KST는 UTC+9 (분 단위)
-    const kstTime = new Date(date.getTime() + (kstOffset + date.getTimezoneOffset()) * 60000);
-    
-    const year = kstTime.getFullYear();
-    const month = String(kstTime.getMonth() + 1).padStart(2, "0");
-    const day = String(kstTime.getDate()).padStart(2, "0");
-    const hoursStr = String(kstTime.getHours()).padStart(2, "0");
-    const minutesStr = String(kstTime.getMinutes()).padStart(2, "0");
-    const secondsStr = String(kstTime.getSeconds()).padStart(2, "0");
-    
-    const result = `${year}-${month}-${day} ${hoursStr}:${minutesStr}:${secondsStr}`;
-    
-    return result;
+    return formatKSTDateTime(date);
   }
 
   /**

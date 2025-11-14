@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import XLSX from "xlsx";
 import { existsSync } from "fs";
 import { join } from "path";
+import { getErrorMessage } from "../shared/utils";
 
 export interface IStorage {
   getUserByCompanyAndEmployeeId(company: string, employeeId: string): Promise<User | undefined>;
@@ -46,7 +47,7 @@ export class ExcelStorage implements IStorage {
     try {
       this.workbook = XLSX.readFile(this.filePath);
     } catch (error) {
-      throw new Error(`엑셀 파일 로드 실패: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(`엑셀 파일 로드 실패: ${getErrorMessage(error)}`);
     }
   }
 
