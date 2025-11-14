@@ -30,13 +30,6 @@ export default function CaptureGuide({ onStart }: CaptureGuideProps) {
             <div className="flex items-start gap-4">
               <CheckCircle2 className="w-8 h-8 text-primary flex-shrink-0 mt-1" />
               <p className="text-3xl text-muted-foreground text-left">
-                밝은 조명 아래에서 촬영해주세요
-              </p>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <CheckCircle2 className="w-8 h-8 text-primary flex-shrink-0 mt-1" />
-              <p className="text-3xl text-muted-foreground text-left">
                 얼굴이 화면 중앙의 가이드라인 안에 오도록 위치해주세요
               </p>
             </div>

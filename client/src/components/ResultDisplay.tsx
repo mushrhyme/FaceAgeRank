@@ -66,7 +66,7 @@ export default function ResultDisplay({
           {/* 이미지 */}
           {capturedImage && (
             <div className="relative flex-shrink-0">
-              <div className="w-96 h-96 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-xl bg-gradient-to-br from-primary/5 to-primary/10 p-2">
+              <div className="w-80 h-80 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-xl bg-gradient-to-br from-primary/5 to-primary/10 p-2">
                 <div className="w-full h-full rounded-xl overflow-hidden">
                   <img
                     src={capturedImage}
