@@ -110,7 +110,7 @@ export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProp
           </div>
           <div className="flex items-center justify-center gap-3 mt-6">
             <span className="text-6xl font-bold text-primary leading-none">[</span>
-            <h1 className="text-6xl font-semibold">AI 얼굴 나이 측정</h1>
+            <h1 className="text-6xl font-semibold">AI가 보는 내 얼굴 나이</h1>
             <span className="text-6xl font-bold text-primary leading-none">]</span>
           </div>
           <p className="text-2xl text-muted-foreground mt-6 min-h-[2.5rem]">
@@ -241,7 +241,7 @@ export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProp
                       }
                     }}
                   >
-                    개인정보 활용 동의
+                    개인정보 수집·이용 및 취급위탁 동의
                   </Label>
                 </div>
                 <div className="pt-2 flex justify-center">
@@ -263,111 +263,65 @@ export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProp
       <Footer />
       
       {/* 개인정보 활용 동의 팝업 */}
-<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-    <DialogHeader>
-      <DialogTitle className="text-2xl font-bold">개인정보 수집·이용 동의서</DialogTitle>
-      <DialogDescription className="text-base pt-3 leading-relaxed">
-        본 동의서는 DT FAIR 2025 AI체험존 운영을 위해 개인정보를 수집·이용하는 데 필요한 내용을 안내하기 위한 문서입니다.
-        내용을 확인하신 후 동의 여부를 선택해 주세요.
-      </DialogDescription>
-    </DialogHeader>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogContent className="max-w-xl">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold">
+            개인정보 수집·이용 및 취급위탁 동의서
+          </DialogTitle>
+          <DialogDescription className="pt-2 text-sm">
+            DT FAIR 2025 AI체험존 운영을 위해 개인정보 수집·이용 동의를 요청드립니다.
+          </DialogDescription>
+        </DialogHeader>
 
-    <div className="py-6 text-base leading-relaxed space-y-6">
+        <div className="space-y-6 pt-4">
+          
+          {/* 1. 수집·이용 동의 */}
+          <div className="border rounded-md p-4 space-y-2">
+            <h3 className="font-semibold">1. 개인정보 수집·이용 안내 및 동의</h3>
+            
+            <ul className="text-sm space-y-1 pl-3 list-disc">
+              <li>수집·이용 목적: 행사 운영 및 AI 얼굴나이 측정 서비스 제공</li>
+              <li>수집 항목: 성명, 회사명, 부서명, 사번, 생년월일</li>
+              <li>보유·이용 기간: 행사 종료일(2025.11.28)까지 보유 후 즉시 파기</li>
+            </ul>
 
-      {/* 제1조 */}
-      <section className="space-y-3 pt-4 border-t border-border/50 first:border-t-0 first:pt-0">
-        <h3 className="text-lg font-semibold text-foreground pb-2">제1조(수집하는 개인정보 항목)</h3>
-        <div className="ml-2 text-muted-foreground space-y-2 pl-4 border-l-2 border-primary/20">
-          <p><span className="text-primary font-medium mr-1">•</span>성명</p>
-          <p><span className="text-primary font-medium mr-1">•</span>회사명</p>
-          <p><span className="text-primary font-medium mr-1">•</span>부서명</p>
-          <p><span className="text-primary font-medium mr-1">•</span>사번</p>
-          <p><span className="text-primary font-medium mr-1">•</span>생년월일</p>
+            <div className="flex items-center space-x-4 pt-2">
+              <label className="flex items-center space-x-1">
+                <input type="radio" name="useAgree" value="yes" defaultChecked />
+                <span className="text-sm">동의함</span>
+              </label>
+              <label className="flex items-center space-x-1">
+                <input type="radio" name="useAgree" value="no" />
+                <span className="text-sm">동의하지 않음</span>
+              </label>
+            </div>
+          </div>
+
+          {/* 2. 취급위탁 동의 */}
+          <div className="border rounded-md p-4 space-y-2">
+            <h3 className="font-semibold">2. 개인정보 취급위탁 안내 및 동의</h3>
+
+            <ul className="text-sm space-y-1 pl-3 list-disc">
+              <li>제공 목적: 행사 운영을 위한 시스템 관리</li>
+              <li>제공 항목: 성명, 회사명, 부서명, 사번, 생년월일</li>
+              <li>수탁자: DT FAIR 2025 운영 담당 조직(내부)</li>
+              <li>보유·이용 기간: 행사 종료일(2025.11.28)까지 보유 후 즉시 파기</li>
+            </ul>
+
+            <div className="flex items-center space-x-4 pt-2">
+              <label className="flex items-center space-x-1">
+                <input type="radio" name="consignAgree" value="yes" defaultChecked />
+                <span className="text-sm">동의함</span>
+              </label>
+              <label className="flex items-center space-x-1">
+                <input type="radio" name="consignAgree" value="no" />
+                <span className="text-sm">동의하지 않음</span>
+              </label>
+            </div>
+          </div>
+
         </div>
-      </section>
-
-      {/* 제2조 */}
-      <section className="space-y-3 pt-4 border-t border-border/50">
-        <h3 className="text-lg font-semibold text-foreground pb-2">제2조(개인정보의 수집 및 이용 목적)</h3>
-        <div className="ml-2 text-muted-foreground space-y-2 pl-4 border-l-2 border-primary/20">
-          <p><span className="text-primary font-medium mr-1">①</span>AI 얼굴나이측정 서비스 제공</p>
-          <p><span className="text-primary font-medium mr-1">②</span>행사 운영 및 체험 기능 제공</p>
-        </div>
-        <p className="text-sm text-muted-foreground italic ml-2 mt-3 pl-4">
-          본 서비스 제공을 위해 필요한 최소한의 정보만 수집합니다.
-        </p>
-      </section>
-
-      {/* 제3조 */}
-      <section className="space-y-3 pt-4 border-t border-border/50">
-        <h3 className="text-lg font-semibold text-foreground pb-2">제3조(개인정보의 보유 및 이용 기간)</h3>
-        <div className="ml-2 text-muted-foreground space-y-2 pl-4 border-l-2 border-primary/20">
-          <p><span className="text-primary font-medium mr-1">①</span>DT FAIR 2025 행사 종료일(2025.11.28)에 즉시 파기</p>
-          <p><span className="text-primary font-medium mr-1">②</span>관련 법령에 따른 별도 보관 의무 없음</p>
-        </div>
-      </section>
-
-      {/* 제4조 */}
-      <section className="space-y-3 pt-4 border-t border-border/50">
-        <h3 className="text-lg font-semibold text-foreground pb-2">제4조(개인정보의 제3자 제공)</h3>
-        <p className="ml-2 text-muted-foreground pl-4 border-l-2 border-primary/20">
-          수집한 개인정보는 외부 기관이나 업체에 제공되지 않습니다.
-        </p>
-      </section>
-
-      {/* 제5조 */}
-      <section className="space-y-3 pt-4 border-t border-border/50">
-        <h3 className="text-lg font-semibold text-foreground pb-2">제5조(개인정보 처리의 위탁)</h3>
-        <div className="ml-2 text-muted-foreground space-y-2 pl-4 border-l-2 border-primary/20">
-          <p><span className="text-primary font-medium mr-1">①</span>개인정보 처리 업무는 외부 업체에 위탁하지 않습니다.</p>
-          <p><span className="text-primary font-medium mr-1">②</span>필요 시 법령에 따라 위탁 사실을 사전에 안내합니다.</p>
-        </div>
-      </section>
-
-      {/* 제6조 */}
-      <section className="space-y-3 pt-4 border-t border-border/50">
-        <h3 className="text-lg font-semibold text-foreground pb-2">제6조(정보주체의 권리 및 행사 방법)</h3>
-        <div className="ml-2 text-muted-foreground space-y-2 pl-4 border-l-2 border-primary/20">
-          <p><span className="text-primary font-medium mr-1">①</span>개인정보 열람 요청</p>
-          <p><span className="text-primary font-medium mr-1">②</span>개인정보 정정 및 삭제 요청</p>
-          <p><span className="text-primary font-medium mr-1">③</span>개인정보 처리 정지 요청</p>
-          <p><span className="text-primary font-medium mr-1">④</span>수집·이용 동의 철회</p>
-        </div>
-        <p className="text-sm text-muted-foreground italic ml-2 mt-3 pl-4">
-          동의 철회 시 서비스 이용이 제한될 수 있습니다.
-        </p>
-      </section>
-
-      {/* 제7조 */}
-      <section className="space-y-3 pt-4 border-t border-border/50">
-        <h3 className="text-lg font-semibold text-foreground pb-2">제7조(개인정보 보호 관련 문의)</h3>
-        <div className="ml-2 text-muted-foreground space-y-1 pl-4 border-l-2 border-primary/20">
-          <p className="font-medium">DT추진팀</p>
-          <p>
-            이메일:
-            <a href="mailto:rollingbill@nongshim.com" className="text-primary hover:underline ml-1">
-              rollingbill@nongshim.com
-            </a>
-          </p>
-          <p>
-            전화:
-            <a href="tel:02-820-7108" className="text-primary hover:underline ml-1">
-              02-820-7108
-            </a>
-          </p>
-        </div>
-      </section>
-
-      {/* 제8조 */}
-      <section className="space-y-3 pt-4 border-t border-border/50">
-        <h3 className="text-lg font-semibold text-foreground pb-2">제8조(동의 거부 권리 및 불이익)</h3>
-        <p className="ml-2 text-muted-foreground pl-4 border-l-2 border-primary/20">
-          개인정보 수집·이용에 대한 동의를 거부할 수 있으나, 필수 정보 제공에 동의하지 않을 경우 서비스 이용이 제한됩니다.
-        </p>
-      </section>
-    </div>
-
     <DialogFooter>
       <Button onClick={handleDialogConfirm} className="h-12 px-8 text-lg">
         확인
