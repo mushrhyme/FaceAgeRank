@@ -5,6 +5,7 @@ import { Sparkles, RotateCcw, Home } from "lucide-react";
 import Footer from "@/components/Footer";
 import EventHeader from "@/components/EventHeader";
 import { useYoungerConfetti } from "@/hooks/useYoungerConfetti";
+import { useOlderRipple } from "@/hooks/useOlderRipple";
 import { getResultMessage, isYoungerLook } from "@/lib/resultUtils";
 import { soundManager, SOUNDS } from "@/lib/sound";
 
@@ -27,10 +28,14 @@ export default function ResultDisplay({
 }: ResultDisplayProps) {
   const ageDifference = faceAge - realAge; // 얼굴 나이 - 실제 나이
   const youngerLook = isYoungerLook(ageDifference); // 동안 여부
+  const olderLook = ageDifference > 0; // 노안 여부
   const message = getResultMessage(ageDifference); // 결과 메시지
 
-  // 팡파레 효과 hook
+  // 팡파레 효과 hook (동안일 때)
   useYoungerConfetti(youngerLook);
+  
+  // 리플 효과 hook (노안일 때)
+  useOlderRipple(olderLook);
 
   // 결과에 따른 음향 효과 재생
   useEffect(() => {
@@ -45,7 +50,11 @@ export default function ResultDisplay({
   }, [youngerLook, ageDifference]);
 
   return (
-    <div className="h-screen flex flex-col bg-background relative">
+    <div 
+      className={`h-screen flex flex-col bg-background relative ${
+        olderLook ? 'animate-screen-shake' : ''
+      }`}
+    >
       <EventHeader />
       <div className="flex-1 overflow-y-auto p-4">
         {/* 상단: 아이콘, 이름, 메시지 */}
