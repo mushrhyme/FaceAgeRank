@@ -160,7 +160,7 @@ export class LocalFaceAgeService implements FaceAgeService {
             `오버헤드: ${overhead.toFixed(2)}초`
           ].filter(Boolean);
           
-          console.log(`   [디버그] ${timingParts.join(' | ')}`);
+          // 디버그 로그는 프로덕션에서 제거됨
 
           // 나이와 분석 시간 반환
           resolve({

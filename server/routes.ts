@@ -96,8 +96,7 @@ export async function registerRoutes(app: Express): Promise<Server | HttpsServer
     }
   });
 
-  // 개발 환경 전용: 성능 테스트용 임시 사용자 조회 (사번과 실제 나이를 직접 받음)
-  // 환경 변수 DEV_MODE 또는 VITE_DEV_MODE=true일 때만 활성화
+  // 개발 모드 전용 엔드포인트
   const isDevMode = process.env.DEV_MODE === "true" || process.env.VITE_DEV_MODE === "true";
   if (isDevMode) {
     app.post("/api/user/lookup-dev", async (req, res) => {
@@ -122,7 +121,6 @@ export async function registerRoutes(app: Express): Promise<Server | HttpsServer
           department,       // 예: "개발팀"
         };
 
-        console.log(`[개발 모드] 임시 사용자 생성: ${name} (${company}/${employeeId}) - 실제 나이: ${realAge}세`);
         res.json(user);
       } catch (error) {
         if (error instanceof z.ZodError) {
