@@ -56,6 +56,7 @@ export const SOUNDS = {
   COUNTDOWN: '/sounds/countdown.mp3', // 카운트다운 효과음
   FIREWORK: '/sounds/firework.mp3',   // 동안일 때 효과음
   FAIL: '/sounds/fail.mp3',           // 노안일 때 효과음
+  MATRIX: '/sounds/matrix.mp3',       // 로그인 폼 배경음악
 } as const;
 
 

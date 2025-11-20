@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +23,7 @@ import { Bot } from 'lucide-react';
 import Footer from "@/components/Footer";
 import EventHeader from "@/components/EventHeader";
 import MatrixBackground from "@/components/MatrixBackground";
+import { soundManager, SOUNDS } from "@/lib/sound";
 
 interface LoginFormProps {
   onSubmit: (company: string, employeeId: string, devData?: { name: string; realAge: number; department: string }) => void;
@@ -39,6 +40,7 @@ export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProp
   const [isTyping, setIsTyping] = useState(true);
   const [isPrivacyAgreed, setIsPrivacyAgreed] = useState(false); // 개인정보 동의 체크 상태
   const [isDialogOpen, setIsDialogOpen] = useState(false); // 개인정보 동의 팝업 열림 상태
+  const backgroundAudioRef = useRef<HTMLAudioElement | null>(null); // 배경음악 Audio 객체 참조
   
   const texts = [
     "지금 이 순간의 얼굴 나이, 과연 몇 살일까요?",
@@ -48,6 +50,21 @@ export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProp
     "생각보다 어리게 나왔다면? 오늘 기분 좋은 날이네요!",
   ];
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
+
+  // 배경음악 자동 재생 (컴포넌트 마운트 시)
+  useEffect(() => {
+    // soundManager의 playBackground 메서드 사용 (LoadingAnalysis와 동일한 방식)
+    const audio = soundManager.playBackground(SOUNDS.MATRIX, 0.5);
+    backgroundAudioRef.current = audio;
+    
+    // 컴포넌트 언마운트 시 음악 정지
+    return () => {
+      if (backgroundAudioRef.current) {
+        backgroundAudioRef.current.pause();
+        backgroundAudioRef.current.currentTime = 0;
+      }
+    };
+  }, []);
 
   // 타이핑 효과 - 주기적으로 반복
   useEffect(() => {
