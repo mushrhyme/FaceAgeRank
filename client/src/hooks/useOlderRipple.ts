@@ -27,20 +27,20 @@ export function useOlderRipple(isOlderLook: boolean) {
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight * 0.35; // 동안 폭죽과 비슷한 위치
 
-    // 폭죽과 유사한 파란색 계열 색상 (RGB 값)
-    // '#3b82f6' -> rgb(59, 130, 246)
-    // '#60a5fa' -> rgb(96, 165, 250)
-    // '#93c5fd' -> rgb(147, 197, 253)
-    // '#dbeafe' -> rgb(219, 234, 254)
-    const blueColors = [
-      { r: 59, g: 130, b: 246 },   // #3b82f6
-      { r: 96, g: 165, b: 250 },   // #60a5fa
-      { r: 147, g: 197, b: 253 },  // #93c5fd
-      { r: 219, g: 234, b: 254 },  // #dbeafe
+    // 폭죽과 유사한 민트색 계열 색상 (RGB 값)
+    // '#26bfa6' -> rgb(38, 191, 166)
+    // '#40e0d0' -> rgb(64, 224, 208)
+    // '#7fffd4' -> rgb(127, 255, 212)
+    // '#afffe6' -> rgb(175, 255, 230)
+    const mintColors = [
+      { r: 38, g: 191, b: 166 },   // #26bfa6
+      { r: 64, g: 224, b: 208 },   // #40e0d0
+      { r: 127, g: 255, b: 212 },  // #7fffd4
+      { r: 175, g: 255, b: 230 },  // #afffe6
     ];
 
     // 랜덤 색상 선택
-    const selectedColor = blueColors[Math.floor(Math.random() * blueColors.length)];
+    const selectedColor = mintColors[Math.floor(Math.random() * mintColors.length)];
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);

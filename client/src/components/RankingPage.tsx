@@ -1,4 +1,4 @@
-import RankingBoard from "@/components/RankingBoard";
+import RankingBoard from "@RankingBoard";
 
 // 노안 랭킹 표시 여부 제어 (환경변수로 설정 가능)
 // VITE_SHOW_OLD_RANKING=true로 설정하면 노안 랭킹 포함 버전 사용

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Camera, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import EventHeader from "@/components/EventHeader";
+import MatrixBackground from "@/components/MatrixBackground";
 import { soundManager, SOUNDS } from "@/lib/sound";
 
 interface WebcamCaptureProps {
@@ -127,13 +128,16 @@ export default function WebcamCapture({
   }, [countdown, onCapture, compressImage]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-background relative">
-      <EventHeader />
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-black relative overflow-hidden">
+      <MatrixBackground color="#26bfa6" opacity={0.3} density={0.3} />
+      <div className="relative z-10">
+        <EventHeader />
+      </div>
       {onBack && (
         <Button
           variant="ghost"
           onClick={onBack}
-          className="absolute top-6 left-6 h-12 px-5 text-base"
+          className="absolute top-6 left-6 h-12 px-5 text-base text-gray-300 hover:text-white hover:bg-gray-800"
           data-testid="button-back"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
@@ -141,16 +145,16 @@ export default function WebcamCapture({
         </Button>
       )}
 
-      <div className="w-full max-w-5xl space-y-8">
+      <div className="w-full max-w-5xl space-y-8 relative z-10">
         <div className="text-center space-y-3">
-          <h1 className="text-3xl font-semibold">카메라 준비</h1>
-          <p className="text-lg text-muted-foreground">
+          <h1 className="text-3xl font-semibold text-white">카메라 준비</h1>
+          <p className="text-lg text-gray-300">
             얼굴이 화면 중앙에 오도록 위치를 조정하세요
           </p>
         </div>
 
         <div className="relative">
-          <div className="rounded-xl overflow-hidden bg-card border border-card-border shadow-lg aspect-video">
+          <div className="rounded-xl overflow-hidden bg-gray-900 border border-gray-700 shadow-lg aspect-video">
             <Webcam
               ref={webcamRef}
               audio={false}
@@ -202,9 +206,9 @@ export default function WebcamCapture({
                     <path
                       d="M 640 460 
                          c -100 0 -300 50 -300 150 
-                         v 80 
+                         v 50 
                          h 600 
-                         v -80 
+                         v -50 
                          c 0 -100 -200 -150 -300 -150 z"
                     />
                   </g>

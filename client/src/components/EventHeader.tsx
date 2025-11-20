@@ -1,20 +1,14 @@
 // DT FAIR 2025 이벤트 헤더 컴포넌트
 export default function EventHeader() {
   return (
-    <header className="absolute top-0 left-0 right-0 z-50 px-6 py-4">
-      <div className="flex items-center gap-4">
+    <header className="absolute top-2 left-0 right-0 z-50 px-4 py-2">
+      <div className="flex items-center gap-2">
         <img 
-          src="/ns-seed.png" 
-          alt="NS SEED" 
-          className="h-16 object-contain"
-        />
-        <img 
-          src="/dt-fair-2025.png" 
+          src="/dt-fair.png" 
           alt="DT FAIR 2025" 
-          className="h-20 object-contain"
+          className="h-12 object-contain"
         />
       </div>
     </header>
   );
 }
-

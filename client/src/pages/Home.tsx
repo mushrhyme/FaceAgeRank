@@ -176,7 +176,6 @@ export default function Home() {
           faceAge={faceAge}
           capturedImage={capturedImage}
           name={user.name}
-          onRetry={handleRetry}
           onReset={handleReset}
         />
       )}

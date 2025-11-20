@@ -10,7 +10,7 @@ export function useYoungerConfetti(isYoungerLook: boolean) {
     // 동안이 아닐 때는 팡파레 효과를 표시하지 않음
     if (!isYoungerLook) return;
 
-    const duration = 2500; // 2.5초간 지속 (3초 이내)
+    const duration = 4500; // 4.5초간 지속
     const animationEnd = Date.now() + duration;
     const defaults = { 
       startVelocity: 30, 
@@ -20,8 +20,8 @@ export function useYoungerConfetti(isYoungerLook: boolean) {
       gravity: 0.8,
     };
 
-    // 동안일 때는 파란색 계열
-    const colors = ['#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe'];
+    // 동안일 때는 민트색 계열
+    const colors = ['#26bfa6', '#40e0d0', '#7fffd4', '#afffe6'];
 
     function randomInRange(min: number, max: number) {
       return Math.random() * (max - min) + min;
@@ -116,6 +116,7 @@ export function useYoungerConfetti(isYoungerLook: boolean) {
     return () => clearInterval(interval);
   }, [isYoungerLook]);
 }
+
 
 
 

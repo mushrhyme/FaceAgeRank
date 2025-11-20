@@ -3,6 +3,7 @@ import { Loader2 } from "lucide-react";
 import Footer from "@/components/Footer";
 import EventHeader from "@/components/EventHeader";
 import ParticlesBackground from "@/components/ParticlesBackground";
+import MatrixBackground from "@/components/MatrixBackground";
 import { soundManager, SOUNDS } from "@/lib/sound";
 
 interface LoadingAnalysisProps {
@@ -29,8 +30,9 @@ export default function LoadingAnalysis({ capturedImage }: LoadingAnalysisProps)
   }, []);
 
   return (
-    <div className="h-screen flex flex-col bg-background relative overflow-hidden">
+    <div className="h-screen flex flex-col bg-black relative overflow-hidden">
       {/* 배경 파티클 레이어 - z-index로 콘텐츠 뒤에 배치 */}
+      <MatrixBackground color="#26bfa6" opacity={0.2} density={0.4} />
       <ParticlesBackground />
       <div className="relative z-10">
         <EventHeader />
@@ -49,16 +51,18 @@ export default function LoadingAnalysis({ capturedImage }: LoadingAnalysisProps)
           </div>
         </div>
         <div className="space-y-4">
-          <h2 className="text-4xl font-semibold" data-testid="text-loading">
+          <h2 className="text-4xl font-semibold text-white" data-testid="text-loading">
             분석 중...
           </h2>
-          <p className="text-2xl text-muted-foreground">
+          <p className="text-2xl text-gray-300">
             AI가 얼굴 나이를 분석하고 있습니다
           </p>
         </div>
         </div>
       </div>
-      <Footer />
+      <div className="relative z-10">
+        <Footer />
+      </div>
     </div>
   );
 }

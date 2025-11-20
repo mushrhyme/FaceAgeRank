@@ -21,23 +21,28 @@ export default function ParticlesBackground({ className = "" }: ParticlesBackgro
   const particlesLoadedRef = useRef(false);
   const timeoutRefsRef = useRef<NodeJS.Timeout[]>([]); // 모든 timeout 저장
   const intervalRefRef = useRef<NodeJS.Timeout | null>(null); // interval 저장
+  const instanceIdRef = useRef<string | null>(null); // 고유 인스턴스 ID
 
   useEffect(() => {
-    // 이미 초기화된 경우 중복 초기화 방지
-    if (particlesLoadedRef.current) {
-      return;
+    // 고유 인스턴스 ID 생성 (컴포넌트마다 다른 ID)
+    if (!instanceIdRef.current) {
+      instanceIdRef.current = `particles-js-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    }
+    
+    // id 설정
+    if (containerRef.current && !containerRef.current.id) {
+      containerRef.current.id = instanceIdRef.current;
     }
 
     // particles.js가 로드될 때까지 대기 후 초기화
     const initializeParticles = () => {
-      if (!containerRef.current || typeof window.particlesJS !== "function" || particlesLoadedRef.current) {
+      if (!containerRef.current || typeof window.particlesJS !== "function") {
         return;
       }
       
       // id 확인
       if (!containerRef.current.id) {
-        console.error("Container element must have an id");
-        return;
+        containerRef.current.id = instanceIdRef.current || `particles-js-${Date.now()}`;
       }
       
       console.log("Initializing particles.js...");
@@ -53,18 +58,18 @@ export default function ParticlesBackground({ className = "" }: ParticlesBackgro
             },
           },
           color: {
-            value: "#3b82f6", // primary 색상 (파란색)
+            value: "#26bfa6", // 민트색 (메인 테마 색상)
           },
           shape: {
             type: "circle", // 원형 파티클
           },
           opacity: {
-            value: 0.7, // 투명도 (더 진하게 보이도록 증가)
+            value: 0.9, // 투명도 (더 진하게 보이도록 증가)
             random: true,
             anim: {
               enable: true,
               speed: 1,
-              opacity_min: 0.3, // 최소 투명도도 높임
+              opacity_min: 0.5, // 최소 투명도도 높임
               sync: false,
             },
           },
@@ -81,8 +86,8 @@ export default function ParticlesBackground({ className = "" }: ParticlesBackgro
           line_linked: {
             enable: true, // 파티클 간 연결선 활성화
             distance: 150, // 연결선 거리
-            color: "#3b82f6",
-            opacity: 0.6, // 연결선 투명도 (더 진하게 - 0.4에서 0.6으로 증가)
+            color: "#26bfa6", // 민트색
+            opacity: 0.8, // 연결선 투명도 (더 진하게)
             width: 2.5, // 연결선 두께 (더 두껍게 - 1.5에서 2.5로 증가)
           },
           move: {
@@ -125,22 +130,38 @@ export default function ParticlesBackground({ className = "" }: ParticlesBackgro
 
       // particles.js 초기화
       try {
-        // 기존 인스턴스가 있다면 제거
-        if (window.pJSDom && window.pJSDom.length > 0) {
-          window.pJSDom.forEach((pJS) => {
-            if (pJS.pJS && pJS.pJS.fn && pJS.pJS.fn.vendors) {
-              pJS.pJS.fn.vendors.destroypJS();
-            }
-          });
-          window.pJSDom = [];
+        // 현재 인스턴스의 기존 canvas 제거
+        if (containerRef.current) {
+          const existingCanvas = containerRef.current.querySelector("canvas");
+          if (existingCanvas && existingCanvas.parentNode) {
+            existingCanvas.parentNode.removeChild(existingCanvas);
+          }
         }
         
         // particles.js 초기화
         window.particlesJS(containerRef.current.id, config);
-        console.log("particles.js initialized successfully");
+        console.log("particles.js initialized successfully for:", containerRef.current.id);
         particlesLoadedRef.current = true;
+        
+        // canvas가 제대로 생성되었는지 확인하고 z-index 설정
+        setTimeout(() => {
+          const canvas = containerRef.current?.querySelector("canvas");
+          if (canvas) {
+            console.log("particles.js canvas created:", canvas.width, "x", canvas.height);
+            // canvas 스타일 강제 적용 (Matrix 위에 표시되도록)
+            canvas.style.position = "absolute";
+            canvas.style.top = "0";
+            canvas.style.left = "0";
+            canvas.style.width = "100%";
+            canvas.style.height = "100%";
+            canvas.style.zIndex = "1"; // Matrix(z-0) 위에 표시
+          } else {
+            console.warn("particles.js canvas not found after initialization");
+          }
+        }, 500);
       } catch (error) {
         console.error("Error initializing particles.js:", error);
+        particlesLoadedRef.current = false;
       }
     };
 
@@ -163,7 +184,7 @@ export default function ParticlesBackground({ className = "" }: ParticlesBackgro
           }
           const timeoutId = setTimeout(() => {
             initializeParticles();
-          }, 100);
+          }, 300); // 100ms -> 300ms로 증가하여 DOM 준비 시간 확보
           timeoutRefsRef.current.push(timeoutId);
         }
       }, 50);
@@ -198,33 +219,51 @@ export default function ParticlesBackground({ className = "" }: ParticlesBackgro
       }
 
       // particles.js 인스턴스 정리
-      if (window.pJSDom && window.pJSDom.length > 0) {
-        window.pJSDom.forEach((pJS) => {
-          if (pJS.pJS && pJS.pJS.fn && pJS.pJS.fn.vendors) {
-            pJS.pJS.fn.vendors.destroypJS();
-          }
-        });
-        window.pJSDom = [];
-      }
-      
       if (containerRef.current) {
-        // particles.js 인스턴스 정리
         const canvas = containerRef.current.querySelector("canvas");
         if (canvas && canvas.parentNode) {
           canvas.parentNode.removeChild(canvas);
         }
       }
+      
+      // pJSDom에서 현재 인스턴스 제거
+      if (window.pJSDom && window.pJSDom.length > 0) {
+        window.pJSDom = window.pJSDom.filter((pJS) => {
+          if (pJS.pJS && pJS.pJS.pJSDom && pJS.pJS.pJSDom[0]) {
+            const pJSId = pJS.pJS.pJSDom[0].id;
+            if (pJSId === instanceIdRef.current) {
+              // 현재 인스턴스인 경우 제거
+              if (pJS.pJS.fn && pJS.pJS.fn.vendors) {
+                pJS.pJS.fn.vendors.destroypJS();
+              }
+              return false; // 필터에서 제외
+            }
+          }
+          return true; // 다른 인스턴스는 유지
+        });
+      }
 
       particlesLoadedRef.current = false;
+      instanceIdRef.current = null;
     };
   }, []);
 
+  // 인스턴스 ID가 없으면 생성
+  if (!instanceIdRef.current) {
+    instanceIdRef.current = `particles-js-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
   return (
     <div
-      id="particles-js"
+      id={instanceIdRef.current}
       ref={containerRef}
-      className={`fixed inset-0 z-0 ${className}`} // 배경 레이어로 설정 (z-index: 0)
-      style={{ width: "100%", height: "100%", pointerEvents: "none" }} // pointerEvents로 클릭 이벤트가 뒤로 전달되도록
+      className={`fixed inset-0 ${className}`} // 배경 레이어로 설정
+      style={{ 
+        width: "100%", 
+        height: "100%", 
+        pointerEvents: "none",
+        zIndex: 0 // MatrixBackground와 같은 레벨, 하지만 particles.js canvas가 위에 렌더링됨
+      }} // pointerEvents로 클릭 이벤트가 뒤로 전달되도록
     />
   );
 }
