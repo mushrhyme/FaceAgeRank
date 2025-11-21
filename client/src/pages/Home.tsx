@@ -4,6 +4,8 @@ import { apiRequest } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
 import type { Step, LoginInfo } from "@shared/types";
 import { formatKSTDateTime } from "@shared/utils";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import LoginForm from "@/components/LoginForm";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import CaptureGuide from "@/components/CaptureGuide";
@@ -19,8 +21,10 @@ export default function Home() {
   const [faceAge, setFaceAge] = useState<number>(0);
   const { toast } = useToast();
 
-  // 개발 모드 여부 확인 (Vite 환경 변수)
-  const isDevMode = import.meta.env.VITE_DEV_MODE === "true";
+  // 개발 모드 여부 상태 관리 (환경 변수 기본값 사용)
+  const [isDevMode, setIsDevMode] = useState<boolean>(
+    import.meta.env.VITE_DEV_MODE === "true"
+  );
 
   const handleLogin = async (
     company: string, 
@@ -154,6 +158,18 @@ export default function Home() {
 
   return (
     <>
+      {/* 우측 상단 키인 모드 전환 토글 */}
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-3 bg-gray-900/90 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-2 shadow-lg">
+        <Label htmlFor="dev-mode-toggle" className="text-sm font-medium text-gray-200 cursor-pointer">
+          Key-in Mode
+        </Label>
+        <Switch
+          id="dev-mode-toggle"
+          checked={isDevMode}
+          onCheckedChange={setIsDevMode}
+        />
+      </div>
+
       {step === "login" && <LoginForm onSubmit={handleLogin} isDevMode={isDevMode} />}
       
       {step === "welcome" && user && (

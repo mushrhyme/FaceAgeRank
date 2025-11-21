@@ -149,7 +149,7 @@ export default function ResultDisplay({
               data-testid="button-reset"
             >
               <Home className="w-6 h-6 mr-2" />
-              맨 처음으로
+              처음으로
             </Button>
           </div>
         </div>
