@@ -11,6 +11,7 @@ import { useOlderRipple } from "@/hooks/useOlderRipple";
 import { getResultMessage, isYoungerLook } from "@/lib/resultUtils";
 import { soundManager, SOUNDS } from "@/lib/sound";
 import { apiRequest } from "@/lib/queryClient";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,7 @@ interface ResultDisplayProps {
   capturedImage?: string;
   name: string;
   onReset: () => void;
+  isMobileMode?: boolean; // 모바일 모드 강제 적용 (QR 코드 접속 시)
 }
 
 export default function ResultDisplay({
@@ -33,7 +35,10 @@ export default function ResultDisplay({
   capturedImage,
   name,
   onReset,
+  isMobileMode = false,
 }: ResultDisplayProps) {
+  const isMobile = useIsMobile(); // 화면 크기 기반 모바일 감지
+  const shouldUseMobileLayout = isMobileMode || isMobile; // QR 코드 접속이거나 모바일 화면이면 모바일 레이아웃
   const ageDifference = faceAge - realAge; // 얼굴 나이 - 실제 나이
   const youngerLook = isYoungerLook(ageDifference); // 동안 여부
   const olderLook = ageDifference > 0; // 노안 여부
@@ -116,21 +121,21 @@ export default function ResultDisplay({
       <div className="relative z-10">
         <EventHeader />
       </div>
-      <div className="flex-1 flex items-center justify-center overflow-y-auto p-4 relative z-10">
-        <div className="w-full max-w-5xl">
+      <div className={`flex-1 flex items-center justify-center overflow-y-auto ${shouldUseMobileLayout ? 'p-3 pt-20' : 'p-4'} relative z-10`}>
+        <div className={`w-full ${shouldUseMobileLayout ? 'max-w-md' : 'max-w-5xl'}`}>
         {/* 상단: 아이콘, 이름, 메시지 */}
-        <div className="text-center space-y-3 pt-4">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mx-auto">
-            <Sparkles className="w-14 h-14 text-primary" />
+        <div className={`text-center ${shouldUseMobileLayout ? 'space-y-2 pt-1' : 'space-y-3 pt-4'}`}>
+          <div className={`inline-flex items-center justify-center ${shouldUseMobileLayout ? 'w-12 h-12' : 'w-20 h-20'} rounded-full bg-primary/10 mx-auto`}>
+            <Sparkles className={`${shouldUseMobileLayout ? "w-8 h-8" : "w-14 h-14"} text-primary`} />
           </div>
-          <div className="space-y-3">
-            <h2 className="text-xl font-medium text-gray-300">
+          <div className={shouldUseMobileLayout ? "space-y-1" : "space-y-3"}>
+            <h2 className={`${shouldUseMobileLayout ? 'text-base' : 'text-xl'} font-medium text-gray-300`}>
               {name} 님의 결과
             </h2>
             {/* 결과 메시지 - 크고 강조된 형태 */}
-            <div className="mt-4">
+            <div className={shouldUseMobileLayout ? "mt-2" : "mt-4"}>
               <h1 
-                className={`text-3xl font-bold ${
+                className={`${shouldUseMobileLayout ? 'text-xl' : 'text-3xl'} font-bold ${
                   youngerLook 
                     ? "text-primary" 
                     : ageDifference > 0 
@@ -146,11 +151,11 @@ export default function ResultDisplay({
         </div>
 
         {/* 중앙: 이미지와 나이 정보를 세로로 배치 */}
-        <div className="flex flex-col items-center gap-6 mt-6 mb-4">
+        <div className={`flex flex-col items-center ${shouldUseMobileLayout ? 'gap-3 mt-3' : 'gap-6 mt-6'} mb-4`}>
           {/* 이미지 */}
           {capturedImage && (
             <div className="relative flex-shrink-0">
-              <div className="w-80 h-80 rounded-2xl overflow-hidden border-4 border-primary/20 shadow-xl bg-gradient-to-br from-primary/5 to-primary/10 p-2">
+              <div className={`${shouldUseMobileLayout ? 'w-56 h-56' : 'w-80 h-80'} rounded-2xl overflow-hidden border-4 border-primary/20 shadow-xl bg-gradient-to-br from-primary/5 to-primary/10 p-2`}>
                 <div className="w-full h-full rounded-xl overflow-hidden">
                   <img
                     src={capturedImage}
@@ -163,20 +168,20 @@ export default function ResultDisplay({
             </div>
           )}
 
-          {/* 나이 정보 - PC에 맞게 크기 확대 */}
-          <div className="grid grid-cols-2 gap-6 w-full max-w-2xl">
+          {/* 나이 정보 - 모바일/PC에 맞게 크기 조정 */}
+          <div className={`grid ${shouldUseMobileLayout ? 'grid-cols-2 gap-2' : 'grid-cols-2 gap-6'} w-full ${shouldUseMobileLayout ? 'max-w-xs' : 'max-w-2xl'}`}>
             <Card className="border-2 border-gray-700 bg-gray-900/90">
-              <div className="pt-6 pb-6 text-center space-y-3">
-                <p className="text-3xl text-gray-300">실제 나이</p>
-                <p className="text-5xl font-bold text-white" data-testid="text-real-age">
+              <div className={`${shouldUseMobileLayout ? 'pt-3 pb-3' : 'pt-6 pb-6'} text-center ${shouldUseMobileLayout ? 'space-y-1' : 'space-y-3'}`}>
+                <p className={`${shouldUseMobileLayout ? 'text-sm' : 'text-3xl'} text-gray-300`}>실제 나이</p>
+                <p className={`${shouldUseMobileLayout ? 'text-2xl' : 'text-5xl'} font-bold text-white`} data-testid="text-real-age">
                   {realAge}살
                 </p>
               </div>
             </Card>
             <Card className="border-2 border-primary/30 bg-gray-900/90">
-              <div className="pt-6 pb-6 text-center space-y-3">
-                <p className="text-3xl text-gray-300">얼굴 나이</p>
-                <p className="text-5xl font-bold text-primary" data-testid="text-face-age">
+              <div className={`${shouldUseMobileLayout ? 'pt-3 pb-3' : 'pt-6 pb-6'} text-center ${shouldUseMobileLayout ? 'space-y-1' : 'space-y-3'}`}>
+                <p className={`${shouldUseMobileLayout ? 'text-sm' : 'text-3xl'} text-gray-300`}>얼굴 나이</p>
+                <p className={`${shouldUseMobileLayout ? 'text-2xl' : 'text-5xl'} font-bold text-primary`} data-testid="text-face-age">
                   {faceAge}살
                 </p>
               </div>
@@ -185,10 +190,10 @@ export default function ResultDisplay({
         </div>
 
         {/* 하단: 나이 차이 메시지와 버튼 */}
-        <div className="space-y-4 mt-4">
+        <div className={`${shouldUseMobileLayout ? 'space-y-3 mt-2' : 'space-y-4 mt-4'}`}>
           {ageDifference !== 0 && (
-            <div className="text-center py-2">
-              <p className="text-2xl text-gray-300">
+            <div className={`text-center ${shouldUseMobileLayout ? 'py-1' : 'py-2'}`}>
+              <p className={`${shouldUseMobileLayout ? 'text-sm' : 'text-2xl'} text-gray-300`}>
                 실제보다{" "}
                 <span className="font-semibold text-white" data-testid="text-age-difference">
                   {Math.abs(ageDifference)}살 {youngerLook ? "낮게" : "높게"}
@@ -198,25 +203,27 @@ export default function ResultDisplay({
             </div>
           )}
 
-          <div className="flex justify-center gap-4 pb-2">
-            <Button
-              onClick={() => setIsQrDialogOpen(true)}
-              variant="outline"
-              size="lg"
-              className="h-14 px-8 text-xl font-semibold shadow-lg border-primary/30 text-primary hover:bg-primary/10"
-              data-testid="button-qr"
-            >
-              <QrCode className="w-6 h-6 mr-2" />
-              QR 코드
-            </Button>
+          <div className={`flex justify-center ${shouldUseMobileLayout ? 'flex-col gap-3' : 'gap-4'} pb-2`}>
+            {!isMobileMode && (
+              <Button
+                onClick={() => setIsQrDialogOpen(true)}
+                variant="outline"
+                size={shouldUseMobileLayout ? "default" : "lg"}
+                className={`${shouldUseMobileLayout ? 'h-12 px-6 text-base' : 'h-14 px-8 text-xl'} font-semibold shadow-lg border-primary/30 text-primary hover:bg-primary/10 w-full`}
+                data-testid="button-qr"
+              >
+                <QrCode className={`${shouldUseMobileLayout ? 'w-5 h-5' : 'w-6 h-6'} mr-2`} />
+                QR 코드
+              </Button>
+            )}
             <Button
               onClick={onReset}
               variant="default"
-              size="lg"
-              className="h-14 px-14 text-xl font-semibold shadow-lg"
+              size={shouldUseMobileLayout ? "default" : "lg"}
+              className={`${shouldUseMobileLayout ? 'h-12 px-8 text-base' : 'h-14 px-14 text-xl'} font-semibold shadow-lg w-full`}
               data-testid="button-reset"
             >
-              <Home className="w-6 h-6 mr-2" />
+              <Home className={`${shouldUseMobileLayout ? 'w-5 h-5' : 'w-6 h-6'} mr-2`} />
               처음으로
             </Button>
           </div>

@@ -25,6 +25,9 @@ export default function Home() {
   const [isDevMode, setIsDevMode] = useState<boolean>(
     import.meta.env.VITE_DEV_MODE === "true"
   );
+  
+  // QR 코드 접속 여부 (URL에 result 파라미터가 있으면 QR 코드 접속으로 간주)
+  const [isFromQR, setIsFromQR] = useState<boolean>(false);
 
   // URL 파라미터에서 결과 데이터 읽기 (QR 코드 스캔 시)
   useEffect(() => {
@@ -32,6 +35,7 @@ export default function Home() {
     const resultParam = urlParams.get("result");
     
     if (resultParam) {
+      setIsFromQR(true); // QR 코드 접속으로 표시
       try {
         // URL 디코딩 후 Base64 디코딩, 그 다음 UTF-8 디코딩
         const base64Data = decodeURIComponent(resultParam);
@@ -272,6 +276,7 @@ export default function Home() {
           capturedImage={capturedImage}
           name={user.name}
           onReset={handleReset}
+          isMobileMode={isFromQR} // QR 코드 접속 시 모바일 모드
         />
       )}
     </>
