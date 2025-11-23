@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -28,9 +29,10 @@ import { soundManager, SOUNDS } from "@/lib/sound";
 interface LoginFormProps {
   onSubmit: (company: string, employeeId: string, devData?: { name: string; realAge: number; department: string }) => void;
   isDevMode?: boolean; // 개발 모드 여부
+  onDevModeChange?: (isDevMode: boolean) => void; // 개발 모드 변경 콜백
 }
 
-export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProps) {
+export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange }: LoginFormProps) {
   const [company, setCompany] = useState("");
   const [employeeId, setEmployeeId] = useState("");
   const [name, setName] = useState(""); // 개발 모드: 이름
@@ -124,6 +126,19 @@ export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProp
   return (
     <div className="h-screen flex flex-col bg-black relative overflow-hidden">
       <MatrixBackground color="#26bfa6" opacity={0.5} />
+      {/* 우측 상단 키인 모드 전환 토글 */}
+      <div className="fixed top-4 right-4 z-50 flex items-center gap-3 bg-gray-900/90 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-2 shadow-lg">
+        <Label htmlFor="dev-mode-toggle" className="text-sm font-medium text-gray-200 cursor-pointer">
+          Key-in Mode
+        </Label>
+        <Switch
+          id="dev-mode-toggle"
+          checked={isDevMode}
+          onCheckedChange={(checked) => {
+            onDevModeChange?.(checked);
+          }}
+        />
+      </div>
       <div className="relative z-10">
         <EventHeader />
       </div>
