@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
@@ -25,6 +25,82 @@ export default function Home() {
   const [isDevMode, setIsDevMode] = useState<boolean>(
     import.meta.env.VITE_DEV_MODE === "true"
   );
+
+  // URL 파라미터에서 결과 데이터 읽기 (QR 코드 스캔 시)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const resultParam = urlParams.get("result");
+    
+    if (resultParam) {
+      try {
+        // URL 디코딩 후 Base64 디코딩, 그 다음 UTF-8 디코딩
+        const base64Data = decodeURIComponent(resultParam);
+        const binaryString = atob(base64Data);
+        // 바이트 배열로 변환
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        // UTF-8 디코딩
+        const decodedData = new TextDecoder().decode(bytes);
+        const resultData = JSON.parse(decodedData);
+        // 결과 데이터로 상태 설정
+        setUser({
+          id: `qr-${resultData.name}`,
+          company: "",
+          employeeId: "",
+          name: resultData.name,
+          realAge: resultData.realAge,
+          department: "",
+        });
+        setFaceAge(resultData.faceAge);
+        // 이미지 URL이 있으면 이미지 로드
+        if (resultData.imageUrl) {
+          // 이미지 URL을 절대 URL로 변환 (상대 경로인 경우)
+          const imageUrl = resultData.imageUrl.startsWith("http")
+            ? resultData.imageUrl
+            : `${window.location.origin}${resultData.imageUrl}`;
+          
+          console.log("이미지 로드 시작:", imageUrl);
+          // 서버에서 이미지를 가져와서 Base64로 변환
+          fetch(imageUrl)
+            .then((res) => {
+              if (!res.ok) {
+                throw new Error(`이미지 로드 실패: ${res.status} ${res.statusText}`);
+              }
+              return res.blob();
+            })
+            .then((blob) => {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                setCapturedImage(reader.result as string);
+              };
+              reader.onerror = () => {
+                console.error("FileReader 오류");
+                setCapturedImage("");
+              };
+              reader.readAsDataURL(blob);
+            })
+            .catch((error) => {
+              console.error("이미지 로드 실패:", error);
+              setCapturedImage("");
+            });
+        } else {
+          setCapturedImage("");
+        }
+        setStep("result");
+        // URL에서 result 파라미터 제거 (깔끔한 URL 유지)
+        window.history.replaceState({}, "", window.location.pathname);
+      } catch (error) {
+        console.error("QR 코드 결과 파싱 실패:", error);
+        toast({
+          title: "오류",
+          description: "QR 코드 결과를 읽을 수 없습니다.",
+          variant: "destructive",
+        });
+      }
+    }
+  }, [toast]);
 
   const handleLogin = async (
     company: string, 

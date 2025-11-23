@@ -1,8 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { createServer as createHttpsServer, type Server as HttpsServer } from "https";
-import { readFileSync } from "fs";
-import { resolve } from "path";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
+import { resolve, join } from "path";
 import { randomUUID } from "crypto";
 import { z } from "zod";
 import { storage } from "./storage";
@@ -184,6 +184,82 @@ export async function registerRoutes(app: Express): Promise<Server | HttpsServer
   // SSE 스트림 엔드포인트 (랭킹 갱신 알림)
   app.get("/api/ranking/stream", (req, res) => {
     sseService.addClient(res);
+  });
+
+  // 이미지 저장 디렉토리 생성
+  const uploadsDir = resolve(import.meta.dirname, "..", "uploads");
+  if (!existsSync(uploadsDir)) {
+    mkdirSync(uploadsDir, { recursive: true });
+  }
+
+  // 이미지 업로드 API (Base64 이미지를 서버에 저장)
+  app.post("/api/image/upload", async (req, res) => {
+    try {
+      if (!req.body.image) {
+        return res.status(400).json({ error: "이미지 데이터가 필요합니다." });
+      }
+
+      // Base64 이미지 파싱
+      const base64Data = req.body.image;
+      const base64String = base64Data.includes(",") 
+        ? base64Data.split(",")[1] 
+        : base64Data;
+      
+      // 이미지 형식 확인 (jpeg 또는 png)
+      const imageFormat = base64Data.includes("data:image/png") ? "png" : "jpeg";
+      
+      // 고유 ID 생성
+      const imageId = randomUUID();
+      const filename = `${imageId}.${imageFormat}`;
+      const filepath = join(uploadsDir, filename);
+
+      // 이미지 파일 저장
+      const imageBuffer = Buffer.from(base64String, "base64");
+      writeFileSync(filepath, imageBuffer);
+
+      // 이미지 URL 반환
+      const imageUrl = `/api/image/${imageId}`;
+      res.json({ imageId, imageUrl });
+    } catch (error: any) {
+      console.error("❌ 이미지 업로드 실패:", error);
+      res.status(500).json({ 
+        error: error?.message || "이미지 업로드 중 오류가 발생했습니다.",
+        details: error?.message || String(error)
+      });
+    }
+  });
+
+  // 이미지 조회 API
+  app.get("/api/image/:imageId", (req, res) => {
+    try {
+      const { imageId } = req.params;
+      const jpegPath = join(uploadsDir, `${imageId}.jpeg`);
+      const pngPath = join(uploadsDir, `${imageId}.png`);
+
+      let filepath: string | null = null;
+      let contentType = "image/jpeg";
+
+      if (existsSync(jpegPath)) {
+        filepath = jpegPath;
+        contentType = "image/jpeg";
+      } else if (existsSync(pngPath)) {
+        filepath = pngPath;
+        contentType = "image/png";
+      } else {
+        return res.status(404).json({ error: "이미지를 찾을 수 없습니다." });
+      }
+
+      const imageBuffer = readFileSync(filepath);
+      res.setHeader("Content-Type", contentType);
+      res.setHeader("Cache-Control", "public, max-age=31536000"); // 1년 캐시
+      res.send(imageBuffer);
+    } catch (error: any) {
+      console.error("❌ 이미지 조회 실패:", error);
+      res.status(500).json({ 
+        error: error?.message || "이미지 조회 중 오류가 발생했습니다.",
+        details: error?.message || String(error)
+      });
+    }
   });
 
   // HTTPS 인증서 파일 경로
