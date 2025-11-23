@@ -25,6 +25,7 @@ import Footer from "@/components/Footer";
 import EventHeader from "@/components/EventHeader";
 import MatrixBackground from "@/components/MatrixBackground";
 import { soundManager, SOUNDS } from "@/lib/sound";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface LoginFormProps {
   onSubmit: (company: string, employeeId: string, devData?: { name: string; realAge: number; department: string }) => void;
@@ -33,6 +34,7 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange }: LoginFormProps) {
+  const isMobile = useIsMobile(); // 모바일 레이아웃 감지
   const [company, setCompany] = useState("");
   const [employeeId, setEmployeeId] = useState("");
   const [name, setName] = useState(""); // 키인 모드: 이름
@@ -126,9 +128,9 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
   return (
     <div className="h-screen flex flex-col bg-black relative overflow-hidden">
       <MatrixBackground color="#26bfa6" opacity={0.5} />
-      {/* 우측 상단 키인 모드 전환 토글 */}
-      <div className="fixed top-4 right-4 z-50 flex items-center gap-3 bg-gray-900/90 backdrop-blur-sm border border-gray-700 rounded-lg px-4 py-2 shadow-lg">
-        <Label htmlFor="dev-mode-toggle" className="text-sm font-medium text-gray-200 cursor-pointer">
+      {/* 우측 상단 키인 모드 전환 토글 - 비활성화됨 */}
+      {/* <div className={`fixed ${isMobile ? 'top-2 right-2' : 'top-4 right-4'} z-50 flex items-center gap-2 bg-gray-900/90 backdrop-blur-sm border border-gray-700 rounded-lg ${isMobile ? 'px-3 py-1.5' : 'px-4 py-2'} shadow-lg`}>
+        <Label htmlFor="dev-mode-toggle" className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-200 cursor-pointer`}>
           Key-in Mode
         </Label>
         <Switch
@@ -138,62 +140,62 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
             onDevModeChange?.(checked);
           }}
         />
-      </div>
+      </div> */}
       <div className="relative z-10">
         <EventHeader />
       </div>
       <div 
-        className="flex-1 flex items-center justify-center p-6 overflow-y-auto relative z-10"
+        className={`flex-1 flex items-center justify-center ${isMobile ? 'p-3 pt-20' : 'p-6'} overflow-y-auto relative z-10`}
         onClick={startBackgroundMusic}
         onKeyDown={startBackgroundMusic}
       >
-      <div className="w-full max-w-5xl">
+      <div className={`w-full ${isMobile ? 'max-w-md' : 'max-w-5xl'}`}>
         {/* 헤더 */}
-        <div className="text-center mb-8 pt-4">
-          <div className="mx-auto w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
-            <Bot className="w-16 h-16 text-primary" />
+        <div className={`text-center ${isMobile ? 'mb-4 pt-2' : 'mb-8 pt-4'}`}>
+          <div className={`mx-auto ${isMobile ? 'w-16 h-16' : 'w-24 h-24'} rounded-full bg-primary/10 flex items-center justify-center`}>
+            <Bot className={`${isMobile ? "w-10 h-10" : "w-16 h-16"} text-primary`} />
           </div>
-          <div className="flex items-center justify-center gap-3 mt-6">
-            <span className="text-6xl font-bold text-primary leading-none">[</span>
-            <h1 className="text-6xl font-semibold text-white">AI가 보는 내 얼굴 나이</h1>
-            <span className="text-6xl font-bold text-primary leading-none">]</span>
+          <div className={`flex items-center justify-center ${isMobile ? 'gap-1 mt-3' : 'gap-3 mt-6'}`}>
+            <span className={`${isMobile ? 'text-2xl' : 'text-6xl'} font-bold text-primary leading-none`}>[</span>
+            <h1 className={`${isMobile ? 'text-2xl' : 'text-6xl'} font-semibold text-white`}>AI가 보는 내 얼굴 나이</h1>
+            <span className={`${isMobile ? 'text-2xl' : 'text-6xl'} font-bold text-primary leading-none`}>]</span>
           </div>
-          <p className="text-2xl text-gray-300 mt-6 min-h-[2.5rem]">
+          <p className={`${isMobile ? 'text-base' : 'text-2xl'} text-gray-300 ${isMobile ? 'mt-3' : 'mt-6'} min-h-[2.5rem]`}>
             {displayedText}
             {isTyping && <span className="animate-pulse">|</span>}
           </p>
         </div>
-        <div className="my-8" />
+        <div className={isMobile ? "my-4" : "my-8"} />
         {/* 폼 */}
-        <div className="max-w-2xl mx-auto">
+        <div className={`${isMobile ? 'max-w-sm' : 'max-w-2xl'} mx-auto`}>
           <Card className="shadow-lg border-2 bg-gray-900/90 border-gray-700">
-            <CardContent className="p-8">
-              <form onSubmit={handleSubmit} className="space-y-6">
+            <CardContent className={isMobile ? "p-4" : "p-8"}>
+              <form onSubmit={handleSubmit} className={isMobile ? "space-y-4" : "space-y-6"}>
                 <div className="space-y-2">
-                  <Label htmlFor="company" className="text-xl font-medium text-gray-200">
+                  <Label htmlFor="company" className={`${isMobile ? 'text-base' : 'text-xl'} font-medium text-gray-200`}>
                     회사명
                   </Label>
                   <Select value={company} onValueChange={(value) => { setCompany(value); startBackgroundMusic(); }} required>
                     <SelectTrigger
                       id="company"
-                      className="h-16 text-xl bg-gray-800 border-gray-700 text-white"
+                      className={`${isMobile ? 'h-12 text-base' : 'h-16 text-xl'} bg-gray-800 border-gray-700 text-white`}
                       data-testid="input-company"
                       onFocus={startBackgroundMusic}
                     >
                       <SelectValue placeholder="회사명을 선택하세요" />
                     </SelectTrigger>
-                    <SelectContent className="text-xl bg-gray-800 border-gray-700">
-                      <SelectItem value="농심" className="text-xl text-white hover:bg-gray-700">농심</SelectItem>
-                      <SelectItem value="율촌화학" className="text-xl text-white hover:bg-gray-700">율촌화학</SelectItem>
-                      <SelectItem value="메가마트" className="text-xl text-white hover:bg-gray-700">메가마트</SelectItem>
-                      <SelectItem value="농심태경" className="text-xl text-white hover:bg-gray-700">농심태경</SelectItem>
-                      <SelectItem value="농심엔지니어링" className="text-xl text-white hover:bg-gray-700">농심엔지니어링</SelectItem>
-                      <SelectItem value="엔디에스" className="text-xl text-white hover:bg-gray-700">엔디에스</SelectItem>
-                      <SelectItem value="호텔농심" className="text-xl text-white hover:bg-gray-700">호텔농심</SelectItem>
-                      <SelectItem value="농심캐피탈" className="text-xl text-white hover:bg-gray-700">농심캐피탈</SelectItem>
-                      <SelectItem value="농심미분" className="text-xl text-white hover:bg-gray-700">농심미분</SelectItem>
-                      <SelectItem value="농심홀딩스" className="text-xl text-white hover:bg-gray-700">농심홀딩스</SelectItem>
-                      <SelectItem value="외부사용자" className="text-xl text-white hover:bg-gray-700">외부사용자</SelectItem>
+                    <SelectContent className={`${isMobile ? 'text-base' : 'text-xl'} bg-gray-800 border-gray-700`}>
+                      <SelectItem value="농심" className={`${isMobile ? 'text-base' : 'text-xl'} text-white hover:bg-gray-700`}>농심</SelectItem>
+                      <SelectItem value="율촌화학" className={`${isMobile ? 'text-base' : 'text-xl'} text-white hover:bg-gray-700`}>율촌화학</SelectItem>
+                      <SelectItem value="메가마트" className={`${isMobile ? 'text-base' : 'text-xl'} text-white hover:bg-gray-700`}>메가마트</SelectItem>
+                      <SelectItem value="농심태경" className={`${isMobile ? 'text-base' : 'text-xl'} text-white hover:bg-gray-700`}>농심태경</SelectItem>
+                      <SelectItem value="농심엔지니어링" className={`${isMobile ? 'text-base' : 'text-xl'} text-white hover:bg-gray-700`}>농심엔지니어링</SelectItem>
+                      <SelectItem value="엔디에스" className={`${isMobile ? 'text-base' : 'text-xl'} text-white hover:bg-gray-700`}>엔디에스</SelectItem>
+                      <SelectItem value="호텔농심" className={`${isMobile ? 'text-base' : 'text-xl'} text-white hover:bg-gray-700`}>호텔농심</SelectItem>
+                      <SelectItem value="농심캐피탈" className={`${isMobile ? 'text-base' : 'text-xl'} text-white hover:bg-gray-700`}>농심캐피탈</SelectItem>
+                      <SelectItem value="농심미분" className={`${isMobile ? 'text-base' : 'text-xl'} text-white hover:bg-gray-700`}>농심미분</SelectItem>
+                      <SelectItem value="농심홀딩스" className={`${isMobile ? 'text-base' : 'text-xl'} text-white hover:bg-gray-700`}>농심홀딩스</SelectItem>
+                      <SelectItem value="외부사용자" className={`${isMobile ? 'text-base' : 'text-xl'} text-white hover:bg-gray-700`}>외부사용자</SelectItem>
                       
                     </SelectContent>
                   </Select>
@@ -201,7 +203,7 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
                 {/* 일반 모드: 사번 입력 필드 */}
                 {!isDevMode && (
                   <div className="space-y-2">
-                    <Label htmlFor="employeeId" className="text-xl font-medium text-gray-200">
+                    <Label htmlFor="employeeId" className={`${isMobile ? 'text-base' : 'text-xl'} font-medium text-gray-200`}>
                       사번
                     </Label>
                     <Input
@@ -211,7 +213,7 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
                       value={employeeId}
                       onChange={(e) => setEmployeeId(e.target.value)}
                       onFocus={startBackgroundMusic}
-                      className="h-16 text-xl bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                      className={`${isMobile ? 'h-12 text-base' : 'h-16 text-xl'} bg-gray-800 border-gray-700 text-white placeholder:text-gray-500`}
                       data-testid="input-employee-id"
                       required
                     />
@@ -221,7 +223,7 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
                 {isDevMode && (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="name" className="text-xl font-medium text-gray-200">
+                      <Label htmlFor="name" className={`${isMobile ? 'text-base' : 'text-xl'} font-medium text-gray-200`}>
                         이름
                       </Label>
                       <Input
@@ -231,12 +233,12 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         onFocus={startBackgroundMusic}
-                        className="h-16 text-xl bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                        className={`${isMobile ? 'h-12 text-base' : 'h-16 text-xl'} bg-gray-800 border-gray-700 text-white placeholder:text-gray-500`}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="realAge" className="text-xl font-medium text-gray-200">
+                      <Label htmlFor="realAge" className={`${isMobile ? 'text-base' : 'text-xl'} font-medium text-gray-200`}>
                         실제 나이
                       </Label>
                       <Input
@@ -246,13 +248,13 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
                         value={realAge}
                         onChange={(e) => setRealAge(e.target.value === "" ? "" : Number(e.target.value))}
                         onFocus={startBackgroundMusic}
-                        className="h-16 text-xl bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                        className={`${isMobile ? 'h-12 text-base' : 'h-16 text-xl'} bg-gray-800 border-gray-700 text-white placeholder:text-gray-500`}
                         min="1"
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="department" className="text-xl font-medium text-gray-200">
+                      <Label htmlFor="department" className={`${isMobile ? 'text-base' : 'text-xl'} font-medium text-gray-200`}>
                         부서
                       </Label>
                       <Input
@@ -262,7 +264,7 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
                         value={department}
                         onChange={(e) => setDepartment(e.target.value)}
                         onFocus={startBackgroundMusic}
-                        className="h-16 text-xl bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                        className={`${isMobile ? 'h-12 text-base' : 'h-16 text-xl'} bg-gray-800 border-gray-700 text-white placeholder:text-gray-500`}
                         required
                       />
                     </div>
@@ -287,7 +289,7 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
                   />
                   <Label
                     htmlFor="privacy-agreement"
-                    className="text-lg font-normal cursor-pointer text-gray-200"
+                    className={`${isMobile ? 'text-xs' : 'text-lg'} font-normal cursor-pointer text-gray-200`}
                     onClick={(e) => {
                       // Label 클릭 시에도 동일한 동작
                       if (!isPrivacyAgreed) {
@@ -302,7 +304,7 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
                 <div className="pt-2 flex justify-center">
                   <Button
                     type="submit"
-                    className="h-16 px-12 text-xl font-medium min-w-64"
+                    className={`${isMobile ? 'h-12 px-8 text-base w-full' : 'h-16 px-12 text-xl'} font-medium ${isMobile ? '' : 'min-w-64'}`}
                     data-testid="button-submit"
                     onClick={startBackgroundMusic}
                     disabled={!isPrivacyAgreed || (isDevMode && (!name || !realAge || !department))} // 개인정보 동의 체크 및 키인 모드 필드 검증
@@ -322,9 +324,9 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
       
       {/* 개인정보 활용 동의 팝업 */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogContent className="max-w-xl bg-gray-900 border-gray-700">
+      <DialogContent className="max-w-xl bg-gray-900 border-gray-700 py-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-white">
+          <DialogTitle className="text-lg font-bold text-white">
             개인정보 수집·이용 및 취급위탁 동의서
           </DialogTitle>
           <DialogDescription className="pt-2 text-sm text-gray-300">
@@ -332,7 +334,7 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 pt-4">
+        <div className="space-y-6 pt-4 pb-4">
           
           {/* 1. 수집·이용 동의 */}
           <div className="border border-gray-700 rounded-md p-4 space-y-2 bg-gray-800/50">
@@ -380,7 +382,7 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
           </div>
 
         </div>
-    <DialogFooter>
+    <DialogFooter className="flex justify-center sm:justify-center">
       <Button onClick={handleDialogConfirm} className="h-12 px-8 text-lg">
         확인
       </Button>

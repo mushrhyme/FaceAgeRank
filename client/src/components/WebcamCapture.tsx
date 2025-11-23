@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import EventHeader from "@/components/EventHeader";
 import MatrixBackground from "@/components/MatrixBackground";
 import { soundManager, SOUNDS } from "@/lib/sound";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface WebcamCaptureProps {
   onCapture: (imageSrc: string) => void;
@@ -17,6 +18,7 @@ export default function WebcamCapture({
   onCapture,
   onBack,
 }: WebcamCaptureProps) {
+  const isMobile = useIsMobile(); // 모바일 레이아웃 감지
   const webcamRef = useRef<Webcam>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [error, setError] = useState<string>("");
@@ -149,7 +151,7 @@ export default function WebcamCapture({
   }, [countdown, onCapture, compressImage]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-black relative overflow-hidden">
+    <div className={`min-h-screen flex flex-col items-center justify-center ${isMobile ? 'p-3 pt-20' : 'p-6'} bg-black relative overflow-hidden`}>
       <MatrixBackground color="#26bfa6" opacity={0.3} density={0.3} />
       <div className="relative z-10">
         <EventHeader />
@@ -158,18 +160,18 @@ export default function WebcamCapture({
         <Button
           variant="ghost"
           onClick={onBack}
-          className="absolute top-6 left-6 h-12 px-5 text-base text-gray-300 hover:text-white hover:bg-gray-800"
+          className={`absolute ${isMobile ? 'top-2 left-2' : 'top-6 left-6'} ${isMobile ? 'h-10 px-3 text-sm' : 'h-12 px-5 text-base'} text-gray-300 hover:text-white hover:bg-gray-800`}
           data-testid="button-back"
         >
-          <ArrowLeft className="w-5 h-5 mr-2" />
+          <ArrowLeft className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'} mr-2`} />
           뒤로
         </Button>
       )}
 
-      <div className="w-full max-w-5xl space-y-8 relative z-10">
-        <div className="text-center space-y-3">
-          <h1 className="text-3xl font-semibold text-white">카메라 준비</h1>
-          <p className="text-lg text-gray-300">
+      <div className={`w-full ${isMobile ? 'max-w-md' : 'max-w-5xl'} ${isMobile ? 'space-y-4' : 'space-y-8'} relative z-10`}>
+        <div className={`text-center ${isMobile ? 'space-y-2' : 'space-y-3'}`}>
+          <h1 className={`${isMobile ? 'text-xl' : 'text-3xl'} font-semibold text-white`}>카메라 준비</h1>
+          <p className={`${isMobile ? 'text-sm' : 'text-lg'} text-gray-300`}>
             얼굴이 화면 중앙에 오도록 위치를 조정하세요
           </p>
         </div>
@@ -256,7 +258,7 @@ export default function WebcamCapture({
                   <div
                     className="text-white font-bold transition-all duration-300 drop-shadow-[0_0_30px_rgba(0,0,0,0.9)]"
                     style={{
-                      fontSize: "16rem",
+                      fontSize: isMobile ? "8rem" : "16rem",
                       lineHeight: 1,
                       animation: "scaleIn 0.3s ease-out",
                     }}
@@ -267,8 +269,8 @@ export default function WebcamCapture({
                   <div
                     className="absolute inset-0 rounded-full border-4 border-white/20"
                     style={{
-                      width: "16rem",
-                      height: "16rem",
+                      width: isMobile ? "8rem" : "16rem",
+                      height: isMobile ? "8rem" : "16rem",
                       left: "50%",
                       top: "50%",
                       transform: "translate(-50%, -50%)",
@@ -296,10 +298,10 @@ export default function WebcamCapture({
 
           {hasPermission && (
             <Badge
-              className="absolute top-6 right-6 bg-green-500/90 text-white backdrop-blur-sm text-lg px-4 py-2"
+              className={`absolute ${isMobile ? 'top-2 right-2' : 'top-6 right-6'} bg-green-500/90 text-white backdrop-blur-sm ${isMobile ? 'text-sm px-2 py-1' : 'text-lg px-4 py-2'}`}
               data-testid="badge-camera-active"
             >
-              <div className="w-3 h-3 rounded-full bg-white mr-2 animate-pulse" />
+              <div className={`${isMobile ? 'w-2 h-2' : 'w-3 h-3'} rounded-full bg-white mr-2 animate-pulse`} />
               카메라 활성
             </Badge>
           )}
@@ -307,17 +309,17 @@ export default function WebcamCapture({
 
         {error && (
           <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription className={isMobile ? "text-sm" : ""}>{error}</AlertDescription>
           </Alert>
         )}
 
         {/* 버튼 영역 - 고정 높이로 레이아웃 시프트 방지 */}
-        <div className="flex justify-center min-h-[100px] items-center">
+        <div className={`flex justify-center ${isMobile ? 'min-h-[80px]' : 'min-h-[100px]'} items-center`}>
           {hasPermission === false ? (
             <Button
               variant="outline"
               onClick={() => window.location.reload()}
-              className="h-16 px-12 text-xl font-medium"
+              className={`${isMobile ? 'h-12 px-8 text-base w-full' : 'h-16 px-12 text-xl'} font-medium`}
               data-testid="button-retry"
             >
               다시 시도
@@ -326,10 +328,10 @@ export default function WebcamCapture({
             <Button
               onClick={handleStartCountdown}
               disabled={!hasPermission || countdown !== null}
-              className="h-16 px-12 text-xl font-medium min-w-64"
+              className={`${isMobile ? 'h-12 px-8 text-base w-full' : 'h-16 px-12 text-xl'} font-medium ${isMobile ? '' : 'min-w-64'}`}
               data-testid="button-start"
             >
-              <Camera className="w-5 h-5 mr-2" />
+              <Camera className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'} mr-2`} />
               시작
             </Button>
           )}

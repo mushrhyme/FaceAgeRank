@@ -54,7 +54,8 @@ export default function ResultDisplay({
         image: capturedImage,
       })
         .then((response) => response.json())
-        .then((data: { imageUrl: string }) => {
+        .then((data: { imageUrl: string; token: string }) => {
+          // 서버에서 반환한 imageUrl에 이미 토큰이 포함되어 있음
           // 상대 경로를 절대 URL로 변환
           const absoluteUrl = data.imageUrl.startsWith("http") 
             ? data.imageUrl 
@@ -203,26 +204,24 @@ export default function ResultDisplay({
           )}
 
           <div className={`flex justify-center ${shouldUseMobileLayout ? 'flex-col gap-3' : 'gap-4'} pb-2`}>
-            {!isMobileMode && (
+            {!shouldUseMobileLayout && (
               <Button
                 onClick={() => setIsQrDialogOpen(true)}
                 variant="outline"
-                size={shouldUseMobileLayout ? "default" : "lg"}
-                className={`${shouldUseMobileLayout ? 'h-12 px-6 text-base' : 'h-14 px-8 text-xl'} font-semibold shadow-lg border-primary/30 text-primary hover:bg-primary/10 w-full`}
+                className={`${shouldUseMobileLayout ? 'h-12 px-6 text-base' : 'h-16 px-12 text-xl'} font-medium border-primary/30 text-primary hover:bg-primary/10 ${shouldUseMobileLayout ? 'w-full' : ''}`}
                 data-testid="button-qr"
               >
-                <QrCode className={`${shouldUseMobileLayout ? 'w-5 h-5' : 'w-6 h-6'} mr-2`} />
+                <QrCode className={`${shouldUseMobileLayout ? 'w-5 h-5' : 'w-5 h-5'} mr-2`} />
                 QR 코드
               </Button>
             )}
             <Button
               onClick={onReset}
               variant="default"
-              size={shouldUseMobileLayout ? "default" : "lg"}
-              className={`${shouldUseMobileLayout ? 'h-12 px-8 text-base' : 'h-14 px-14 text-xl'} font-semibold shadow-lg w-full`}
+              className={`${shouldUseMobileLayout ? 'h-12 px-8 text-base' : 'h-16 px-12 text-xl'} font-medium ${shouldUseMobileLayout ? 'w-full' : ''}`}
               data-testid="button-reset"
             >
-              <Home className={`${shouldUseMobileLayout ? 'w-5 h-5' : 'w-6 h-6'} mr-2`} />
+              <Home className={`${shouldUseMobileLayout ? 'w-5 h-5' : 'w-5 h-5'} mr-2`} />
               처음으로
             </Button>
           </div>
@@ -241,7 +240,7 @@ export default function ResultDisplay({
               결과 QR 코드
             </DialogTitle>
             <DialogDescription className="text-center text-gray-300 pt-2">
-              QR 코드를 스캔하여 결과를 확인하세요
+              QR 코드를 스캔하여 결과를 저장하세요
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center space-y-6 pt-4 pb-4">
@@ -256,12 +255,8 @@ export default function ResultDisplay({
                   />
                 </div>
                 <div className="text-center space-y-2">
-                  <p className="text-sm text-gray-400">
-                    {name} 님의 결과
-                  </p>
-                  <p className="text-xs text-gray-500 break-all px-4">
-                    {resultUrl}
-                  </p>
+  
+                  
                 </div>
               </>
             ) : (

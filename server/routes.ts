@@ -1,8 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { createServer as createHttpsServer, type Server as HttpsServer } from "https";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
-import { resolve, join } from "path";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 import { randomUUID } from "crypto";
 import { z } from "zod";
 import { storage } from "./storage";
@@ -150,13 +150,39 @@ export async function registerRoutes(app: Express): Promise<Server | HttpsServer
     sseService.addClient(res);
   });
 
-  // 이미지 저장 디렉토리 생성
-  const uploadsDir = resolve(import.meta.dirname, "..", "uploads");
-  if (!existsSync(uploadsDir)) {
-    mkdirSync(uploadsDir, { recursive: true });
+  // 이미지 메타데이터 인터페이스
+  interface ImageMetadata {
+    imageId: string;
+    token: string;
+    expiresAt: number; // 만료 시간 (밀리초)
+    format: string; // "jpeg" 또는 "png"
+    buffer: Buffer; // 이미지 데이터 (메모리에만 저장)
   }
 
-  // 이미지 업로드 API (Base64 이미지를 서버에 저장)
+  // 이미지 저장소 (메모리 전용)
+  const imageStore = new Map<string, ImageMetadata>();
+
+  // 만료된 이미지 삭제 함수
+  const deleteExpiredImages = () => {
+    const now = Date.now();
+    const expiredImages: string[] = [];
+
+    for (const [imageId, metadata] of imageStore.entries()) {
+      if (now >= metadata.expiresAt) {
+        expiredImages.push(imageId);
+      }
+    }
+
+    for (const imageId of expiredImages) {
+      imageStore.delete(imageId);
+      console.log(`🗑️ 만료된 이미지 삭제 (메모리): ${imageId}`);
+    }
+  };
+
+  // 30초마다 만료된 이미지 정리
+  setInterval(deleteExpiredImages, 30000);
+
+  // 이미지 업로드 API (Base64 이미지를 메모리에만 저장)
   app.post("/api/image/upload", async (req, res) => {
     try {
       if (!req.body.image) {
@@ -172,18 +198,26 @@ export async function registerRoutes(app: Express): Promise<Server | HttpsServer
       // 이미지 형식 확인 (jpeg 또는 png)
       const imageFormat = base64Data.includes("data:image/png") ? "png" : "jpeg";
       
-      // 고유 ID 생성
+      // 고유 ID 및 토큰 생성
       const imageId = randomUUID();
-      const filename = `${imageId}.${imageFormat}`;
-      const filepath = join(uploadsDir, filename);
+      const token = randomUUID(); // 접근 토큰
 
-      // 이미지 파일 저장
+      // 이미지를 Buffer로 변환 (메모리에만 저장)
       const imageBuffer = Buffer.from(base64String, "base64");
-      writeFileSync(filepath, imageBuffer);
 
-      // 이미지 URL 반환
-      const imageUrl = `/api/image/${imageId}`;
-      res.json({ imageId, imageUrl });
+      // 메타데이터 저장 (1분 후 만료)
+      const expiresAt = Date.now() + 60 * 1000; // 1분 = 60,000ms
+      imageStore.set(imageId, {
+        imageId,
+        token,
+        expiresAt,
+        format: imageFormat,
+        buffer: imageBuffer, // 메모리에만 저장
+      });
+
+      // 이미지 URL 반환 (토큰 포함)
+      const imageUrl = `/api/image/${imageId}?token=${token}`;
+      res.json({ imageId, imageUrl, token });
     } catch (error: any) {
       console.error("❌ 이미지 업로드 실패:", error);
       res.status(500).json({ 
@@ -193,30 +227,35 @@ export async function registerRoutes(app: Express): Promise<Server | HttpsServer
     }
   });
 
-  // 이미지 조회 API
+  // 이미지 조회 API (토큰 검증, 메모리에서 직접 제공)
   app.get("/api/image/:imageId", (req, res) => {
     try {
       const { imageId } = req.params;
-      const jpegPath = join(uploadsDir, `${imageId}.jpeg`);
-      const pngPath = join(uploadsDir, `${imageId}.png`);
+      const token = req.query.token as string;
 
-      let filepath: string | null = null;
-      let contentType = "image/jpeg";
-
-      if (existsSync(jpegPath)) {
-        filepath = jpegPath;
-        contentType = "image/jpeg";
-      } else if (existsSync(pngPath)) {
-        filepath = pngPath;
-        contentType = "image/png";
-      } else {
+      // 메타데이터 확인
+      const metadata = imageStore.get(imageId);
+      if (!metadata) {
         return res.status(404).json({ error: "이미지를 찾을 수 없습니다." });
       }
 
-      const imageBuffer = readFileSync(filepath);
+      // 토큰 검증
+      if (token !== metadata.token) {
+        return res.status(403).json({ error: "접근 권한이 없습니다." });
+      }
+
+      // 만료 시간 확인
+      if (Date.now() >= metadata.expiresAt) {
+        // 만료된 이미지 삭제 (메모리에서)
+        imageStore.delete(imageId);
+        return res.status(410).json({ error: "이미지가 만료되었습니다." });
+      }
+
+      // 메모리에서 이미지 데이터 직접 제공
+      const contentType = metadata.format === "png" ? "image/png" : "image/jpeg";
       res.setHeader("Content-Type", contentType);
-      res.setHeader("Cache-Control", "public, max-age=31536000"); // 1년 캐시
-      res.send(imageBuffer);
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // 캐시 방지
+      res.send(metadata.buffer);
     } catch (error: any) {
       console.error("❌ 이미지 조회 실패:", error);
       res.status(500).json({ 

@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import EventHeader from "@/components/EventHeader";
 import MatrixBackground from "@/components/MatrixBackground";
 import { soundManager, SOUNDS } from "@/lib/sound";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface WelcomeScreenProps {
   name: string;
@@ -15,6 +16,7 @@ export default function WelcomeScreen({
   name,
   onContinue,
 }: WelcomeScreenProps) {
+  const isMobile = useIsMobile(); // 모바일 레이아웃 감지
   // 컴포넌트가 마운트될 때 웰컴 음악 재생
   useEffect(() => {
     soundManager.play(SOUNDS.WELCOME, 0.6); // 웰컴 화면 배경음악
@@ -26,30 +28,30 @@ export default function WelcomeScreen({
       <div className="relative z-10">
         <EventHeader />
       </div>
-      <div className="flex-1 flex items-center justify-center p-8 relative z-10">
-      <div className="w-full max-w-6xl text-center space-y-12">
-        <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary/10 mx-auto">
-          <UserCheck className="w-16 h-16 text-primary" />
+      <div className={`flex-1 flex items-center justify-center ${isMobile ? 'p-4 pt-20' : 'p-8'} relative z-10`}>
+      <div className={`w-full ${isMobile ? 'max-w-md' : 'max-w-6xl'} text-center ${isMobile ? 'space-y-6' : 'space-y-12'}`}>
+        <div className={`inline-flex items-center justify-center ${isMobile ? 'w-16 h-16' : 'w-24 h-24'} rounded-full bg-primary/10 mx-auto`}>
+          <UserCheck className={`${isMobile ? "w-10 h-10" : "w-16 h-16"} text-primary`} />
         </div>
 
-        <div className="space-y-4">
-          <h1 className="text-6xl font-bold text-white" data-testid="text-welcome-name">
+        <div className={isMobile ? "space-y-2" : "space-y-4"}>
+          <h1 className={`${isMobile ? 'text-3xl' : 'text-6xl'} font-bold text-white`} data-testid="text-welcome-name">
             {name} 님
           </h1>
 
-          <p className="text-5xl font-semibold text-primary mt-[15px]">
+          <p className={`${isMobile ? 'text-2xl' : 'text-5xl'} font-semibold text-primary ${isMobile ? 'mt-2' : 'mt-[15px]'}`}>
             환영합니다!
           </p>
         </div>
 
-        <p className="text-3xl text-gray-300">
+        <p className={`${isMobile ? 'text-lg' : 'text-3xl'} text-gray-300`}>
           얼굴 나이 측정을 시작하겠습니다
         </p>
 
-        <div className="pt-8">
+        <div className={isMobile ? "pt-4" : "pt-8"}>
           <Button
             onClick={onContinue}
-            className="h-20 px-16 text-2xl font-medium min-w-80"
+            className={`${isMobile ? 'h-12 px-8 text-base w-full' : 'h-20 px-16 text-2xl'} font-medium ${isMobile ? '' : 'min-w-80'}`}
             data-testid="button-continue"
           >
             다음
