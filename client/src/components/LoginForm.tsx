@@ -41,6 +41,7 @@ export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProp
   const [isPrivacyAgreed, setIsPrivacyAgreed] = useState(false); // 개인정보 동의 체크 상태
   const [isDialogOpen, setIsDialogOpen] = useState(false); // 개인정보 동의 팝업 열림 상태
   const backgroundAudioRef = useRef<HTMLAudioElement | null>(null); // 배경음악 Audio 객체 참조
+  const hasUserInteracted = useRef(false); // 사용자 상호작용 여부 추적
   
   const texts = [
     "지금 이 순간의 얼굴 나이, 과연 몇 살일까요?",
@@ -51,13 +52,17 @@ export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProp
   ];
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
 
-  // 배경음악 자동 재생 (컴포넌트 마운트 시)
+  // 사용자 상호작용 후 배경음악 재생
+  const startBackgroundMusic = () => {
+    if (!hasUserInteracted.current && !backgroundAudioRef.current) {
+      hasUserInteracted.current = true;
+      const audio = soundManager.playBackground(SOUNDS.MATRIX, 0.5);
+      backgroundAudioRef.current = audio;
+    }
+  };
+
+  // 컴포넌트 언마운트 시 음악 정지
   useEffect(() => {
-    // soundManager의 playBackground 메서드 사용 (LoadingAnalysis와 동일한 방식)
-    const audio = soundManager.playBackground(SOUNDS.MATRIX, 0.5);
-    backgroundAudioRef.current = audio;
-    
-    // 컴포넌트 언마운트 시 음악 정지
     return () => {
       if (backgroundAudioRef.current) {
         backgroundAudioRef.current.pause();
@@ -122,7 +127,11 @@ export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProp
       <div className="relative z-10">
         <EventHeader />
       </div>
-      <div className="flex-1 flex items-center justify-center p-6 overflow-y-auto relative z-10">
+      <div 
+        className="flex-1 flex items-center justify-center p-6 overflow-y-auto relative z-10"
+        onClick={startBackgroundMusic}
+        onKeyDown={startBackgroundMusic}
+      >
       <div className="w-full max-w-5xl">
         {/* 헤더 */}
         <div className="text-center mb-8 pt-4">
@@ -149,11 +158,12 @@ export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProp
                   <Label htmlFor="company" className="text-xl font-medium text-gray-200">
                     회사명
                   </Label>
-                  <Select value={company} onValueChange={setCompany} required>
+                  <Select value={company} onValueChange={(value) => { setCompany(value); startBackgroundMusic(); }} required>
                     <SelectTrigger
                       id="company"
                       className="h-16 text-xl bg-gray-800 border-gray-700 text-white"
                       data-testid="input-company"
+                      onFocus={startBackgroundMusic}
                     >
                       <SelectValue placeholder="회사명을 선택하세요" />
                     </SelectTrigger>
@@ -181,6 +191,7 @@ export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProp
                     placeholder="사번을 입력하세요"
                     value={employeeId}
                     onChange={(e) => setEmployeeId(e.target.value)}
+                    onFocus={startBackgroundMusic}
                     className="h-16 text-xl bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
                     data-testid="input-employee-id"
                     required
@@ -199,6 +210,7 @@ export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProp
                         placeholder="이름을 입력하세요"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
+                        onFocus={startBackgroundMusic}
                         className="h-16 text-xl bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
                         required
                       />
@@ -213,6 +225,7 @@ export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProp
                         placeholder="실제 나이를 입력하세요"
                         value={realAge}
                         onChange={(e) => setRealAge(e.target.value === "" ? "" : Number(e.target.value))}
+                        onFocus={startBackgroundMusic}
                         className="h-16 text-xl bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
                         min="1"
                         required
@@ -228,6 +241,7 @@ export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProp
                         placeholder="부서를 입력하세요"
                         value={department}
                         onChange={(e) => setDepartment(e.target.value)}
+                        onFocus={startBackgroundMusic}
                         className="h-16 text-xl bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
                         required
                       />
@@ -270,6 +284,7 @@ export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProp
                     type="submit"
                     className="h-16 px-12 text-xl font-medium min-w-64"
                     data-testid="button-submit"
+                    onClick={startBackgroundMusic}
                     disabled={!isPrivacyAgreed || (isDevMode && (!name || !realAge || !department))} // 개인정보 동의 체크 및 개발 모드 필드 검증
                   >
                     확인
