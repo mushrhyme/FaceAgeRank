@@ -32,29 +32,32 @@ export default function Home() {
     devData?: { name: string; realAge: number; department: string }
   ) => {
     try {
-      let response: Response;
-      
       if (isDevMode && devData) {
-        // 개발 모드: /api/user/lookup-dev 호출
-        response = await apiRequest("POST", "/api/user/lookup-dev", {
+        // 키인 모드: DB 조회 없이 입력한 정보를 그대로 사용
+        const keyinEmployeeId = "KEYIN"; // 키인 모드 플레이스홀더
+        const userData: User = {
+          id: `dev-${company}-${devData.name}`, // 임시 ID 생성 (회사명-이름 조합)
           company,
-          employeeId,
+          employeeId: keyinEmployeeId, // 키인 모드에서는 플레이스홀더 사용
           name: devData.name,
           realAge: devData.realAge,
           department: devData.department,
-        });
+        };
+        setUser(userData);
+        setLoginInfo({ company, employeeId: keyinEmployeeId }); // 로그인 정보 저장 (플레이스홀더 사용)
+        setStep("welcome");
       } else {
         // 일반 모드: /api/user/lookup 호출
-        response = await apiRequest("POST", "/api/user/lookup", {
+        const response = await apiRequest("POST", "/api/user/lookup", {
           company,
           employeeId,
         });
+        
+        const userData = await response.json() as User;
+        setUser(userData);
+        setLoginInfo({ company, employeeId }); // 로그인 정보 저장
+        setStep("welcome");
       }
-      
-      const userData = await response.json() as User;
-      setUser(userData);
-      setLoginInfo({ company, employeeId }); // 로그인 정보 저장
-      setStep("welcome");
     } catch (error) {
       toast({
         title: "오류",

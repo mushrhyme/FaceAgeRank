@@ -102,14 +102,14 @@ export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProp
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (company && employeeId && isPrivacyAgreed) { // 개인정보 동의 체크 확인
-      if (isDevMode) {
-        // 개발 모드: 추가 필드 검증
-        if (name && realAge && department) {
-          onSubmit(company, employeeId, { name, realAge: Number(realAge), department });
-        }
-      } else {
-        // 일반 모드: 기존 로직
+    if (isDevMode) {
+      // 키인 모드: 사번 없이 회사명, 이름, 실제나이, 부서만 필요
+      if (company && name && realAge && department && isPrivacyAgreed) {
+        onSubmit(company, "", { name, realAge: Number(realAge), department }); // employeeId는 빈 문자열
+      }
+    } else {
+      // 일반 모드: 회사명, 사번 필요
+      if (company && employeeId && isPrivacyAgreed) {
         onSubmit(company, employeeId);
       }
     }
@@ -178,25 +178,30 @@ export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProp
                       <SelectItem value="농심캐피탈" className="text-xl text-white hover:bg-gray-700">농심캐피탈</SelectItem>
                       <SelectItem value="농심미분" className="text-xl text-white hover:bg-gray-700">농심미분</SelectItem>
                       <SelectItem value="농심홀딩스" className="text-xl text-white hover:bg-gray-700">농심홀딩스</SelectItem>
+                      <SelectItem value="외부사용자" className="text-xl text-white hover:bg-gray-700">외부사용자</SelectItem>
+                      
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="employeeId" className="text-xl font-medium text-gray-200">
-                    사번
-                  </Label>
-                  <Input
-                    id="employeeId"
-                    type="text"
-                    placeholder="사번을 입력하세요"
-                    value={employeeId}
-                    onChange={(e) => setEmployeeId(e.target.value)}
-                    onFocus={startBackgroundMusic}
-                    className="h-16 text-xl bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
-                    data-testid="input-employee-id"
-                    required
-                  />
-                </div>
+                {/* 일반 모드: 사번 입력 필드 */}
+                {!isDevMode && (
+                  <div className="space-y-2">
+                    <Label htmlFor="employeeId" className="text-xl font-medium text-gray-200">
+                      사번
+                    </Label>
+                    <Input
+                      id="employeeId"
+                      type="text"
+                      placeholder="사번을 입력하세요"
+                      value={employeeId}
+                      onChange={(e) => setEmployeeId(e.target.value)}
+                      onFocus={startBackgroundMusic}
+                      className="h-16 text-xl bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                      data-testid="input-employee-id"
+                      required
+                    />
+                  </div>
+                )}
                 {/* 개발 모드: 추가 필드 */}
                 {isDevMode && (
                   <>
