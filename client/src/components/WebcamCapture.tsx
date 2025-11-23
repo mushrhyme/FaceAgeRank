@@ -21,6 +21,7 @@ export default function WebcamCapture({
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [error, setError] = useState<string>("");
   const [countdown, setCountdown] = useState<number | null>(null);
+  const countdownAudioRef = useRef<HTMLAudioElement | null>(null); // 카운트다운 음악 제어를 위한 ref
 
   const handleUserMedia = useCallback(() => {
     setHasPermission(true);
@@ -94,14 +95,33 @@ export default function WebcamCapture({
   const handleStartCountdown = useCallback(() => {
     setCountdown(3);
     // 카운트다운 시작 시 첫 번째 효과음 재생 (3 표시)
-    soundManager.play(SOUNDS.COUNTDOWN, 0.6);
+    const audio = soundManager.play(SOUNDS.COUNTDOWN, 0.6);
+    countdownAudioRef.current = audio; // Audio 객체 저장
+  }, []);
+
+  // 컴포넌트 언마운트 시 카운트다운 음악 정리
+  useEffect(() => {
+    return () => {
+      if (countdownAudioRef.current) {
+        countdownAudioRef.current.pause();
+        countdownAudioRef.current.currentTime = 0;
+        countdownAudioRef.current = null;
+      }
+    };
   }, []);
 
   useEffect(() => {
     if (countdown === null) return;
 
     if (countdown === 0) {
-      // 카운트다운이 0이 되면 촬영 효과음만 재생 (countdown 효과음은 재생하지 않음)
+      // 카운트다운이 0이 되면 카운트다운 음악 정지
+      if (countdownAudioRef.current) {
+        countdownAudioRef.current.pause();
+        countdownAudioRef.current.currentTime = 0;
+        countdownAudioRef.current = null;
+      }
+      
+      // 촬영 효과음 재생
       soundManager.play(SOUNDS.CAMERA, 0.7); // 촬영 찰칵 소리
       
       const imageSrc = webcamRef.current?.getScreenshot();
@@ -118,7 +138,8 @@ export default function WebcamCapture({
     }
 
     // 카운트다운 숫자가 변경될 때마다 카운트다운 효과음 재생 (0이 아닐 때만)
-    soundManager.play(SOUNDS.COUNTDOWN, 0.6); // 카운트다운 효과음
+    const audio = soundManager.play(SOUNDS.COUNTDOWN, 0.6); // 카운트다운 효과음
+    countdownAudioRef.current = audio; // Audio 객체 저장
 
     const timer = setTimeout(() => {
       setCountdown(countdown - 1);
