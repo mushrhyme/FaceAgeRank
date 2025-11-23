@@ -151,7 +151,7 @@ export default function WebcamCapture({
   }, [countdown, onCapture, compressImage]);
 
   return (
-    <div className={`min-h-screen flex flex-col items-center justify-center ${isMobile ? 'p-3 pt-20' : 'p-6'} bg-black relative overflow-hidden`}>
+    <div className={`min-h-screen flex flex-col ${isMobile ? '' : 'items-center justify-center'} ${isMobile ? 'p-3' : 'p-6'} bg-black relative overflow-hidden`}>
       <MatrixBackground color="#26bfa6" opacity={0.3} density={0.3} />
       <div className="relative z-10">
         <EventHeader />
@@ -168,7 +168,7 @@ export default function WebcamCapture({
         </Button>
       )}
 
-      <div className={`w-full ${isMobile ? 'max-w-md' : 'max-w-5xl'} ${isMobile ? 'space-y-4' : 'space-y-8'} relative z-10`}>
+      <div className={`flex-1 flex flex-col ${isMobile ? 'items-center justify-center' : 'items-center'} w-full ${isMobile ? 'max-w-md mx-auto' : 'max-w-5xl'} ${isMobile ? 'space-y-4' : 'space-y-8'} relative z-10`}>
         <div className={`text-center ${isMobile ? 'space-y-2' : 'space-y-3'}`}>
           <h1 className={`${isMobile ? 'text-xl' : 'text-3xl'} font-semibold text-white`}>카메라 준비</h1>
           <p className={`${isMobile ? 'text-sm' : 'text-lg'} text-gray-300`}>

@@ -135,13 +135,7 @@ export default function ResultDisplay({
             {/* 결과 메시지 - 크고 강조된 형태 */}
             <div className={shouldUseMobileLayout ? "mt-2" : "mt-4"}>
               <h1 
-                className={`${shouldUseMobileLayout ? 'text-xl' : 'text-3xl'} font-bold ${
-                  youngerLook 
-                    ? "text-primary" 
-                    : ageDifference > 0 
-                    ? "text-gray-400" 
-                    : "text-gray-300"
-                }`}
+                className={`${shouldUseMobileLayout ? 'text-xl' : 'text-3xl'} font-bold text-[#26bfa6]`}
                 data-testid="result-message"
               >
                 {message}
@@ -193,9 +187,9 @@ export default function ResultDisplay({
         <div className={`${shouldUseMobileLayout ? 'space-y-3 mt-2' : 'space-y-4 mt-4'}`}>
           {ageDifference !== 0 && (
             <div className={`text-center ${shouldUseMobileLayout ? 'py-1' : 'py-2'}`}>
-              <p className={`${shouldUseMobileLayout ? 'text-sm' : 'text-2xl'} text-gray-300`}>
+              <p className={`${shouldUseMobileLayout ? 'text-sm' : 'text-2xl'} text-[#26bfa6]`}>
                 실제보다{" "}
-                <span className="font-semibold text-white" data-testid="text-age-difference">
+                <span className="font-semibold" data-testid="text-age-difference">
                   {Math.abs(ageDifference)}살 {youngerLook ? "낮게" : "높게"}
                 </span>{" "}
                 나왔네요
