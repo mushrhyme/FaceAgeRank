@@ -96,43 +96,7 @@ export async function registerRoutes(app: Express): Promise<Server | HttpsServer
     }
   });
 
-  // 개발 모드 전용 엔드포인트
-  const isDevMode = process.env.DEV_MODE === "true" || process.env.VITE_DEV_MODE === "true";
-  if (isDevMode) {
-    app.post("/api/user/lookup-dev", async (req, res) => {
-      try {
-        const schema = z.object({
-          company: z.string().min(1),
-          employeeId: z.string().min(1),
-          name: z.string().min(1),
-          realAge: z.number().int().positive(), // 실제 나이
-          department: z.string().min(1),
-        });
-
-        const { company, employeeId, name, realAge, department } = schema.parse(req.body);
-        
-        // 임시 User 객체 생성 (ID는 랜덤 생성)
-        const user = {
-          id: randomUUID(), // 예: "550e8400-e29b-41d4-a716-446655440000"
-          company,          // 예: "농심"
-          employeeId,       // 예: "12345"
-          name,             // 예: "홍길동"
-          realAge,          // 예: 30
-          department,       // 예: "개발팀"
-        };
-
-        res.json(user);
-      } catch (error) {
-        if (error instanceof z.ZodError) {
-          return res.status(400).json({ 
-            error: "잘못된 요청입니다.",
-            details: error.errors 
-          });
-        }
-        res.status(500).json({ error: "서버 오류가 발생했습니다." });
-      }
-    });
-  }
+  // 키인 모드: 클라이언트에서 직접 User 객체를 생성하므로 서버 엔드포인트 불필요
 
   // 분석 결과 저장
   app.post("/api/analysis/save", async (req, res) => {

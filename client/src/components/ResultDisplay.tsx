@@ -59,7 +59,6 @@ export default function ResultDisplay({
           const absoluteUrl = data.imageUrl.startsWith("http") 
             ? data.imageUrl 
             : `${window.location.origin}${data.imageUrl}`;
-          console.log("이미지 업로드 완료:", absoluteUrl);
           setImageUrl(absoluteUrl);
         })
         .catch((error) => {

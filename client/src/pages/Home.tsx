@@ -19,10 +19,8 @@ export default function Home() {
   const [faceAge, setFaceAge] = useState<number>(0);
   const { toast } = useToast();
 
-  // 개발 모드 여부 상태 관리 (환경 변수 기본값 사용)
-  const [isDevMode, setIsDevMode] = useState<boolean>(
-    import.meta.env.VITE_DEV_MODE === "true"
-  );
+  // 키인 모드 여부 상태 관리 (기본값: false)
+  const [isDevMode, setIsDevMode] = useState<boolean>(false);
   
   // QR 코드 접속 여부 (URL에 result 파라미터가 있으면 QR 코드 접속으로 간주)
   const [isFromQR, setIsFromQR] = useState<boolean>(false);
@@ -63,7 +61,6 @@ export default function Home() {
             ? resultData.imageUrl
             : `${window.location.origin}${resultData.imageUrl}`;
           
-          console.log("이미지 로드 시작:", imageUrl);
           // 서버에서 이미지를 가져와서 Base64로 변환
           fetch(imageUrl)
             .then((res) => {
@@ -223,12 +220,6 @@ export default function Home() {
     }
   };
 
-  const handleRetry = () => {
-    setCapturedImage("");
-    setFaceAge(0);
-    setStep("guide");
-  };
-
   const handleReset = () => {
     setCapturedImage("");
     setFaceAge(0);
@@ -259,7 +250,7 @@ export default function Home() {
         <WebcamCapture onCapture={handleCapture} />
       )}
       
-      {step === "loading" && <LoadingAnalysis capturedImage={capturedImage} />}
+      {step === "loading" && <LoadingAnalysis />}
       
       {step === "result" && user && (
         <ResultDisplay

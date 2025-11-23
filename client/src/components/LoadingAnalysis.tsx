@@ -6,11 +6,7 @@ import ParticlesBackground from "@/components/ParticlesBackground";
 import MatrixBackground from "@/components/MatrixBackground";
 import { soundManager, SOUNDS } from "@/lib/sound";
 
-interface LoadingAnalysisProps {
-  capturedImage?: string; // Home.tsx에서 전달하지만 현재 사용하지 않음
-}
-
-export default function LoadingAnalysis({ capturedImage }: LoadingAnalysisProps) {
+export default function LoadingAnalysis() {
   const audioRef = useRef<HTMLAudioElement | null>(null); // 배경음악 제어를 위한 ref
 
   // 컴포넌트가 마운트될 때 배경음악 재생

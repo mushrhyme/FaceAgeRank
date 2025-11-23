@@ -28,16 +28,16 @@ import { soundManager, SOUNDS } from "@/lib/sound";
 
 interface LoginFormProps {
   onSubmit: (company: string, employeeId: string, devData?: { name: string; realAge: number; department: string }) => void;
-  isDevMode?: boolean; // 개발 모드 여부
-  onDevModeChange?: (isDevMode: boolean) => void; // 개발 모드 변경 콜백
+  isDevMode?: boolean; // 키인 모드 여부
+  onDevModeChange?: (isDevMode: boolean) => void; // 키인 모드 변경 콜백
 }
 
 export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange }: LoginFormProps) {
   const [company, setCompany] = useState("");
   const [employeeId, setEmployeeId] = useState("");
-  const [name, setName] = useState(""); // 개발 모드: 이름
-  const [realAge, setRealAge] = useState<number | "">(""); // 개발 모드: 실제 나이
-  const [department, setDepartment] = useState(""); // 개발 모드: 부서
+  const [name, setName] = useState(""); // 키인 모드: 이름
+  const [realAge, setRealAge] = useState<number | "">(""); // 키인 모드: 실제 나이
+  const [department, setDepartment] = useState(""); // 키인 모드: 부서
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
   const [isPrivacyAgreed, setIsPrivacyAgreed] = useState(false); // 개인정보 동의 체크 상태
@@ -217,7 +217,7 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
                     />
                   </div>
                 )}
-                {/* 개발 모드: 추가 필드 */}
+                {/* 키인 모드: 추가 필드 */}
                 {isDevMode && (
                   <>
                     <div className="space-y-2">
@@ -305,7 +305,7 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
                     className="h-16 px-12 text-xl font-medium min-w-64"
                     data-testid="button-submit"
                     onClick={startBackgroundMusic}
-                    disabled={!isPrivacyAgreed || (isDevMode && (!name || !realAge || !department))} // 개인정보 동의 체크 및 개발 모드 필드 검증
+                    disabled={!isPrivacyAgreed || (isDevMode && (!name || !realAge || !department))} // 개인정보 동의 체크 및 키인 모드 필드 검증
                   >
                     확인
                   </Button>
