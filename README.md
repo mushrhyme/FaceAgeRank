@@ -50,6 +50,53 @@ npm run dev
 
 서버는 기본적으로 `http://localhost:5001`에서 실행됩니다.
 
+#### 같은 네트워크에서 접속하기
+
+같은 Wi-Fi/이더넷 네트워크에 연결된 다른 기기에서 접속하려면:
+
+1. 서버가 실행 중인 컴퓨터의 로컬 IP 주소 확인:
+   ```bash
+   # macOS/Linux
+   ifconfig | grep "inet "
+   
+   # Windows
+   ipconfig
+   ```
+
+2. 다른 기기에서 `http://[서버IP주소]:5001`로 접속
+   - 예: `http://192.168.0.10:5001`
+
+#### 다른 네트워크에서 접속하기
+
+인터넷을 통해 다른 네트워크에서 접속하려면 다음 방법 중 하나를 사용하세요:
+
+**방법 1: ngrok 사용 (가장 간단)**
+
+1. [ngrok](https://ngrok.com/) 설치 및 무료 계정 가입
+2. 대시보드에서 authtoken 복사: https://dashboard.ngrok.com/get-started/your-authtoken
+3. authtoken 설정:
+   ```bash
+   ngrok authtoken [여기에_복사한_토큰_붙여넣기]
+   ```
+4. 서버 실행 후 ngrok 실행:
+   ```bash
+   # 서버가 HTTPS로 실행 중이므로 HTTPS를 명시적으로 지정
+   ngrok http https://localhost:5001
+   
+   # 또는 포트만 지정해도 ngrok이 자동으로 HTTPS를 감지
+   ngrok http 5001
+   ```
+5. 생성된 공개 URL (예: `https://xxxx-xx-xx-xx-xx.ngrok.io`)을 다른 사람에게 공유
+   - ⚠️ 무료 버전은 서버 재시작 시 URL이 변경됩니다
+   - ⚠️ ngrok 무료 버전은 첫 접속 시 경고 페이지가 표시될 수 있습니다 ("Visit Site" 버튼 클릭)
+
+**방법 2: 포트 포워딩 (라우터 설정 필요)**
+
+1. 라우터 관리 페이지 접속
+2. 포트 포워딩 설정: 외부 포트 → 내부 IP:5001
+3. 공인 IP 주소 확인 후 `http://[공인IP]:[외부포트]`로 접속
+   - ⚠️ 보안 주의: 방화벽 및 인증 설정 권장
+
 ### 5. 프로덕션 빌드
 
 ```bash

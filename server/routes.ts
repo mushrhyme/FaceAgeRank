@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import express, { type Express } from "express";
 import { createServer, type Server } from "http";
 import { createServer as createHttpsServer, type Server as HttpsServer } from "https";
 import { readFileSync } from "fs";

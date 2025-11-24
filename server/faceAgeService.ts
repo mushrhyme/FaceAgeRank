@@ -6,6 +6,12 @@
 
 import { spawn } from "child_process";
 import { join } from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+// ES 모듈에서 __dirname 대체
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export interface FaceAgeService {
   /**
@@ -25,10 +31,18 @@ export class LocalFaceAgeService implements FaceAgeService {
   private onnxModelPath: string;
 
   constructor(modelPath?: string) {
-    // Python 스크립트 경로 설정
-    this.pythonScriptPath = join(import.meta.dirname, "face_age_analysis.py");
+    // 프로젝트 루트 경로 (프로덕션 빌드에서는 dist/ 디렉토리이므로 상위로 이동)
+    // 개발 모드: __dirname = server/
+    // 프로덕션: __dirname = dist/ (빌드된 파일 위치)
+    const isProduction = process.env.NODE_ENV === "production";
+    const projectRoot = isProduction 
+      ? join(process.cwd()) // 프로덕션에서는 process.cwd()가 프로젝트 루트
+      : join(__dirname, ".."); // 개발 모드에서는 상위 디렉토리
+    
+    // Python 스크립트 경로 설정 (항상 server/ 디렉토리에서 찾음)
+    this.pythonScriptPath = join(projectRoot, "server", "face_age_analysis.py");
     // ONNX 모델 경로 설정 (프로젝트 루트 또는 환경 변수)
-    this.onnxModelPath = modelPath || join(import.meta.dirname, "..", "age_estimation.onnx");
+    this.onnxModelPath = modelPath || join(projectRoot, "age_estimation.onnx");
   }
 
   /**
@@ -40,7 +54,11 @@ export class LocalFaceAgeService implements FaceAgeService {
   async predictAge(imageBuffer: Buffer): Promise<number | { age: number; analysisTime?: number }> {
     const processStartTime = Date.now();
     return new Promise<number | { age: number; analysisTime?: number }>((resolve, reject) => {
-      const projectRoot = join(import.meta.dirname, "..");
+      // 프로젝트 루트 경로 (프로덕션 빌드에서는 dist/ 디렉토리이므로 상위로 이동)
+      const isProduction = process.env.NODE_ENV === "production";
+      const projectRoot = isProduction 
+        ? process.cwd() // 프로덕션에서는 process.cwd()가 프로젝트 루트
+        : join(__dirname, ".."); // 개발 모드에서는 상위 디렉토리
       
       // Python 스크립트 실행 (stdin으로 이미지 데이터 전달)
       // ONNX 모델 경로를 명령줄 인자로 전달

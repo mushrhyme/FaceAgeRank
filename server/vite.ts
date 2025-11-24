@@ -31,6 +31,7 @@ export async function setupVite(app: Express, server: Server | HttpsServer) {
     allowedHosts: true as const,
   };
 
+  log("Vite 서버 인스턴스 생성 중...");
   const vite = await createViteServer({
     ...viteConfig,
     configFile: false,
@@ -44,8 +45,11 @@ export async function setupVite(app: Express, server: Server | HttpsServer) {
     server: serverOptions,
     appType: "custom",
   });
+  log("Vite 서버 인스턴스 생성 완료");
 
+  log("Vite 미들웨어 등록 중...");
   app.use(vite.middlewares);
+  log("Vite 미들웨어 등록 완료");
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
 
