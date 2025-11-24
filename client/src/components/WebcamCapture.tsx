@@ -4,6 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Camera, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import EventHeader from "@/components/EventHeader";
 import MatrixBackground from "@/components/MatrixBackground";
 import { soundManager, SOUNDS } from "@/lib/sound";
@@ -24,11 +32,24 @@ export default function WebcamCapture({
   const [error, setError] = useState<string>("");
   const [countdown, setCountdown] = useState<number | null>(null);
   const countdownAudioRef = useRef<HTMLAudioElement | null>(null); // 카운트다운 음악 제어를 위한 ref
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]); // 사용 가능한 카메라 목록
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | undefined>(undefined); // 선택된 카메라 ID
 
   const handleUserMedia = useCallback(() => {
     setHasPermission(true);
     setError("");
-  }, []);
+    
+    // 사용 가능한 카메라 목록 가져오기
+    navigator.mediaDevices.enumerateDevices().then((mediaDevices) => {
+      const videoDevices = mediaDevices.filter((device) => device.kind === "videoinput");
+      setDevices(videoDevices);
+      
+      // 카메라가 있고 아직 선택되지 않았다면 첫 번째 카메라 선택
+      if (videoDevices.length > 0 && !selectedDeviceId) {
+        setSelectedDeviceId(videoDevices[0].deviceId);
+      }
+    });
+  }, [selectedDeviceId]);
 
   const handleUserMediaError = useCallback((error: string | DOMException) => {
     setHasPermission(false);
@@ -100,6 +121,31 @@ export default function WebcamCapture({
     const audio = soundManager.play(SOUNDS.COUNTDOWN, 0.6);
     countdownAudioRef.current = audio; // Audio 객체 저장
   }, []);
+
+  // 컴포넌트 마운트 시 사용 가능한 카메라 목록 가져오기
+  useEffect(() => {
+    const getDevices = async () => {
+      try {
+        // 카메라 권한 요청 (카메라 목록을 가져오기 위해 필요)
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        stream.getTracks().forEach(track => track.stop()); // 스트림 종료
+        
+        // 카메라 목록 가져오기
+        const mediaDevices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = mediaDevices.filter((device) => device.kind === "videoinput");
+        setDevices(videoDevices);
+        
+        // 첫 번째 카메라를 기본으로 선택
+        if (videoDevices.length > 0 && !selectedDeviceId) {
+          setSelectedDeviceId(videoDevices[0].deviceId);
+        }
+      } catch (error) {
+        console.error("카메라 목록 가져오기 실패:", error);
+      }
+    };
+    
+    getDevices();
+  }, [selectedDeviceId]);
 
   // 컴포넌트 언마운트 시 카운트다운 음악 정리
   useEffect(() => {
@@ -176,6 +222,37 @@ export default function WebcamCapture({
           </p>
         </div>
 
+        {/* 카메라 선택 드롭다운 - PC에서만 표시 */}
+        {!isMobile && devices.length > 1 && (
+          <div className={`w-full ${isMobile ? 'max-w-sm' : 'max-w-md'} space-y-2`}>
+            <Label htmlFor="camera-select" className="text-white text-sm">
+              카메라 선택
+            </Label>
+            <Select
+              value={selectedDeviceId || ""}
+              onValueChange={(value) => {
+                setSelectedDeviceId(value);
+                setHasPermission(null); // 카메라 변경 시 권한 상태 초기화
+              }}
+            >
+              <SelectTrigger id="camera-select" className="bg-gray-800 border-gray-700 text-white">
+                <SelectValue placeholder="카메라를 선택하세요" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-700">
+                {devices.map((device) => (
+                  <SelectItem
+                    key={device.deviceId}
+                    value={device.deviceId}
+                    className="text-white focus:bg-gray-700"
+                  >
+                    {device.label || `카메라 ${devices.indexOf(device) + 1}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         <div className="relative">
           <div className="rounded-xl overflow-hidden bg-gray-900 border border-gray-700 shadow-lg aspect-video">
             <Webcam
@@ -185,7 +262,8 @@ export default function WebcamCapture({
               videoConstraints={{
                 width: 1280,
                 height: 720,
-                facingMode: "user",
+                deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
+                ...(selectedDeviceId ? {} : { facingMode: "user" }), // deviceId가 없을 때만 facingMode 사용
               }}
               onUserMedia={handleUserMedia}
               onUserMediaError={handleUserMediaError}
