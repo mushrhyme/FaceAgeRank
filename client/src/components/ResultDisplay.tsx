@@ -113,11 +113,11 @@ export default function ResultDisplay({
 
   return (
     <div 
-      className={`h-screen flex flex-col bg-black relative overflow-hidden ${
+      className={`h-screen flex flex-col bg-gradient-to-br from-gray-50 to-white relative overflow-hidden ${
         olderLook ? 'animate-screen-shake' : ''
       }`}
     >
-      <MatrixBackground color="#26bfa6" opacity={0.2} density={0.4} />
+      <MatrixBackground color="#26bfa6" opacity={0.1} density={0.3} />
       <div className="relative z-10">
         <EventHeader />
       </div>
@@ -125,11 +125,11 @@ export default function ResultDisplay({
         <div className={`w-full ${shouldUseMobileLayout ? 'max-w-md' : 'max-w-5xl'}`}>
         {/* 상단: 아이콘, 이름, 메시지 */}
         <div className={`text-center ${shouldUseMobileLayout ? 'space-y-2 pt-1' : 'space-y-3 pt-4'}`}>
-          <div className={`inline-flex items-center justify-center ${shouldUseMobileLayout ? 'w-12 h-12' : 'w-20 h-20'} rounded-full bg-primary/10 mx-auto`}>
+          <div className={`inline-flex items-center justify-center ${shouldUseMobileLayout ? 'w-12 h-12' : 'w-20 h-20'} rounded-full bg-primary/10 mx-auto border border-primary/20`}>
             <Sparkles className={`${shouldUseMobileLayout ? "w-8 h-8" : "w-14 h-14"} text-primary`} />
           </div>
           <div className={shouldUseMobileLayout ? "space-y-1" : "space-y-3"}>
-            <h2 className={`${shouldUseMobileLayout ? 'text-base' : 'text-xl'} font-medium text-gray-300`}>
+            <h2 className={`${shouldUseMobileLayout ? 'text-base' : 'text-xl'} font-medium text-gray-700`}>
               {name} 님의 결과
             </h2>
             {/* 결과 메시지 - 크고 강조된 형태 */}
@@ -149,7 +149,7 @@ export default function ResultDisplay({
           {/* 이미지 */}
           {capturedImage && (
             <div className="relative flex-shrink-0">
-              <div className={`${shouldUseMobileLayout ? 'w-56 h-56' : 'w-80 h-80'} rounded-2xl overflow-hidden border-4 border-primary/20 shadow-xl bg-gradient-to-br from-primary/5 to-primary/10 p-2`}>
+              <div className={`${shouldUseMobileLayout ? 'w-56 h-56' : 'w-80 h-80'} rounded-2xl overflow-hidden border-4 border-primary/30 shadow-lg bg-gradient-to-br from-primary/10 to-primary/5 p-2`}>
                 <div className="w-full h-full rounded-xl overflow-hidden">
                   <img
                     src={capturedImage}
@@ -164,17 +164,17 @@ export default function ResultDisplay({
 
           {/* 나이 정보 - 모바일/PC에 맞게 크기 조정 */}
           <div className={`grid ${shouldUseMobileLayout ? 'grid-cols-2 gap-2' : 'grid-cols-2 gap-6'} w-full ${shouldUseMobileLayout ? 'max-w-xs' : 'max-w-2xl'}`}>
-            <Card className="border-2 border-gray-700 bg-gray-900/90">
+            <Card className="border-2 border-gray-200 bg-white shadow-md">
               <div className={`${shouldUseMobileLayout ? 'pt-3 pb-3' : 'pt-6 pb-6'} text-center ${shouldUseMobileLayout ? 'space-y-1' : 'space-y-3'}`}>
-                <p className={`${shouldUseMobileLayout ? 'text-sm' : 'text-3xl'} text-gray-300`}>실제 나이</p>
-                <p className={`${shouldUseMobileLayout ? 'text-2xl' : 'text-5xl'} font-bold text-white`} data-testid="text-real-age">
+                <p className={`${shouldUseMobileLayout ? 'text-sm' : 'text-3xl'} text-gray-600`}>실제 나이</p>
+                <p className={`${shouldUseMobileLayout ? 'text-2xl' : 'text-5xl'} font-bold text-gray-900`} data-testid="text-real-age">
                   {realAge}살
                 </p>
               </div>
             </Card>
-            <Card className="border-2 border-primary/30 bg-gray-900/90">
+            <Card className="border-2 border-primary/30 bg-white shadow-md">
               <div className={`${shouldUseMobileLayout ? 'pt-3 pb-3' : 'pt-6 pb-6'} text-center ${shouldUseMobileLayout ? 'space-y-1' : 'space-y-3'}`}>
-                <p className={`${shouldUseMobileLayout ? 'text-sm' : 'text-3xl'} text-gray-300`}>얼굴 나이</p>
+                <p className={`${shouldUseMobileLayout ? 'text-sm' : 'text-3xl'} text-gray-600`}>얼굴 나이</p>
                 <p className={`${shouldUseMobileLayout ? 'text-2xl' : 'text-5xl'} font-bold text-primary`} data-testid="text-face-age">
                   {faceAge}살
                 </p>
@@ -202,7 +202,7 @@ export default function ResultDisplay({
               <Button
                 onClick={() => setIsQrDialogOpen(true)}
                 variant="outline"
-                className={`${shouldUseMobileLayout ? 'h-12 px-6 text-base' : 'h-16 px-12 text-xl'} font-medium border-primary/30 text-primary hover:bg-primary/10 ${shouldUseMobileLayout ? 'w-full' : ''}`}
+                className={`${shouldUseMobileLayout ? 'h-12 px-6 text-base' : 'h-16 px-12 text-xl'} font-medium border-primary/40 text-primary hover:bg-primary/10 bg-white ${shouldUseMobileLayout ? 'w-full' : ''}`}
                 data-testid="button-qr"
               >
                 <QrCode className={`${shouldUseMobileLayout ? 'w-5 h-5' : 'w-5 h-5'} mr-2`} />
@@ -228,19 +228,19 @@ export default function ResultDisplay({
 
       {/* QR 코드 다이얼로그 */}
       <Dialog open={isQrDialogOpen} onOpenChange={setIsQrDialogOpen}>
-        <DialogContent className="max-w-md bg-gray-900 border-gray-700">
+        <DialogContent className="max-w-md bg-white border-gray-200">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-white text-center">
+            <DialogTitle className="text-2xl font-bold text-gray-900 text-center">
               결과 QR 코드
             </DialogTitle>
-            <DialogDescription className="text-center text-gray-300 pt-2">
+            <DialogDescription className="text-center text-gray-600 pt-2">
               QR 코드를 스캔하여 결과를 저장하세요
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center space-y-6 pt-4 pb-4">
             {imageUrl ? (
               <>
-                <div className="bg-white p-4 rounded-lg">
+                <div className="bg-white p-4 rounded-lg border border-gray-200">
                   <QRCodeSVG
                     value={resultUrl}
                     size={256}
@@ -249,13 +249,17 @@ export default function ResultDisplay({
                   />
                 </div>
                 <div className="text-center space-y-2">
-  
-                  
+                  <p className="text-sm text-gray-600 font-medium">
+                    ⚠️ 촬영한 이미지는 1분 뒤에 삭제됩니다
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    그 전에 QR 코드를 스캔하여 결과를 저장해주세요
+                  </p>
                 </div>
               </>
             ) : (
               <div className="text-center space-y-2 py-8">
-                <p className="text-gray-400">이미지 업로드 중...</p>
+                <p className="text-gray-600">이미지 업로드 중...</p>
                 <p className="text-xs text-gray-500">잠시만 기다려주세요</p>
               </div>
             )}

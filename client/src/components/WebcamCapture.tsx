@@ -82,7 +82,7 @@ export default function WebcamCapture({
     setError(errorMessage);
   }, []);
 
-  // 이미지 압축 함수 (Base64 이미지 크기 줄이기)
+  // 이미지 압축 및 반전 처리 함수 (Base64 이미지 크기 줄이기)
   const compressImage = useCallback((base64Image: string, maxWidth = 800, quality = 0.7): Promise<string> => {
     return new Promise((resolve) => {
       const img = new Image();
@@ -102,6 +102,9 @@ export default function WebcamCapture({
 
         const ctx = canvas.getContext('2d');
         if (ctx) {
+          // 기본적으로 좌우 반전 적용 (거울처럼 보이도록)
+          ctx.translate(width, 0);
+          ctx.scale(-1, 1);
           ctx.drawImage(img, 0, 0, width, height);
           // JPEG로 압축 (quality로 품질 조절)
           const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
@@ -116,10 +119,10 @@ export default function WebcamCapture({
   }, []);
 
   const handleStartCountdown = useCallback(() => {
+    // 사파리 등 브라우저 호환성을 위해 오디오 컨텍스트 활성화
+    soundManager.activateAudioContext();
     setCountdown(3);
-    // 카운트다운 시작 시 첫 번째 효과음 재생 (3 표시)
-    const audio = soundManager.play(SOUNDS.COUNTDOWN, 0.6);
-    countdownAudioRef.current = audio; // Audio 객체 저장
+    // useEffect에서 카운트다운 효과음이 재생되므로 여기서는 재생하지 않음
   }, []);
 
   // 컴포넌트 마운트 시 사용 가능한 카메라 목록 가져오기
@@ -268,6 +271,9 @@ export default function WebcamCapture({
               onUserMedia={handleUserMedia}
               onUserMediaError={handleUserMediaError}
               className="w-full h-full object-cover"
+              style={{
+                transform: 'scaleX(-1)', // 기본적으로 좌우 반전 적용 (거울처럼)
+              }}
             />
 
             {hasPermission && (
