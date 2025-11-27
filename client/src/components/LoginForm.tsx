@@ -11,7 +11,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -30,12 +29,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface LoginFormProps {
   onSubmit: (company: string, employeeId: string, devData?: { name: string; realAge: number; department: string }) => void;
   isDevMode?: boolean; // 키인 모드 여부
-  onDevModeChange?: (isDevMode: boolean) => void; // 키인 모드 변경 콜백
 }
 
-export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange }: LoginFormProps) {
+export default function LoginForm({ onSubmit, isDevMode = false }: LoginFormProps) {
   const isMobile = useIsMobile(); // 모바일 레이아웃 감지
-  const [company, setCompany] = useState("");
+  const [company, setCompany] = useState("농심"); // 기본값: 농심
   const [employeeId, setEmployeeId] = useState("");
   const [name, setName] = useState(""); // 키인 모드: 이름
   const [realAge, setRealAge] = useState<number | "">(""); // 키인 모드: 실제 나이
@@ -58,6 +56,8 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
 
   // 사용자 상호작용 후 배경음악 재생
   const startBackgroundMusic = () => {
+    // 사파리 등 브라우저 호환성을 위해 오디오 컨텍스트 활성화
+    soundManager.activateAudioContext();
     if (!hasUserInteracted.current && !backgroundAudioRef.current) {
       hasUserInteracted.current = true;
       const audio = soundManager.playBackground(SOUNDS.MATRIX, 0.5);
@@ -106,6 +106,8 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // 사파리 등 브라우저 호환성을 위해 오디오 컨텍스트 활성화
+    soundManager.activateAudioContext();
     if (isDevMode) {
       // 키인 모드: 사번 없이 회사명, 이름, 실제나이, 부서만 필요
       if (company && name && realAge && department && isPrivacyAgreed) {
@@ -121,6 +123,8 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
 
   // 팝업에서 확인 버튼 클릭 시
   const handleDialogConfirm = () => {
+    // 사파리 등 브라우저 호환성을 위해 오디오 컨텍스트 활성화
+    soundManager.activateAudioContext();
     setIsPrivacyAgreed(true); // 체크박스 체크
     setIsDialogOpen(false); // 팝업 닫기
   };
@@ -128,19 +132,6 @@ export default function LoginForm({ onSubmit, isDevMode = false, onDevModeChange
   return (
     <div className="h-screen flex flex-col bg-black relative overflow-hidden">
       <MatrixBackground color="#26bfa6" opacity={0.5} />
-      {/* 우측 상단 키인 모드 전환 토글 - 비활성화됨 */}
-      {/* <div className={`fixed ${isMobile ? 'top-2 right-2' : 'top-4 right-4'} z-50 flex items-center gap-2 bg-gray-900/90 backdrop-blur-sm border border-gray-700 rounded-lg ${isMobile ? 'px-3 py-1.5' : 'px-4 py-2'} shadow-lg`}>
-        <Label htmlFor="dev-mode-toggle" className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-200 cursor-pointer`}>
-          Key-in Mode
-        </Label>
-        <Switch
-          id="dev-mode-toggle"
-          checked={isDevMode}
-          onCheckedChange={(checked) => {
-            onDevModeChange?.(checked);
-          }}
-        />
-      </div> */}
       <div className="relative z-10">
         <EventHeader />
       </div>
