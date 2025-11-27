@@ -2,6 +2,33 @@
  * 사운드 재생을 위한 유틸리티 클래스
  */
 class SoundManager {
+  private audioContextActivated: boolean = false; // 오디오 컨텍스트 활성화 여부
+
+  /**
+   * 오디오 컨텍스트 활성화 (사파리 등 브라우저 호환성을 위해)
+   * 사용자 상호작용 후 한 번 호출하면 이후 오디오 재생이 가능해집니다
+   */
+  activateAudioContext(): void {
+    if (this.audioContextActivated) return;
+    
+    try {
+      // 무음 오디오를 생성하여 재생하여 오디오 컨텍스트 활성화
+      const silentAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
+      silentAudio.volume = 0.01;
+      silentAudio.play()
+        .then(() => {
+          this.audioContextActivated = true;
+          silentAudio.pause();
+          silentAudio.remove();
+        })
+        .catch(() => {
+          // 실패해도 계속 진행 (일부 브라우저에서는 실패할 수 있음)
+        });
+    } catch (error) {
+      // 에러 무시
+    }
+  }
+
   /**
    * 사운드 재생
    * @param soundPath 사운드 파일 경로 (public 폴더 기준)
@@ -12,6 +39,10 @@ class SoundManager {
     try {
       const audio = new Audio(soundPath);
       audio.volume = volume;
+      // 오디오 컨텍스트가 활성화되지 않았다면 활성화 시도
+      if (!this.audioContextActivated) {
+        this.activateAudioContext();
+      }
       audio.play().catch((error) => {
         // 브라우저 정책으로 인한 자동 재생 차단 시 무시
         console.warn(`사운드 재생 실패: ${soundPath}`, error);
